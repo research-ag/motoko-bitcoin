@@ -8,6 +8,10 @@ on:
   pull_request:
     types: [synchronize, opened, reopened, ready_for_review, unlabeled]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Run tests
@@ -27,7 +31,7 @@ jobs:
         run: mops install
 
       - name: run tests
-        run: mops test --mode wasi
+        run: mops test
 
   format:
     name: Check formatting
