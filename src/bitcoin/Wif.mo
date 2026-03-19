@@ -1,5 +1,5 @@
-import Iter "mo:base/Iter";
-import Result "mo:base/Result";
+import Iter "mo:core/Iter";
+import Result "mo:core/Result";
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
@@ -40,7 +40,7 @@ module {
   public func decode(key : WifPrivateKey) : Result.Result<Types.BitcoinPrivateKey, Text> {
     let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(key)) {
       case (?b58decoded) {
-        b58decoded.vals();
+        b58decoded.values();
       };
       case _ {
         return #err("Could not base58 decode key.");

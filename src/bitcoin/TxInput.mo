@@ -1,7 +1,8 @@
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Blob "mo:base/Blob";
-import Result "mo:base/Result";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Iter "mo:core/Iter";
+import Blob "mo:core/Blob";
+import Result "mo:core/Result";
 import Script "./Script";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
@@ -56,7 +57,7 @@ module {
       let encodedScript = Script.toBytes(script);
       // Total size based on output layout.
       let totalSize = 32 + 4 + encodedScript.size() + 4;
-      let output = Array.init<Nat8>(totalSize, 0);
+      let output = VarArray.repeat<Nat8>(0, totalSize);
       var outputOffset = 0;
 
       let prevTxId = Blob.toArray(prevOutput.txid);
@@ -78,7 +79,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      return Array.freeze(output);
+      return Array.fromVarArray(output);
     };
   };
 };

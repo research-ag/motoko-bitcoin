@@ -1,6 +1,7 @@
+import Nat "mo:core/Nat";
 import Numbers "./Numbers";
-import Int "mo:base/Int";
-import Iter "mo:base/Iter";
+import Int "mo:core/Int";
+import Iter "mo:core/Iter";
 
 module {
   // Compute a ** -1 mod n.
@@ -24,10 +25,10 @@ module {
     let reversedBits = Numbers.toBinaryReversed(b);
     var result : Nat = 1;
 
-    for (i in Iter.revRange(reversedBits.size() - 1, 0)) {
+    for (i in Iter.reverse(Nat.range(0, reversedBits.size()))) {
       result := mul(result, result, n);
 
-      if (reversedBits[Int.abs(i)]) {
+      if (reversedBits[i]) {
         result := mul(result, a, n);
       };
     };

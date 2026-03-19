@@ -1,3 +1,4 @@
+import Nat "mo:core/Nat";
 import Bitcoin "../../src/bitcoin/Bitcoin";
 import Types "../../src/bitcoin/Types";
 import Script "../../src/bitcoin/Script";
@@ -6,10 +7,11 @@ import Wif "../../src/bitcoin/Wif";
 import TestUtils "../TestUtils";
 import Hex "../Hex";
 import BitcoinTestTools "./bitcoinTestTools";
-import Array "mo:base/Array";
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
-import Blob "mo:base/Blob";
+import Array "mo:core/Array";
+import Debug "mo:core/Debug";
+import Runtime "mo:core/Runtime";
+import Iter "mo:core/Iter";
+import Blob "mo:core/Blob";
 
 let runTest = TestUtils.runTestWithDefaults;
 
@@ -424,7 +426,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -449,7 +451,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -466,7 +468,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -492,12 +494,12 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
   ) {
     case (#ok tx, true, #ok data) {
       assert (tx.txInputs.size() == expectedInputs.size());
-      for (i in Iter.range(0, expectedInputs.size() - 1)) {
+      for (i in Nat.range(0, expectedInputs.size())) {
         assert (tx.txInputs[i].prevOutput.txid == expectedInputs[i].txid);
         assert (tx.txInputs[i].prevOutput.vout == expectedInputs[i].vout);
       };
       assert (tx.txOutputs.size() == testCase.expectedOutputs.size());
-      for (i in Iter.range(0, testCase.expectedOutputs.size() - 1)) {
+      for (i in Nat.range(0, testCase.expectedOutputs.size())) {
         assert (tx.txOutputs[i].amount == testCase.expectedOutputs[i].amount);
         assert (tx.txOutputs[i].scriptPubKey == expectedOutputs[i].script);
       };

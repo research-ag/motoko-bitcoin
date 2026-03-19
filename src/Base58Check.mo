@@ -1,6 +1,7 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
-import Iter "mo:base/Iter";
+import Nat "mo:core/Nat";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Blob "mo:core/Blob";
 import Sha256 "mo:sha2/Sha256";
 import Base58 "./Base58";
 
@@ -10,9 +11,9 @@ module {
   public func encode(input : [Nat8]) : Text {
     // Add 4-byte hash check to the end.
     let hash : [Nat8] = Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, input)));
-    let inputWithCheck : [var Nat8] = Array.init<Nat8>(input.size() + 4, 0);
+    let inputWithCheck : [var Nat8] = VarArray.repeat<Nat8>(0, input.size() + 4);
 
-    for (i in Iter.range(0, input.size() - 1)) {
+    for (i in Nat.range(0, input.size())) {
       inputWithCheck[i] := input[i];
     };
 
@@ -21,7 +22,7 @@ module {
     inputWithCheck[input.size() + 2] := hash[2];
     inputWithCheck[input.size() + 3] := hash[3];
 
-    return Base58.encode(Array.freeze(inputWithCheck));
+    return Base58.encode(Array.fromVarArray(inputWithCheck));
   };
 
   // Convert the given checked Base58 input to Base256. Returns null if the
@@ -40,7 +41,7 @@ module {
     // Re-calculate checksum, ensure it matches the included 4-byte checksum.
     let hash : [Nat8] = Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, output)));
 
-    for (i in Iter.range(0, 3)) {
+    for (i in Nat.range(0, 4)) {
       if (hash[i] != decoded[decoded.size() - 4 + i]) {
         return null;
       };

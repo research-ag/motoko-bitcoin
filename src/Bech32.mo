@@ -1,13 +1,14 @@
-import Text "mo:base/Text";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Nat8 "mo:base/Nat8";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Blob "mo:base/Blob";
-import Buffer "mo:base/Buffer";
-import Result "mo:base/Result";
-import Char "mo:base/Char";
+import Text "mo:core/Text";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Iter "mo:core/Iter";
+import Nat8 "mo:core/Nat8";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Blob "mo:core/Blob";
+import List "mo:core/List";
+import Result "mo:core/Result";
+import Char "mo:core/Char";
 
 module {
   public type Encoding = {
@@ -53,7 +54,7 @@ module {
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
     // Ensure HRP is lowercase.
     let encodedHrp : [Nat8] = Blob.toArray(Text.encodeUtf8(hrp));
-    for (val in encodedHrp.vals()) {
+    for (val in encodedHrp.values()) {
       assert (val < CHAR_A or val > CHAR_Z);
     };
 
@@ -61,7 +62,7 @@ module {
 
     // hrp | '1' | values | checksum.
     let totalSize = hrp.size() + 1 + values.size() + checksum.size();
-    let output : Buffer.Buffer<Char> = Buffer.Buffer<Char>(totalSize);
+    let output = List.empty<Char>();
 
     for (val in Text.toIter(hrp)) {
       output.add(val);
@@ -69,14 +70,14 @@ module {
 
     output.add('1');
 
-    for (val in values.vals()) {
+    for (val in values.values()) {
       output.add(charset[Nat8.toNat(val)]);
     };
-    for (val in checksum.vals()) {
+    for (val in checksum.values()) {
       output.add(charset[Nat8.toNat(val)]);
     };
 
-    return Text.fromIter(output.vals());
+    return Text.fromIter(output.values());
   };
 
   // Decode given text as Bech32 or Bech32m.
@@ -87,7 +88,7 @@ module {
     var uppercase : Bool = false;
     let inputData : [Nat8] = Blob.toArray(Text.encodeUtf8(input));
 
-    for (i in Iter.range(0, inputData.size() - 1)) {
+    for (i in Nat.range(0, inputData.size())) {
       let c : Nat8 = inputData[i];
 
       if (c == CHAR_1) {
@@ -117,16 +118,14 @@ module {
     };
 
     // Split into HRP and data.
-    let hrpBuffer : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(separatorIndex);
-    let valuesBuffer : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      input.size() - 1 - separatorIndex
-    );
+    let hrpBuffer = List.empty<Nat8>();
+    let valuesBuffer = List.empty<Nat8>();
 
-    for (i in Iter.range(0, separatorIndex - 1)) {
+    for (i in Nat.range(0, separatorIndex)) {
       hrpBuffer.add(toLower(inputData[i]));
     };
 
-    for (i in Iter.range(separatorIndex + 1, inputData.size() - 1)) {
+    for (i in Nat.range(separatorIndex + 1, inputData.size())) {
       let c : Nat8 = inputData[i];
       let mappedVal : Nat8 = reverseCharset[Nat8.toNat(c)];
 
@@ -135,8 +134,8 @@ module {
       };
       valuesBuffer.add(mappedVal);
     };
-    let values : [Nat8] = Buffer.toArray(valuesBuffer);
-    let hrp : [Nat8] = Buffer.toArray(hrpBuffer);
+    let values : [Nat8] = List.toArray(valuesBuffer);
+    let hrp : [Nat8] = List.toArray(hrpBuffer);
 
     return switch (
       verifyChecksum(hrp, values),
@@ -147,10 +146,10 @@ module {
       };
       case (#ok(encodingType), ?hrp) {
         // Remove checksum from data.
-        for (i in Iter.range(0, 5)) {
+        for (i in Nat.range(0, 6)) {
           ignore (valuesBuffer.removeLast());
         };
-        return #ok(encodingType, hrp, Buffer.toArray(valuesBuffer));
+        return #ok(encodingType, hrp, List.toArray(valuesBuffer));
       };
       case _ {
         #err("Failed to decode HRP.");
@@ -164,16 +163,16 @@ module {
   func expandHrp(hrp : [Nat8]) : [Nat8] {
     let hrpSize = hrp.size();
     let outputSize = hrpSize * 2 + 1;
-    let output = Array.init<Nat8>(outputSize, 0);
+    let output = VarArray.repeat<Nat8>(0, outputSize);
 
     var i : Nat = 0;
-    for (currHrp in hrp.vals()) {
+    for (currHrp in hrp.values()) {
       output[i] := currHrp >> 5;
       output[i + hrpSize + 1] := currHrp & 0x1f;
       i += 1;
     };
 
-    return Array.freeze(output);
+    return Array.fromVarArray(output);
   };
 
   // Constant value associated to the given encoding.
@@ -194,23 +193,21 @@ module {
 
     // Merge expandedHrp and data arrays and append 6 zeroes to get
     // [expandedHrp..., data..., 0, 0, 0, 0, 0, 0].
-    let polyModValues : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      expandedHrp.size() + data.size() + 6
-    );
+    let polyModValues = List.empty<Nat8>();
 
-    for (val in expandedHrp.vals()) {
+    for (val in expandedHrp.values()) {
       polyModValues.add(val);
     };
-    for (val in data.vals()) {
+    for (val in data.values()) {
       polyModValues.add(val);
     };
 
     // Pad with 6 zeros.
-    for (_ in Iter.range(0, 5)) {
-      polyModValues.add(0);
+    for (_ in Nat.range(0, 6)) {
+      polyModValues.add(0 : Nat8);
     };
 
-    let mod : Nat32 = polymod(Buffer.toArray(polyModValues)) ^ encodingConstant(encoding);
+    let mod : Nat32 = polymod(List.toArray(polyModValues)) ^ encodingConstant(encoding);
 
     // Convert the 5-bit groups in mod to checksum data.
     return Array.tabulate<Nat8>(
@@ -231,18 +228,16 @@ module {
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
     // Merge expandedHrp and values arrays.
-    let polyModValues : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      expandedHrp.size() + values.size()
-    );
+    let polyModValues = List.empty<Nat8>();
 
-    for (val in expandedHrp.vals()) {
+    for (val in expandedHrp.values()) {
       polyModValues.add(val);
     };
-    for (val in values.vals()) {
+    for (val in values.values()) {
       polyModValues.add(val);
     };
 
-    let check : Nat32 = polymod(Buffer.toArray(polyModValues));
+    let check : Nat32 = polymod(List.toArray(polyModValues));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);
@@ -259,7 +254,7 @@ module {
   func polymod(values : [Nat8]) : Nat32 {
     var c : Nat32 = 1;
 
-    for (value in values.vals()) {
+    for (value in values.values()) {
       let c0 : Nat8 = Nat8.fromIntWrap(Nat32.toNat(c >> 25));
       c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(Nat8.toNat(value));
 

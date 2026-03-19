@@ -1,8 +1,9 @@
 // @testmode wasi
 
-import Debug "mo:base/Debug";
-import Array "mo:base/Array";
-import Int32 "mo:base/Int32";
+import Debug "mo:core/Debug";
+import Runtime "mo:core/Runtime";
+import Array "mo:core/Array";
+import Int32 "mo:core/Int32";
 import TestCases "./p2pkhSighashTestVectors";
 import TestUtils "../TestUtils";
 import Hex "../Hex";
@@ -47,7 +48,7 @@ func test(tcase : TestCase) {
       (tx, script, revExpectedResult);
     };
     case _ {
-      Debug.trap("Could not decode test data");
+      Runtime.trap("Could not decode test data");
     };
   };
 
@@ -57,10 +58,10 @@ func test(tcase : TestCase) {
   ) {
     case (#ok tx, #ok script) { (tx, script) };
     case (#ok tx, #err msg) {
-      Debug.trap("Could not deserialize script data: " # msg);
+      Runtime.trap("Could not deserialize script data: " # msg);
     };
     case (#err(msg), _) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 

@@ -1,7 +1,9 @@
-import Debug "mo:base/Debug";
-import Nat "mo:base/Nat";
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
+import Debug "mo:core/Debug";
+import Nat "mo:core/Nat";
+import Iter "mo:core/Iter";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Runtime "mo:core/Runtime";
 import TestUtils "../TestUtils";
 import Common "../../src/Common";
 import Secp256k1TestVectors "./Secp256k1TestVectors";
@@ -9,7 +11,6 @@ import WycheproofEcdhTestVectors "./wycheproofEcdhTestVectors";
 import Curves "../../src/ec/Curves";
 import Jacobi "../../src/ec/Jacobi";
 import Hex "../Hex";
-import P "mo:base/Prelude";
 
 type DoublingVector = Secp256k1TestVectors.DoublingVector;
 type MultiplicationVector = Secp256k1TestVectors.MultiplicationVector;
@@ -25,7 +26,7 @@ func getSecp256k1Point(coords : ?(Nat, Nat)) : Jacobi.Point {
     case (?(x, y)) {
       switch (Jacobi.fromNat(x, y, 1, Curves.secp256k1)) {
         case (null) {
-          P.unreachable();
+          Runtime.trap("unreachable");
         };
         case (?point) {
           point;
@@ -80,7 +81,7 @@ func testSerializationCompressed(vector : SerializationVector) {
 
 func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
   var compressed : Bool = false;
-  for (flag in testCase.flags.vals()) {
+  for (flag in testCase.flags.values()) {
     if (flag == "CompressedPoint") {
       compressed := true;
     };
@@ -107,11 +108,11 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
 
       // Align private key to 32 bytes because conversion to Nat function
       // expects a 32-byte array.
-      let alignedPrivateKey = Array.init<Nat8>(32, 0);
-      for (i in Iter.range(0, Nat.min(privateKeyBytes.size() - 1, 31))) {
+      let alignedPrivateKey = VarArray.repeat<Nat8>(0, 32);
+      for (i in Nat.range(0, Nat.min(privateKeyBytes.size(), 32))) {
         alignedPrivateKey[alignedPrivateKey.size() - 1 - i] := privateKeyBytes[privateKeyBytes.size() - 1 - i];
       };
-      let privateKey : Nat = Common.readBE256(Array.freeze(alignedPrivateKey), 0);
+      let privateKey : Nat = Common.readBE256(Array.fromVarArray(alignedPrivateKey), 0);
 
       // Read expected output. It is sometimes empty.
       let expectedOutput : ?Nat = if (outputBytes.size() > 0) {
@@ -134,21 +135,21 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
               assert (expectedOutput == x.value);
             };
             case _ {
-              Debug.trap("Test failed.");
+              Runtime.trap("Test failed.");
             };
           };
         };
         case _ {
           // Point decoding is allowed to fail if the test case is not valid.
           if (testCase.result != "invalid") {
-            Debug.trap("Could not decode point.");
+            Runtime.trap("Could not decode point.");
           };
         };
       };
     };
     case _ {
       // Converting data from hex failed.
-      Debug.trap("Could not decode test data.");
+      Runtime.trap("Could not decode test data.");
     };
   };
 };

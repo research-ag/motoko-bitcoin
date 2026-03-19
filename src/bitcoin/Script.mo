@@ -1,13 +1,14 @@
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
-import Array "mo:base/Array";
+import List "mo:core/List";
+import Runtime "mo:core/Runtime";
+import Iter "mo:core/Iter";
+import Nat8 "mo:core/Nat8";
+import Nat16 "mo:core/Nat16";
+import Nat32 "mo:core/Nat32";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
-import Debug "mo:base/Debug";
-import Result "mo:base/Result";
+import Result "mo:core/Result";
 
 module Script {
   let maxNat8 = 0xff;
@@ -309,7 +310,7 @@ module Script {
         0xb2;
       };
       case _ {
-        Debug.trap(debug_show ("Unsupported opcode", opcode));
+        Runtime.trap(debug_show ("Unsupported opcode", opcode));
       };
     };
   };
@@ -510,7 +511,7 @@ module Script {
     // There is no trivial way of estimating the number of instructions
     // expected to be read. Thus, will assume 5, which is the p2pkh script
     // expected to be the common scenario.
-    let instructionsBuf = Buffer.Buffer<Instruction>(5);
+    let instructionsBuf = List.empty<Instruction>();
     // Keep traack of total bytes read to not go beyond size if it was set.
     var totalReadCount : Nat = 0;
     let opPushData1 : Nat8 = encodeOpcode(#OP_PUSHDATA1);
@@ -576,15 +577,15 @@ module Script {
     if (readSize and totalReadCount < size) {
       return #err "Truncated script.";
     };
-    return #ok(Buffer.toArray(instructionsBuf));
+    return #ok(List.toArray(instructionsBuf));
   };
 
   // Serialize given script to bytes.
   public func toBytes(script : Script) : [Nat8] {
-    let buf : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(script.size());
+    let buf = List.empty<Nat8>();
     let opPushData1 : Nat = Nat8.toNat(encodeOpcode(#OP_PUSHDATA1));
 
-    for (instruction in script.vals()) {
+    for (instruction in script.values()) {
       switch (instruction) {
         case (#opcode(opcode)) {
           buf.add(encodeOpcode(opcode));
@@ -597,23 +598,23 @@ module Script {
             buf.add(Nat8.fromIntWrap(data.size()));
           } else if (data.size() <= maxNat16) {
             // Data for OP_PUSHDATA2.
-            let sizeData = Array.init<Nat8>(2, 0);
+            let sizeData = VarArray.repeat<Nat8>(0, 2);
             Common.writeLE16(sizeData, 0, Nat16.fromIntWrap(data.size()));
-            for (item in sizeData.vals()) {
+            for (item in sizeData.values()) {
               buf.add(item);
             };
           } else if (data.size() <= maxNat32) {
             // Data for OP_PUSHDATA4.
-            let sizeData = Array.init<Nat8>(4, 0);
+            let sizeData = VarArray.repeat<Nat8>(0, 4);
             Common.writeLE32(sizeData, 0, Nat32.fromIntWrap(data.size()));
-            for (item in sizeData.vals()) {
+            for (item in sizeData.values()) {
               buf.add(item);
             };
           } else {
-            Debug.trap("Data too long to encode.");
+            Runtime.trap("Data too long to encode.");
           };
           // Copy data into buffer.
-          for (item in data.vals()) {
+          for (item in data.values()) {
             buf.add(item);
           };
         };
@@ -628,7 +629,7 @@ module Script {
         if (i < encodedBufSize.size()) {
           encodedBufSize[i];
         } else {
-          buf.get(i - encodedBufSize.size());
+          buf.at(i - encodedBufSize.size());
         };
       },
     );

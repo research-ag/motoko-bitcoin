@@ -1,4 +1,5 @@
-import Debug "mo:base/Debug";
+import Debug "mo:core/Debug";
+import Runtime "mo:core/Runtime";
 import Hash "../../src/Hash";
 import TestUtils "../TestUtils";
 import Curves "../../src/ec/Curves";
@@ -68,7 +69,7 @@ func testP2pkhDecodeAddress(testCase : AddressTestCase) {
       assert (Hash.hash160(testCase.key) == publicKeyHash);
     };
     case (#err msg) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };
@@ -79,7 +80,7 @@ func testMakeScript(testCase : MakeScriptTestCase) {
       assert (testCase.expectedBytes == Script.toBytes(script));
     };
     case (#err msg) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };

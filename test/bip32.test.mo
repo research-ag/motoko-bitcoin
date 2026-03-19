@@ -1,7 +1,7 @@
 // @testmode wasi
 
 import Bip32 "../src/Bip32";
-import Iter "mo:base/Iter";
+import Iter "mo:core/Iter";
 import { test } "mo:test";
 
 type DerivationVector = {
@@ -234,7 +234,7 @@ func testDerivations(vector : DerivationVector) {
     (
       do ? {
         assert (xPublicKey!.serialize() == vector.xPublicKey);
-        for ({ derivePath; serialized } in vector.derivations.vals()) {
+        for ({ derivePath; serialized } in vector.derivations.values()) {
           switch (xPublicKey!.derivePath(derivePath)) {
             case (null) {
               assert (serialized == null);
@@ -268,7 +268,7 @@ func testRelativeDerivation(vector : DerivationVector) {
     (
       do ? {
         assert (xPublicKey!.serialize() == vector.xPublicKey);
-        for ({ derivePath; serialized } in vector.derivations.vals()) {
+        for ({ derivePath; serialized } in vector.derivations.values()) {
           switch (xPublicKey!.derivePath(derivePath)) {
             case (null) {
               assert (serialized == null);

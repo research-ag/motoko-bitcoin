@@ -1,5 +1,5 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
 import Sha256 "mo:sha2/Sha256";
 import Sha512 "mo:sha2/Sha512";
 

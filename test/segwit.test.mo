@@ -1,11 +1,14 @@
+import Nat "mo:core/Nat";
 import Segwit "../src/Segwit";
-import Debug "mo:base/Debug";
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
-import Nat8 "mo:base/Nat8";
-import Text "mo:base/Text";
-import Char "mo:base/Char";
+import Debug "mo:core/Debug";
+import List "mo:core/List";
+import Iter "mo:core/Iter";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
+import Char "mo:core/Char";
+import Runtime "mo:core/Runtime";
 import { test } "mo:test";
 
 type ValidAddressTestCase = {
@@ -154,20 +157,20 @@ let invalidAddressEncodingTestCases : [InvalidAddressEncodingTestCase] = [
 ];
 
 func scriptPubKey({ version; program } : Segwit.WitnessProgram) : [Nat8] {
-  let output = Buffer.Buffer<Nat8>(program.size() + 2);
+  let output = List.empty<Nat8>();
   if (version > 0) {
     output.add(version + 0x50);
   } else {
-    output.add(0);
+    output.add(0 : Nat8);
   };
 
   output.add(Nat8.fromIntWrap(program.size()));
 
-  for (val in program.vals()) {
+  for (val in program.values()) {
     output.add(val);
   };
 
-  return Buffer.toArray(output);
+  return List.toArray(output);
 };
 
 func toLower(text : Text) : Text {
@@ -192,7 +195,7 @@ func testValidAddress(testCase : ValidAddressTestCase) {
       witnessProgram;
     };
     case (#err(msg)) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 
@@ -204,11 +207,11 @@ func testValidAddress(testCase : ValidAddressTestCase) {
       let lhs = toLower(testCase.address);
       let rhs = toLower(recoded);
       if (lhs != rhs) {
-        Debug.trap(lhs # " != " # rhs);
+        Runtime.trap(lhs # " != " # rhs);
       };
     };
     case (#err(msg)) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };
@@ -227,10 +230,10 @@ func testInvalidAddress(testCase : Text) {
 
 // Test whether address encoding fails on invalid input.
 func testInvalidAddressEncoding(testCase : InvalidAddressEncodingTestCase) {
-  let program = Array.freeze(Array.init<Nat8>(testCase.programSize, 0));
+  let program = Array.fromVarArray(VarArray.repeat<Nat8>(0, testCase.programSize));
   switch (Segwit.encode(testCase.hrp, { version = testCase.version; program })) {
     case (# ok(_)) {
-      Debug.trap("Encode succeeds on invalid input.");
+      Runtime.trap("Encode succeeds on invalid input.");
     };
     case _ {
       // Test passed.
@@ -241,7 +244,7 @@ func testInvalidAddressEncoding(testCase : InvalidAddressEncodingTestCase) {
 test(
   "valid addresses",
   func() {
-    for (i in Iter.range(0, validAddressTestCases.size() - 1)) {
+    for (i in Nat.range(0, validAddressTestCases.size())) {
       testValidAddress(validAddressTestCases[i]);
     };
   },
@@ -250,7 +253,7 @@ test(
 test(
   "invalid addresses",
   func() {
-    for (i in Iter.range(0, invalidAddressesTestCases.size() - 1)) {
+    for (i in Nat.range(0, invalidAddressesTestCases.size())) {
       testInvalidAddress(invalidAddressesTestCases[i]);
     };
   },
@@ -259,7 +262,7 @@ test(
 test(
   "inalid address encoding",
   func() {
-    for (i in Iter.range(0, invalidAddressEncodingTestCases.size() - 1)) {
+    for (i in Nat.range(0, invalidAddressEncodingTestCases.size())) {
       testInvalidAddressEncoding(invalidAddressEncodingTestCases[i]);
     };
   },

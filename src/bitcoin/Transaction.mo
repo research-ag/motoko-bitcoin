@@ -1,11 +1,12 @@
-import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
-import Nat32 "mo:base/Nat32";
-import Nat "mo:base/Nat";
-import Blob "mo:base/Blob";
-import Text "mo:base/Text";
-import Result "mo:base/Result";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import List "mo:core/List";
+import Iter "mo:core/Iter";
+import Nat32 "mo:core/Nat32";
+import Nat "mo:core/Nat";
+import Blob "mo:core/Blob";
+import Text "mo:core/Text";
+import Result "mo:core/Result";
 import Hash "../Hash";
 import Script "./Script";
 import Common "../Common";
@@ -69,8 +70,8 @@ module {
     };
 
     // Read transaction inputs.
-    let txInputs = Buffer.Buffer<TxInput.TxInput>(txInSize);
-    for (_ in Iter.range(0, txInSize - 1)) {
+    let txInputs = List.empty<TxInput.TxInput>();
+    for (_ in Nat.range(0, txInSize)) {
       switch (TxInput.fromBytes(data)) {
         case (#ok txIn) {
           txInputs.add(txIn);
@@ -92,8 +93,8 @@ module {
     };
 
     // Read transaction outputs.
-    let txOutputs = Buffer.Buffer<TxOutput.TxOutput>(txOutSize);
-    for (_ in Iter.range(0, txOutSize - 1)) {
+    let txOutputs = List.empty<TxOutput.TxOutput>();
+    for (_ in Nat.range(0, txOutSize)) {
       switch (TxOutput.fromBytes(data)) {
         case (#ok txOut) {
           txOutputs.add(txOut);
@@ -105,9 +106,9 @@ module {
     };
 
     // build witnesses if necessary
-    var witnesses = Array.init<Witness.Witness>(txInSize, []);
+    let witnesses = VarArray.repeat<Witness.Witness>([], txInSize);
     if (has_witness) {
-      for (i in Iter.range(0, txInSize - 1)) {
+      for (i in Nat.range(0, txInSize)) {
         switch (Witness.fromBytes(data)) {
           case (#ok witness) {
             witnesses[i] := witness;
@@ -132,8 +133,8 @@ module {
     return #ok(
       Transaction(
         version,
-        Buffer.toArray(txInputs),
-        Buffer.toArray(txOutputs),
+        List.toArray(txInputs),
+        List.toArray(txOutputs),
         witnesses,
         locktime,
       )
@@ -185,7 +186,7 @@ module {
       assert (sigHashType & Types.SIGHASH_ANYONECANPAY == 0);
 
       // Clear scripts for other TxInputs.
-      for (i in Iter.range(0, txInputs.size() - 1)) {
+      for (i in Nat.range(0, txInputs.size())) {
         txInputs[i].script := [];
       };
 
@@ -199,12 +200,12 @@ module {
 
       // Serialize transaction and append SighashType.
       let txData : [Nat8] = toBytes();
-      let output : [var Nat8] = Array.init<Nat8>(txData.size() + 4, 0);
+      let output : [var Nat8] = VarArray.repeat<Nat8>(0, txData.size() + 4);
 
       Common.copy(output, 0, txData, 0, txData.size());
       Common.writeLE32(output, txData.size(), sigHashType);
 
-      return Hash.doubleSHA256(Array.freeze(output));
+      return Hash.doubleSHA256(Array.fromVarArray(output));
     };
 
     /// Create a P2TR key spend signature hash for this transaction. This is
@@ -250,11 +251,11 @@ module {
       let prevouts = Array.map<TxInput.TxInput, [Nat8]>(
         txInputs,
         func(txin) {
-          let vout_buffer = Array.init<Nat8>(4, 0);
+          let vout_buffer = VarArray.repeat<Nat8>(0, 4);
           Common.writeLE32(vout_buffer, 0, txin.prevOutput.vout);
           let prevout = Array.flatten([
             Blob.toArray(txin.prevOutput.txid),
-            Array.freeze(vout_buffer),
+            Array.fromVarArray(vout_buffer),
           ]);
           prevout;
         },
@@ -264,38 +265,38 @@ module {
       let epoch : [Nat8] = [0x00];
 
       let sighash_type : [Nat8] = [0x00];
-      var nVersion_buffer = Array.init<Nat8>(4, 0);
+      let nVersion_buffer = VarArray.repeat<Nat8>(0, 4);
       Common.writeLE32(nVersion_buffer, 0, 2);
-      let nVersion = Array.freeze<Nat8>(nVersion_buffer);
+      let nVersion = Array.fromVarArray<Nat8>(nVersion_buffer);
 
-      let nLockTime : [Nat8] = Array.freeze(Array.init<Nat8>(4, 0));
+      let nLockTime : [Nat8] = Array.fromVarArray(VarArray.repeat<Nat8>(0, 4));
       let sha_prevouts : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(prevouts)));
 
       let amounts_bytes = Array.flatten(
         Array.map<Nat64, [Nat8]>(
           amounts,
           func(amount) {
-            let amount_bytes = Array.init<Nat8>(8, 0);
+            let amount_bytes = VarArray.repeat<Nat8>(0, 8);
             Common.writeLE64(amount_bytes, 0, amount);
-            Array.freeze(amount_bytes);
+            Array.fromVarArray(amount_bytes);
           },
         )
       );
       let sha_amounts : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, amounts_bytes));
 
-      let scriptpubkeys = Array.init<[Nat8]>(txInputs.size(), Script.toBytes(scriptPubKey));
-      let sha_scriptpubkeys : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(Array.freeze(scriptpubkeys))));
+      let scriptpubkeys = VarArray.repeat<[Nat8]>(Script.toBytes(scriptPubKey), txInputs.size());
+      let sha_scriptpubkeys : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, Array.flatten(Array.fromVarArray(scriptpubkeys))));
 
       // ignote the nSequence flag
       // this is inlined generation of the 0xFFFFFFFF flag for each input
 
-      // let sequences = Array.freeze(Array.init<Nat8>(txInputs.size() * 4, 0xFF));
+      // let sequences = Array.fromVarArray(VarArray.repeat<Nat8>(0xFF, txInputs.size() * 4));
       let sequences_buffer = Array.map<TxInput.TxInput, [Nat8]>(
         txInputs,
         func(txin) {
-          let sequence_buffer = Array.init<Nat8>(4, 0);
+          let sequence_buffer = VarArray.repeat<Nat8>(0, 4);
           Common.writeLE32(sequence_buffer, 0, txin.sequence);
-          Array.freeze(sequence_buffer);
+          Array.fromVarArray(sequence_buffer);
         },
       );
       let sequences = Array.flatten(sequences_buffer);
@@ -312,9 +313,9 @@ module {
 
       let sha_outputs : [Nat8] = Blob.toArray(Sha256.fromArray(#sha256, outputs_bytes));
 
-      var input_index_buffer = Array.init<Nat8>(4, 0);
+      let input_index_buffer = VarArray.repeat<Nat8>(0, 4);
       Common.writeLE32(input_index_buffer, 0, txInputIndex);
-      let input_index = Array.freeze(input_index_buffer);
+      let input_index = Array.fromVarArray(input_index_buffer);
 
       // spend_type = (ext_flag * 2) + annex_present
       let (spend_type, scriptpath_bytes) : ([Nat8], [Nat8]) = switch (maybe_leaf_hash) {
@@ -353,7 +354,7 @@ module {
     /// `| version | witness flags if it is present | len(txIns) | txIns | len(txOuts) | txOuts | witnesses | locktime |`
     public func toBytes() : [Nat8] {
       let has_non_empty_witness = Array.foldLeft<Witness.Witness, Bool>(
-        Array.freeze(witnesses),
+        Array.fromVarArray(witnesses),
         false,
         func(accum, witness) {
           (witness.size() > 0) or accum;
@@ -404,15 +405,15 @@ module {
         },
       );
 
-      let witnessesBuffer = Buffer.Buffer<[Nat8]>(0);
+      let witnessesBuffer = List.empty<[Nat8]>();
 
       if (has_non_empty_witness) {
-        for (i in Iter.range(0, witnesses.size() - 1)) {
+        for (i in Nat.range(0, witnesses.size())) {
           witnessesBuffer.add(Witness.toBytes(witnesses[i]));
         };
       };
 
-      let serializedWitnesses = Array.flatten(Buffer.toArray(witnessesBuffer));
+      let serializedWitnesses = Array.flatten(List.toArray(witnessesBuffer));
 
       // Total size of output excluding sigHashType.
       let totalSize : Nat =
@@ -426,7 +427,7 @@ module {
       + serializedWitnesses.size()
       // 4 bytes for locktime.
       + 4;
-      let output = Array.init<Nat8>(totalSize, 0);
+      let output = VarArray.repeat<Nat8>(0, totalSize);
       var outputOffset = 0;
 
       // Write version.
@@ -453,7 +454,7 @@ module {
       outputOffset += serializedTxInSize.size();
 
       // Write serialized TxInputs.
-      for (serializedTxIn in serializedTxIns.vals()) {
+      for (serializedTxIn in serializedTxIns.values()) {
         Common.copy(
           output,
           outputOffset,
@@ -475,7 +476,7 @@ module {
       outputOffset += serializedTxOutSize.size();
 
       // Write serialized TxOutputs.
-      for (serializedTxOut in serializedTxOuts.vals()) {
+      for (serializedTxOut in serializedTxOuts.values()) {
         Common.copy(
           output,
           outputOffset,
@@ -500,7 +501,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      let result = Array.freeze(output);
+      let result = Array.fromVarArray(output);
       result;
     };
 
@@ -561,7 +562,7 @@ module {
       + serializedTxInSize.size() + totalTxInSize + serializedTxOutSize.size() + totalTxOutSize
       // 4 bytes for locktime.
       + 4;
-      let output = Array.init<Nat8>(totalSize, 0);
+      let output = VarArray.repeat<Nat8>(0, totalSize);
       var outputOffset = 0;
 
       // Write version.
@@ -579,7 +580,7 @@ module {
       outputOffset += serializedTxInSize.size();
 
       // Write serialized TxInputs.
-      for (serializedTxIn in serializedTxIns.vals()) {
+      for (serializedTxIn in serializedTxIns.values()) {
         Common.copy(
           output,
           outputOffset,
@@ -601,7 +602,7 @@ module {
       outputOffset += serializedTxOutSize.size();
 
       // Write serialized TxOutputs.
-      for (serializedTxOut in serializedTxOuts.vals()) {
+      for (serializedTxOut in serializedTxOuts.values()) {
         Common.copy(
           output,
           outputOffset,
@@ -617,7 +618,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      Array.freeze(output);
+      Array.fromVarArray(output);
     };
   };
 };

@@ -1,5 +1,5 @@
-import Blob "mo:base/Blob";
-import Nat "mo:base/Nat";
+import Blob "mo:core/Blob";
+import Nat "mo:core/Nat";
 import TestVectors "p2trTestVectors";
 import { expect; test } "mo:test";
 

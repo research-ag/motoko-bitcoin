@@ -3,7 +3,7 @@ import P2tr "./P2tr";
 import Script "./Script";
 import Segwit "../Segwit";
 import Types "./Types";
-import Result "mo:base/Result";
+import Result "mo:core/Result";
 
 module {
   public func addressFromText(address : Text) : Result.Result<Types.Address, Text> {

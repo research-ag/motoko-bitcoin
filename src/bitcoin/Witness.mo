@@ -1,8 +1,10 @@
-import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
+import Nat "mo:core/Nat";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import List "mo:core/List";
 import ByteUtils "../ByteUtils";
-import Iter "mo:base/Iter";
-import Result "mo:base/Result";
+import Iter "mo:core/Iter";
+import Result "mo:core/Result";
 
 module {
   // Witness consists of a sequence of byte arrays.
@@ -16,14 +18,14 @@ module {
   /// for more details.
   public func toBytes(witness : Witness) : [Nat8] {
     let numElements = witness.size();
-    let buffer = Buffer.Buffer<[Nat8]>(numElements * 2 + 1);
+    let buffer = List.empty<[Nat8]>();
     buffer.add(ByteUtils.writeVarint(numElements));
     for (witness_element in Iter.fromArray(witness)) {
       let size = ByteUtils.writeVarint(witness_element.size());
       buffer.add(size);
       buffer.add(witness_element);
     };
-    Array.flatten<Nat8>(Buffer.toArray(buffer));
+    Array.flatten<Nat8>(List.toArray(buffer));
 
   };
 
@@ -34,8 +36,8 @@ module {
         return #err "Could not read number of elements in the witness";
       };
     };
-    let witness : [var [Nat8]] = Array.init(numElements, []);
-    for (i in Iter.range(0, numElements - 1)) {
+    let witness : [var [Nat8]] = VarArray.repeat([], numElements);
+    for (i in Nat.range(0, numElements)) {
       let size = switch (ByteUtils.readVarint(data)) {
         case (?size) { size };
         case (null) {
@@ -50,7 +52,7 @@ module {
       };
       witness[i] := witness_element;
     };
-    let result = Array.freeze(witness);
+    let result = Array.fromVarArray(witness);
     #ok result;
   };
 };
