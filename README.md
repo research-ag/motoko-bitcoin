@@ -19,7 +19,7 @@ This project includes performance benchmarks using the `bench` mops package.
 
 Run all benchmarks locally:
 
-```
+```sh
 mops bench
 ```
 

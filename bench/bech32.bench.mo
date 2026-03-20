@@ -17,7 +17,7 @@ module {
     let hrps : [Text] = ["bc", "tb", "bcrt", "regtest"];
     let values : [[Nat8]] = [
       [],
-      [0, 1, 2, 3, 4, 5],
+      [0, 1, 2, 3, 4],
       Array.tabulate<Nat8>(20, func i { Nat8.fromNat((i * 7 + 3) % 32) }),
       Array.tabulate<Nat8>(32, func i { Nat8.fromNat((i * 11 + 5) % 32) }),
     ];

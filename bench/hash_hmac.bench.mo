@@ -14,10 +14,7 @@ module {
     bench.rows(["HMAC-SHA256", "HMAC-SHA512"]);
     bench.cols(["len 0", "len 32", "len 64", "len 256"]);
 
-    let keys : [[Nat8]] = [
-      Array.tabulate<Nat8>(16, func i { Nat8.fromNat((i * 9 + 2) % 256) }),
-      Array.tabulate<Nat8>(64, func i { Nat8.fromNat((i * 5 + 3) % 256) }),
-    ];
+    let key : [Nat8] = Array.tabulate<Nat8>(64, func i { Nat8.fromNat((i * 5 + 3) % 256) });
 
     let datas : [[Nat8]] = [
       [],
@@ -38,12 +35,12 @@ module {
         let msg = datas[di];
         switch (row) {
           case ("HMAC-SHA256") {
-            let h = Hmac.sha256(keys[0]);
+            let h = Hmac.sha256(key);
             h.writeArray(msg);
             ignore Blob.toArray(h.sum());
           };
           case ("HMAC-SHA512") {
-            let h = Hmac.sha512(keys[1]);
+            let h = Hmac.sha512(key);
             h.writeArray(msg);
             ignore Blob.toArray(h.sum());
           };
