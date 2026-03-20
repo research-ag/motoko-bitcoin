@@ -26,7 +26,7 @@ jobs:
 
       - name: Install mops and PocketIC
         run: |
-          npm install -g ic-mops @dfinity/pocket-ic
+          npm install -g ic-mops @dfinity/pic
           mops --version
 
       - name: Run benches to markdown
