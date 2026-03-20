@@ -19,15 +19,24 @@ jobs:
           persist-credentials: true
           fetch-depth: 0
 
+      - name: Install dfx and IC SDK
+        uses: dfinity/setup-dfx@main
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: '22'
 
       - name: Install mops and PocketIC
         run: |
           npm install -g ic-mops @dfinity/pic
           mops --version
+
+      - name: Install dependencies (mops)
+        run: mops install
+
+      - name: Setup Motoko toolchain (mops)
+        run: mops toolchain init
 
       - name: Run benches to markdown
         run: |
