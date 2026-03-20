@@ -13,6 +13,26 @@ Run all tests
 mops test --mode wasi
 ```
 
+## Benchmarks
+
+This project includes performance benchmarks using the `bench` mops package.
+
+Run all benchmarks locally:
+
+```
+mops bench
+```
+
+Tips:
+- Use your shell's filtering (or bench runner options) to focus on specific suites, e.g., base58 or bitcoin tx.
+- Benchmark files are located under the `bench/` directory and cover encoding (Base58/Base58Check/Bech32), hashing and HMAC, BIP32 derivation, EC arithmetic, ECDSA verification, and Bitcoin transaction building and sighash.
+
+### CI: Auto-generate benchmark.md
+
+- GitHub Actions workflow `.github/workflows/bench.yml` runs on pushes and PRs.
+- It executes `mops bench > benchmark.md`.
+- On push events, if `benchmark.md` changed, the workflow commits the updated file back to the branch with message `chore(bench): update benchmark.md [skip ci]` so the commit does not retrigger CI.
+
 ## Usage
 
 Base58:
