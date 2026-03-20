@@ -21,8 +21,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |        | len 0 | len 10 |  len 32 |    len 64 |   len 128 |
 | :----- | ----: | -----: | ------: | --------: | --------: |
-| encode | 1_918 | 42_104 | 309_465 | 1_145_178 | 4_400_854 |
-| decode | 2_195 | 37_486 | 302_205 | 1_134_338 | 4_383_556 |
+| encode | 1_927 | 42_113 | 309_474 | 1_145_187 | 4_400_863 |
+| decode | 2_204 | 37_495 | 302_214 | 1_134_347 | 4_383_565 |
 
 
 **Heap**
@@ -62,8 +62,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |        |  len 0 |  len 10 |  len 32 |    len 64 |   len 128 |
 | :----- | -----: | ------: | ------: | --------: | --------: |
-| encode | 51_608 | 115_401 | 438_813 | 1_364_343 | 4_793_814 |
-| decode | 49_175 | 108_541 | 425_137 | 1_340_937 | 4_751_522 |
+| encode | 51_744 | 115_430 | 438_842 | 1_364_372 | 4_793_843 |
+| decode | 49_180 | 108_546 | 425_142 | 1_340_942 | 4_751_527 |
 
 
 **Heap**
@@ -78,7 +78,7 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |        |    len 0 |   len 10 |   len 32 |   len 64 |   len 128 |
 | :----- | -------: | -------: | -------: | -------: | --------: |
-| encode | 3.19 KiB | 3.77 KiB |    5 KiB | 6.77 KiB | 10.36 KiB |
+| encode | 3.23 KiB | 3.77 KiB |    5 KiB | 6.77 KiB | 10.36 KiB |
 | decode | 3.05 KiB | 3.34 KiB | 4.06 KiB | 5.11 KiB |  7.23 KiB |
 
 
@@ -101,10 +101,10 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 **Instructions**
 
-|         |  len 0 |  len 5 | len 20 |  len 32 |
-| :------ | -----: | -----: | -----: | ------: |
-| bech32  | 40_125 | 49_150 | 89_525 | 120_675 |
-| bech32m | 40_431 | 49_456 | 89_831 | 120_981 |
+|         |  len 0 |  len 5 | len 20 | len 32 |
+| :------ | -----: | -----: | -----: | -----: |
+| bech32  | 19_871 | 25_844 | 47_571 | 67_910 |
+| bech32m | 20_177 | 26_150 | 47_877 | 68_216 |
 
 
 **Heap**
@@ -119,8 +119,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         |    len 0 |    len 5 |   len 20 |   len 32 |
 | :------ | -------: | -------: | -------: | -------: |
-| bech32  | 1.64 KiB | 1.84 KiB | 2.85 KiB | 3.63 KiB |
-| bech32m | 1.64 KiB | 1.84 KiB | 2.85 KiB | 3.63 KiB |
+| bech32  | 1.96 KiB | 2.15 KiB | 2.87 KiB | 3.54 KiB |
+| bech32m | 1.96 KiB | 2.15 KiB | 2.87 KiB | 3.54 KiB |
 
 
 </details>
@@ -144,8 +144,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |       |     depth 3 |     depth 4 |     depth 5 |
 | :---- | ----------: | ----------: | ----------: |
-| text  | 544_795_100 | 725_738_650 | 910_318_961 |
-| array | 544_684_515 | 725_667_160 | 910_236_443 |
+| text  | 544_119_455 | 724_830_530 | 909_205_149 |
+| array | 544_016_556 | 724_767_356 | 909_133_168 |
 
 
 **Heap**
@@ -158,10 +158,10 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 **Garbage Collection**
 
-|       |  depth 3 |   depth 4 |   depth 5 |
-| :---- | -------: | --------: | --------: |
-| text  | 13.4 MiB | 17.85 MiB | 22.39 MiB |
-| array | 13.4 MiB | 17.85 MiB | 22.39 MiB |
+|       |   depth 3 |   depth 4 |   depth 5 |
+| :---- | --------: | --------: | --------: |
+| text  | 13.38 MiB | 17.83 MiB | 22.36 MiB |
+| array | 13.38 MiB | 17.82 MiB | 22.36 MiB |
 
 
 </details>
@@ -185,8 +185,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         |   2 utxos |   4 utxos |
 | :------ | --------: | --------: |
-| build   |   744_730 |   752_652 |
-| sighash | 1_396_768 | 1_404_330 |
+| build   |   739_711 |   747_661 |
+| sighash | 1_353_777 | 1_361_367 |
 
 
 **Heap**
@@ -201,8 +201,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         |   2 utxos |   4 utxos |
 | :------ | --------: | --------: |
-| build   | 11.66 KiB | 12.13 KiB |
-| sighash | 25.81 KiB | 26.28 KiB |
+| build   | 12.27 KiB | 12.74 KiB |
+| sighash | 28.12 KiB |  28.6 KiB |
 
 
 </details>
@@ -226,8 +226,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |          |    k small |   k medium |    k large |
 | :------- | ---------: | ---------: | ---------: |
-| mulBase  | 10_061_620 | 17_926_736 | 36_232_205 |
-| mulPoint | 10_056_796 | 17_922_632 | 36_226_598 |
+| mulBase  | 10_051_216 | 17_908_116 | 36_197_846 |
+| mulPoint | 10_046_392 | 17_904_012 | 36_192_302 |
 
 
 **Heap**
@@ -242,8 +242,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |          |    k small |   k medium |    k large |
 | :------- | ---------: | ---------: | ---------: |
-| mulBase  | 323.28 KiB | 513.55 KiB |    977 KiB |
-| mulPoint | 322.64 KiB | 512.92 KiB | 976.36 KiB |
+| mulBase  | 324.09 KiB | 514.03 KiB | 976.75 KiB |
+| mulPoint | 323.46 KiB |  513.4 KiB | 976.11 KiB |
 
 
 </details>
@@ -267,8 +267,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |                    |    sample 0 |    sample 1 |
 | :----------------- | ----------: | ----------: |
-| DER+verify         |  28_925_636 |  28_831_426 |
-| verify (preparsed) | 151_605_700 | 152_875_585 |
+| DER+verify         |  28_811_294 |  28_716_406 |
+| verify (preparsed) | 151_491_557 | 152_789_627 |
 
 
 **Heap**
@@ -281,10 +281,10 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 **Garbage Collection**
 
-|                    |   sample 0 |  sample 1 |
-| :----------------- | ---------: | --------: |
-| DER+verify         | 662.85 KiB | 656.9 KiB |
-| verify (preparsed) |   3.79 MiB |  3.82 MiB |
+|                    |   sample 0 |   sample 1 |
+| :----------------- | ---------: | ---------: |
+| DER+verify         | 662.09 KiB | 654.92 KiB |
+| verify (preparsed) |   3.79 MiB |   3.82 MiB |
 
 
 </details>
@@ -308,8 +308,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |             |   len 0 |  len 32 |  len 64 | len 256 |
 | :---------- | ------: | ------: | ------: | ------: |
-| HMAC-SHA256 | 107_042 | 114_393 | 130_916 | 201_291 |
-| HMAC-SHA512 | 185_587 | 193_846 | 202_143 | 270_730 |
+| HMAC-SHA256 | 106_931 | 114_282 | 130_805 | 201_180 |
+| HMAC-SHA512 | 185_348 | 193_607 | 201_904 | 270_491 |
 
 
 **Heap**
