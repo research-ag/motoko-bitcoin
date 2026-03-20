@@ -40,10 +40,9 @@ jobs:
 
       - name: Run benches to markdown
         run: |
-          mops bench --replica pocket-ic > benchmark.md
+          mops bench > benchmark.md
 
       - name: Commit benchmark.md if changed
-        if: github.event_name == 'push'
         run: |
           if git diff --quiet -- benchmark.md; then
             echo "No changes in benchmark.md"
