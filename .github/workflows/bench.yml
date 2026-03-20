@@ -18,6 +18,7 @@ jobs:
         with:
           persist-credentials: true
           fetch-depth: 0
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Install dfx and IC SDK
         uses: dfinity/setup-dfx@main
@@ -49,7 +50,9 @@ jobs:
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            BRANCH_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
             git add benchmark.md
             git commit -m "chore(bench): update benchmark.md [skip ci]"
-            git push
+            git pull --rebase origin "$BRANCH_NAME"
+            git push origin HEAD:"$BRANCH_NAME"
           fi
