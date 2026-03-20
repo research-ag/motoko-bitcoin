@@ -31,7 +31,7 @@ jobs:
 
       - name: Run benches to markdown
         run: |
-          mops bench > benchmark.md
+          mops bench --replica pocket-ic > benchmark.md
 
       - name: Commit benchmark.md if changed
         if: github.event_name == 'push'
