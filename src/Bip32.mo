@@ -1,3 +1,4 @@
+import Nat "mo:core/Nat";
 import Common "./Common";
 import Hmac "./Hmac";
 import Hash "./Hash";
@@ -5,12 +6,13 @@ import Base58Check "./Base58Check";
 import Curves "./ec/Curves";
 import Jacobi "./ec/Jacobi";
 import Affine "./ec/Affine";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Text "mo:base/Text";
-import Buffer "mo:base/Buffer";
-import Nat32 "mo:base/Nat32";
-import Blob "mo:base/Blob";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Iter "mo:core/Iter";
+import Text "mo:core/Text";
+import List "mo:core/List";
+import Nat32 "mo:core/Nat32";
+import Blob "mo:core/Blob";
 
 module {
   public type Path = {
@@ -67,7 +69,7 @@ module {
           switch (parentPubKey) {
             case (?(#publicKeyData publicKeyData)) {
               let parentPubKeyHash = Hash.hash160(publicKeyData);
-              for (i in Iter.range(0, 3)) {
+              for (i in Nat.range(0, 4)) {
                 if (parentPubKeyHash[i] != fingerprint[i]) {
                   return null;
                 };
@@ -75,7 +77,7 @@ module {
             };
             case (?(#fingerprint parentPublicKeyFingerprint)) {
               if (parentPublicKeyFingerprint.size() > 0) {
-                for (i in Iter.range(0, 3)) {
+                for (i in Nat.range(0, 4)) {
                   if (parentPublicKeyFingerprint[i] != fingerprint[i]) {
                     return null;
                   };
@@ -138,7 +140,7 @@ module {
   // indices (e.g., m/0/1').
   func arrayPathFromString(path : Text) : ?[Nat32] {
     // Initial size most suitable for single-digit indices
-    let parsedPathBuffer : Buffer.Buffer<Nat32> = Buffer.Buffer(path.size() / 2);
+    let parsedPathBuffer = List.empty<Nat32>();
 
     let sanitized : Text = Text.replace(
       path,
@@ -176,7 +178,7 @@ module {
         };
       };
     };
-    return ?Buffer.toArray(parsedPathBuffer);
+    return ?List.toArray(parsedPathBuffer);
   };
 
   // Representation of a BIP32 extended public key.
@@ -217,7 +219,7 @@ module {
         );
 
         // Derive the hierarchy of child keys.
-        for (childIndex in pathArray.vals()) {
+        for (childIndex in pathArray.values()) {
           target := target.deriveChild(childIndex)!;
         };
         target;
@@ -235,11 +237,11 @@ module {
       // Compute HMAC with chaincode as the key and the serialized
       // parentPublicKey (33 bytes) concatenated with the serialized
       // index (4 bytes) as its data.
-      let hmacData : [var Nat8] = Array.init<Nat8>(33 + 4, 0x00);
+      let hmacData : [var Nat8] = VarArray.repeat<Nat8>(0x00, 33 + 4);
       Common.copy(hmacData, 0, key, 0, 33);
       Common.writeBE32(hmacData, 33, index);
       let hmacSha512 : Hmac.Hmac = Hmac.sha512(chaincode);
-      hmacSha512.writeArray(Array.freeze(hmacData));
+      hmacSha512.writeArray(Array.fromVarArray(hmacData));
       let fullNode : [Nat8] = Blob.toArray(hmacSha512.sum());
 
       // Split HMAC output into two 32-byte sequences.
@@ -291,7 +293,7 @@ module {
     // Serialize the extended public key data into Base58 encoded string
     // following format dictated by BIP32 specification.
     public func serialize() : Text {
-      let result = Array.init<Nat8>(78, 0);
+      let result = VarArray.repeat<Nat8>(0, 78);
 
       Common.writeBE32(result, 0, publicPrefix);
 
@@ -315,7 +317,7 @@ module {
       Common.copy(result, 13, chaincode, 0, 32);
       Common.copy(result, 45, key, 0, key.size());
 
-      return Base58Check.encode(Array.freeze(result));
+      return Base58Check.encode(Array.fromVarArray(result));
     };
   };
 };

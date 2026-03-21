@@ -1,4 +1,4 @@
-import P "mo:base/Prelude";
+import Runtime "mo:core/Runtime";
 import Field "./Field";
 
 module {
@@ -12,7 +12,7 @@ module {
       let inverse : ?Nat = Field.inverse(value, n);
       switch inverse {
         case (null) {
-          P.unreachable();
+          Runtime.trap("unreachable");
         };
         case (?inverse) {
           return Fp(inverse, n);

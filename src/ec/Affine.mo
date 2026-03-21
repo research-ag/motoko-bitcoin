@@ -1,7 +1,8 @@
 import FpBase "./Fp";
 import Curves "./Curves";
 import Common "../Common";
-import Array "mo:base/Array";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
 
 module {
   type Fp = FpBase.Fp;
@@ -107,14 +108,14 @@ module {
       case (#point(x, y, _)) {
         return if (compressed) {
           let startByte : Nat8 = if (y.value % 2 == 0) 0x02 else 0x03;
-          let output = Array.init<Nat8>(33, startByte);
+          let output = VarArray.repeat<Nat8>(startByte, 33);
           Common.writeBE256(output, 1, x.value);
-          Array.freeze(output);
+          Array.fromVarArray(output);
         } else {
-          let output = Array.init<Nat8>(65, 0x04);
+          let output = VarArray.repeat<Nat8>(0x04, 65);
           Common.writeBE256(output, 1, x.value);
           Common.writeBE256(output, 33, y.value);
-          Array.freeze(output);
+          Array.fromVarArray(output);
         };
       };
     };

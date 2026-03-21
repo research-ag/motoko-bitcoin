@@ -1,10 +1,10 @@
-import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
-import Result "mo:base/Result";
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
-import P "mo:base/Prelude";
+import Nat "mo:core/Nat";
+import Nat8 "mo:core/Nat8";
+import Nat32 "mo:core/Nat32";
+import Result "mo:core/Result";
+import List "mo:core/List";
+import Iter "mo:core/Iter";
+import Runtime "mo:core/Runtime";
 import Bech32 "../src/Bech32";
 
 module {
@@ -17,10 +17,10 @@ module {
   // Convert a Witness Program to a SegWit Address.
   public func encode(hrp : Text, { version; program } : WitnessProgram) : Result.Result<Text, Text> {
 
-    let bech32Input = Buffer.Buffer<Nat8>(program.size());
+    let bech32Input = List.empty<Nat8>();
     bech32Input.add(version);
 
-    switch (convertBits(program.vals(), bech32Input, 8, 5, true)) {
+    switch (convertBits(program.values(), bech32Input, 8, 5, true)) {
       case (#err(msg)) {
         return #err(msg);
       };
@@ -35,7 +35,7 @@ module {
 
     let bech32Result : Text = Bech32.encode(
       hrp,
-      Buffer.toArray(bech32Input),
+      List.toArray(bech32Input),
       encoding,
     );
 
@@ -68,20 +68,20 @@ module {
     };
 
     // Split into version and program.
-    let dataIter : Iter.Iter<Nat8> = data.vals();
+    let dataIter : Iter.Iter<Nat8> = data.values();
     let version : Nat8 = switch (dataIter.next()) {
       case (?val) {
         val;
       };
       case _ {
-        P.unreachable();
+        Runtime.trap("unreachable");
       };
     };
 
-    let convertedData = Buffer.Buffer<Nat8>(0);
+    let convertedData = List.empty<Nat8>();
     switch (convertBits(dataIter, convertedData, 5, 8, false)) {
       case (#ok) {
-        let convertedDataSize : Nat = convertedData.size();
+        let convertedDataSize : Nat = List.size(convertedData);
 
         if (convertedDataSize < 2 or convertedDataSize > 40) {
           return #err("Wrong output size.");
@@ -104,7 +104,7 @@ module {
           return #err("Encoding does not match witness version.");
         };
 
-        return #ok(decodedHrp, { version; program = Buffer.toArray(convertedData) });
+        return #ok(decodedHrp, { version; program = List.toArray(convertedData) });
       };
       case _ {
         return #err("Convert bits failed.");
@@ -115,7 +115,7 @@ module {
   // Convert between two bases that are power of 2.
   func convertBits(
     data : Iter.Iter<Nat8>,
-    output : Buffer.Buffer<Nat8>,
+    output : List.List<Nat8>,
     from : Nat32,
     to : Nat32,
     pad : Bool,

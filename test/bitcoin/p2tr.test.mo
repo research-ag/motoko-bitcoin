@@ -1,11 +1,13 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
+import Nat "mo:core/Nat";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
 import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
-import Debug "mo:base/Debug";
+import Debug "mo:core/Debug";
+import Runtime "mo:core/Runtime";
 import Fp "../../src/ec/Fp";
 import P2tr "../../src/bitcoin/P2tr";
-import Result "mo:base/Result";
+import Result "mo:core/Result";
 import Script "../../src/bitcoin/Script";
 import { expect; test } "mo:test";
 
@@ -61,7 +63,7 @@ test(
 test(
   "tweak from key and hash: invalid input sizes",
   func() {
-    func array_of_size(size : Nat) : [Nat8] = Array.freeze(Array.init<Nat8>(size, 0));
+    func array_of_size(size : Nat) : [Nat8] = Array.repeat<Nat8>(0, size);
     let valid_key_or_hash = array_of_size(32);
 
     for (i in [0, 1, 31, 33].vals()) {
@@ -88,7 +90,7 @@ test(
         expect.bool(tweaked.is_even).isTrue();
       };
       case (#err(text)) {
-        Debug.trap(text);
+        Runtime.trap(text);
       };
     };
   },
@@ -104,7 +106,7 @@ test(
 
     let tweak = switch (P2tr.tweakFromKeyAndHash(public_key_bip340, merkle_root)) {
       case (#ok(tweak)) { tweak };
-      case (#err(text)) { Debug.trap(text) };
+      case (#err(text)) { Runtime.trap(text) };
     };
 
     let expected : [Nat8] = [100, 6, 11, 39, 35, 146, 187, 231, 26, 61, 8, 17, 107, 6, 180, 177, 70, 67, 14, 141, 245, 171, 35, 208, 45, 113, 164, 60, 177, 196, 74, 202];
@@ -120,7 +122,7 @@ test(
         expect.bool(tweaked.is_even).isFalse();
       };
       case (#err(text)) {
-        Debug.trap(text);
+        Runtime.trap(text);
       };
     };
   },

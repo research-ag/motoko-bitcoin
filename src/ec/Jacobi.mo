@@ -6,9 +6,10 @@
 //
 // Therefore, DO NOT use this code for any operations involving secrets.
 
-import Iter "mo:base/Iter";
-import Int "mo:base/Int";
-import Debug "mo:base/Debug";
+import Iter "mo:core/Iter";
+import Runtime "mo:core/Runtime";
+import Int "mo:core/Int";
+import Nat "mo:core/Nat";
 import BaseFp "./Fp";
 import Affine "./Affine";
 import Curves "./Curves";
@@ -135,9 +136,9 @@ module {
 
   // Normalize the given point such that z = 1.
   public func scale(point : Point) : Point {
-    switch (normalizeInfinity(point)) {
+    return switch (normalizeInfinity(point)) {
       case (#infinity(curve)) {
-        return #infinity(curve);
+        #infinity(curve);
       };
       case (#point(x, y, z, curve)) {
         if (z.isEqual(curve.Fp(1))) {
@@ -150,21 +151,20 @@ module {
         let newX = x.mul(zzInverse);
         let newY = y.mul(zzInverse).mul(zInverse);
         let newZ = curve.Fp(1);
-
-        return #point(newX, newY, newZ, curve);
+        #point(newX, newY, newZ, curve);
       };
     };
   };
 
   // Return double of the given point.
   public func double(point : Point) : Point {
-    switch (normalizeInfinity(point)) {
+    return switch (normalizeInfinity(point)) {
       case (#infinity(curve)) {
-        return #infinity(curve);
+        #infinity(curve);
       };
       case (#point(x, y, z, curve)) {
         let (x2, y2, z2) = doDouble(x.value, y.value, z.value, curve.a, curve.p);
-        return #point(
+        #point(
           fpFromInt(x2, curve),
           fpFromInt(y2, curve),
           fpFromInt(z2, curve),
@@ -179,17 +179,14 @@ module {
     if (other == 0) {
       return #infinity(getCurve(point));
     };
-    switch (scale(point)) {
-      case (#infinity(curve)) {
-        return #infinity(curve);
-      };
+    return switch (scale(point)) {
       case (#point(x2, y2, _, curve)) {
         var p : (Int, Int, Int) = (0, 0, 1);
         let naf = Numbers.toNaf(other);
         let y2neg = y2.neg().value;
 
-        for (i in Iter.revRange(naf.size() - 1, 0)) {
-          let nafItem : Int = naf[Int.abs(i)];
+        for (i in Iter.reverse(Nat.range(0, naf.size()))) {
+          let nafItem : Int = naf[i];
           p := doDouble(p.0, p.1, p.2, curve.a, curve.p);
           if (nafItem < 0) {
             p := _add(
@@ -209,7 +206,10 @@ module {
         if (p.1 == 0 or p.2 == 0) {
           return #infinity(curve);
         };
-        return #point(fpFromInt(p.0, curve), fpFromInt(p.1, curve), fpFromInt(p.2, curve), curve);
+        #point(fpFromInt(p.0, curve), fpFromInt(p.1, curve), fpFromInt(p.2, curve), curve);
+      };
+      case (#infinity(curve)) {
+        #infinity(curve);
       };
     };
   };
@@ -222,7 +222,7 @@ module {
   // Add the given two points.
   public func add(point1 : Point, point2 : Point) : Point {
     if (not Curves.isEqual(getCurve(point1), getCurve(point2))) {
-      Debug.trap("Cannot add two points on different curves");
+      Runtime.trap("Cannot add two points on different curves");
     };
 
     return switch (normalizeInfinity(point1), normalizeInfinity(point2)) {

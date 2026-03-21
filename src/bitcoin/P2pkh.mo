@@ -2,15 +2,12 @@ import Types "./Types";
 import EcdsaTypes "../ecdsa/Types";
 import Ecdsa "../ecdsa/Ecdsa";
 import Base58Check "../Base58Check";
-import Sha256 "mo:sha2/Sha256";
-import Ripemd160 "../Ripemd160";
-import PublicKey "../ecdsa/Publickey";
 import ByteUtils "../ByteUtils";
 import Hash "../Hash";
 import Script "./Script";
-import Array "mo:base/Array";
-import Result "mo:base/Result";
-import Iter "mo:base/Iter";
+import Array "mo:core/Array";
+import Result "mo:core/Result";
+import Iter "mo:core/Iter";
 
 module {
   type PublicKey = Ecdsa.PublicKey;
@@ -78,7 +75,7 @@ module {
 
     let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(address)) {
       case (?b58decoded) {
-        b58decoded.vals();
+        b58decoded.values();
       };
       case _ {
         return #err("Could not base58 decode address.");

@@ -1,10 +1,11 @@
-import Buffer "mo:base/Buffer";
-import Blob "mo:base/Blob";
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
-import Result "mo:base/Result";
-import Nat32 "mo:base/Nat32";
-import Nat8 "mo:base/Nat8";
+import Nat "mo:core/Nat";
+import List "mo:core/List";
+import Blob "mo:core/Blob";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Result "mo:core/Result";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
 import Transaction "./Transaction";
 import Der "../ecdsa/Der";
 import Script "./Script";
@@ -51,10 +52,10 @@ module {
     };
 
     // Collect TxOutputs, making space for a potential extra output for change.
-    let txOutputs = Buffer.Buffer<TxOutput.TxOutput>(destinations.size() + 1);
+    let txOutputs = List.empty<TxOutput.TxOutput>();
     var totalSpend : Satoshi = fees;
 
-    for (dest in destinations.vals()) {
+    for (dest in destinations.values()) {
       let (destAddr, destAmount) = dest;
       switch (Address.scriptPubKey(destAddr)) {
         case (#ok destScriptPubKey) {
@@ -70,9 +71,9 @@ module {
     // Select which UTXOs to spend. For now, we spend the first available
     // UTXOs.
     var availableFunds : Satoshi = 0;
-    let txInputs : Buffer.Buffer<TxInput.TxInput> = Buffer.Buffer(utxos.size());
+    let txInputs = List.empty<TxInput.TxInput>();
 
-    label UtxoLoop for (utxo in utxos.vals()) {
+    label UtxoLoop for (utxo in utxos.values()) {
       availableFunds += utxo.value;
       txInputs.add(TxInput.TxInput(utxo.outpoint, defaultSequence));
 
@@ -104,9 +105,9 @@ module {
     return #ok(
       Transaction.Transaction(
         version,
-        Buffer.toArray(txInputs),
-        Buffer.toArray(txOutputs),
-        Array.init<Witness.Witness>(txInputs.size(), Witness.EMPTY_WITNESS),
+        List.toArray(txInputs),
+        List.toArray(txOutputs),
+        VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, List.size(txInputs)),
         0,
       )
     );
@@ -164,7 +165,7 @@ module {
           },
         );
         // Assign ScriptSigs to their associated TxInputs.
-        for (i in Iter.range(0, scriptSigs.size() - 1)) {
+        for (i in Nat.range(0, scriptSigs.size())) {
           transaction.txInputs[i].script := scriptSigs[i];
         };
 

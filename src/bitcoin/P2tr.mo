@@ -2,9 +2,9 @@ import Common "../Common";
 import Curves "../ec/Curves";
 import Fp "../ec/Fp";
 import Hash "../Hash";
-import Result "mo:base/Result";
-import Array "mo:base/Array";
-import Nat "mo:base/Nat";
+import Result "mo:core/Result";
+import Array "mo:core/Array";
+import Nat "mo:core/Nat";
 import Script "./Script";
 import Segwit "../Segwit";
 import Types "./Types";
@@ -126,7 +126,7 @@ module {
 
     let tweaked_public_key_sec1_bytes = Jacobi.toBytes(tweaked_public_key, true);
     #ok({
-      bip340_public_key = Array.subArray(tweaked_public_key_sec1_bytes, 1, 32);
+      bip340_public_key = Array.sliceToArray(tweaked_public_key_sec1_bytes, 1, 33);
       is_even = tweaked_public_key_sec1_bytes[0] == 0x02;
     });
   };

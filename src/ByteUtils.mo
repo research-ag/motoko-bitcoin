@@ -1,9 +1,10 @@
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
+import Nat8 "mo:core/Nat8";
+import Nat16 "mo:core/Nat16";
+import Nat32 "mo:core/Nat32";
+import Nat64 "mo:core/Nat64";
+import Iter "mo:core/Iter";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
 import Common "./Common";
 
 module {
@@ -16,7 +17,7 @@ module {
     reverse : Bool,
   ) : ?[Nat8] {
     return do ? {
-      let readData : [var Nat8] = Array.init<Nat8>(count, 0);
+      let readData : [var Nat8] = VarArray.repeat<Nat8>(0, count);
       if (reverse) {
         var nextReadIndex : Nat = count - 1;
 
@@ -36,7 +37,7 @@ module {
         };
       };
 
-      Array.freeze(readData);
+      Array.fromVarArray(readData);
     };
   };
 
@@ -117,17 +118,17 @@ module {
     assert (value < 0x10000000000000000);
 
     return if (value < 0xfd) { [Nat8.fromIntWrap(value)] } else if (value < 0x10000) {
-      let result = Array.init<Nat8>(3, 0xfd);
+      let result = VarArray.repeat<Nat8>(0xfd, 3);
       Common.writeLE16(result, 1, Nat16.fromIntWrap(value));
-      Array.freeze(result);
+      Array.fromVarArray(result);
     } else if (value < 0x100000000) {
-      let result = Array.init<Nat8>(5, 0xfe);
+      let result = VarArray.repeat<Nat8>(0xfe, 5);
       Common.writeLE32(result, 1, Nat32.fromIntWrap(value));
-      Array.freeze(result);
+      Array.fromVarArray(result);
     } else {
-      let result = Array.init<Nat8>(9, 0xff);
+      let result = VarArray.repeat<Nat8>(0xff, 9);
       Common.writeLE64(result, 1, Nat64.fromIntWrap(value));
-      Array.freeze(result);
+      Array.fromVarArray(result);
     };
   };
 };

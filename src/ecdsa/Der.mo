@@ -1,10 +1,11 @@
-import Result "mo:base/Result";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
-import Nat8 "mo:base/Nat8";
-import Array "mo:base/Array";
-import Buffer "mo:base/Buffer";
-import Blob "mo:base/Blob";
+import Result "mo:core/Result";
+import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
+import Nat8 "mo:core/Nat8";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import List "mo:core/List";
+import Blob "mo:core/Blob";
 import Types "./Types";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
@@ -22,17 +23,17 @@ module {
     // negative.
     func preprocessData(data : [Nat8]) : [Nat8] {
       // Serialize value big endian to 32 byte array.
-      let outputBuf = Buffer.Buffer<Nat8>(data.size());
+      let outputBuf = List.empty<Nat8>();
 
-      for (i in Iter.range(0, data.size() - 1)) {
+      for (i in Nat.range(0, data.size())) {
         // We are looking for the first non-zero byte.
-        if (outputBuf.size() == 0) {
+        if (List.size(outputBuf) == 0) {
           // Check whether the current byte is a non-zero.
           if (data[i] != 0) {
             // Check whether the current byte has its msb set.
             if (data[i] >= 0x80) {
               // Msb is set, add zero to output buffer.
-              outputBuf.add(0x00);
+              outputBuf.add(0x00 : Nat8);
             };
             // Add the current byte.
             outputBuf.add(data[i]);
@@ -44,15 +45,15 @@ module {
         };
       };
 
-      return Buffer.toArray(outputBuf);
+      return List.toArray(outputBuf);
     };
 
-    let output = Buffer.Buffer<Nat8>(0);
+    let output = List.empty<Nat8>();
     let rData : [Nat8] = preprocessData(r);
     let sData : [Nat8] = preprocessData(s);
 
     // Add DER identifier.
-    output.add(0x30);
+    output.add(0x30 : Nat8);
     // Total size of everything that comes next, excluding sighash type.
     output.add(
       Nat8.fromIntWrap(
@@ -71,26 +72,26 @@ module {
       )
     );
     // DER sequence identifier.
-    output.add(0x02);
+    output.add(0x02 : Nat8);
     // Signature r component size.
     output.add(Nat8.fromIntWrap(rData.size()));
 
     // Signature r component.
-    for (i in rData.vals()) {
+    for (i in rData.values()) {
       output.add(i);
     };
 
     // DER sequence identifier.
-    output.add(0x02);
+    output.add(0x02 : Nat8);
     // Signature s component size.
     output.add(Nat8.fromIntWrap(sData.size()));
 
     // Signature s component.
-    for (i in sData.vals()) {
+    for (i in sData.values()) {
       output.add(i);
     };
 
-    return Blob.fromArray(Buffer.toArray(output));
+    return Blob.fromArray(List.toArray(output));
   };
 
   // Accepts a Blob containing the concatenation of the 32-byte big endian
@@ -99,18 +100,18 @@ module {
   // 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
   public func encodeSignature(signature : Blob) : DerSignature {
     let data : [Nat8] = Blob.toArray(signature);
-    let rdata = Array.init<Nat8>(32, 0);
-    let sdata = Array.init<Nat8>(32, 0);
+    let rdata = VarArray.repeat<Nat8>(0, 32);
+    let sdata = VarArray.repeat<Nat8>(0, 32);
     Common.copy(rdata, 0, data, 0, 32);
     Common.copy(sdata, 0, data, 32, 32);
 
-    return _encodeSignature(Array.freeze(rdata), Array.freeze(sdata));
+    return _encodeSignature(Array.fromVarArray(rdata), Array.fromVarArray(sdata));
   };
 
   // Decode signature in DER format.
   // 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
   public func decodeSignature(signature : DerSignature) : Result.Result<Signature, Text> {
-    let data : Iter.Iter<Nat8> = signature.vals();
+    let data : Iter.Iter<Nat8> = signature.values();
 
     let (totalLen, rLen) = switch (
       ByteUtils.readOne(data),
@@ -177,22 +178,22 @@ module {
 
     let alignedRdata = if (rData.size() < 32) {
       // Align to 32 bytes.
-      let aligned : [var Nat8] = Array.init<Nat8>(32, 0);
-      for (i in Iter.range(0, Nat.min(rData.size() - 1, 31))) {
+      let aligned : [var Nat8] = VarArray.repeat<Nat8>(0, 32);
+      for (i in Nat.range(0, Nat.min(rData.size(), 32))) {
         aligned[aligned.size() - 1 - i] := rData[rData.size() - 1 - i];
       };
-      Array.freeze(aligned);
+      Array.fromVarArray(aligned);
     } else {
       rData;
     };
 
     let alignedSdata = if (sData.size() < 32) {
       // Align to 32 bytes.
-      let aligned : [var Nat8] = Array.init<Nat8>(32, 0);
-      for (i in Iter.range(0, Nat.min(sData.size() - 1, 31))) {
+      let aligned : [var Nat8] = VarArray.repeat<Nat8>(0, 32);
+      for (i in Nat.range(0, Nat.min(sData.size(), 32))) {
         aligned[aligned.size() - 1 - i] := sData[sData.size() - 1 - i];
       };
-      Array.freeze(aligned);
+      Array.fromVarArray(aligned);
     } else {
       sData;
     };

@@ -1,6 +1,6 @@
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
+import Debug "mo:core/Debug";
+import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
 import { test } "mo:test";
 
 // A mini test runner to facilitate debugging and benchmarking.
@@ -34,8 +34,8 @@ module {
     test(
       test_obj.title,
       func() {
-        for (i in Iter.range(0, options.count - 1)) {
-          for (vectorIndex in Iter.range(0, test_obj.vectors.size() - 1)) {
+        for (i in Nat.range(0, options.count)) {
+          for (vectorIndex in Nat.range(0, test_obj.vectors.size())) {
             if (options.verbose) {
               Debug.print("    Test Case #" # Nat.toText(vectorIndex + 1));
             };

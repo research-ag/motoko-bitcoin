@@ -1,9 +1,10 @@
-import Text "mo:base/Text";
-import Char "mo:base/Char";
-import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
+import Text "mo:core/Text";
+import Char "mo:core/Char";
+import Nat8 "mo:core/Nat8";
+import Nat32 "mo:core/Nat32";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Iter "mo:core/Iter";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
@@ -75,7 +76,7 @@ module {
     // Base256, which is approximately 733 / 1000. The input size is multiplied
     // by this value and rounded up to get the total Base256 required size.
     let size : Nat = (input.size() - zeroes - spaces) * 733 / 1000 + 1;
-    let b256 : [var Nat8] = Array.init<Nat8>(size, 0x00);
+    let b256 : [var Nat8] = VarArray.repeat<Nat8>(0x00, size);
 
     label l loop {
       switch (current) {
@@ -162,7 +163,7 @@ module {
     // Allocate enough space in big-endian base58 representation:
     // log(256) / log(58), rounded up.
     let size : Nat = (input.size() - inputPointer) * 138 / 100 + 1;
-    let b58 : [var Nat8] = Array.init<Nat8>(size, 0);
+    let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
 
     while (inputPointer < input.size()) {
       var carry : Nat = Nat8.toNat(input[inputPointer]);
@@ -198,6 +199,6 @@ module {
         };
       },
     );
-    return Text.fromIter(output.vals());
+    return Text.fromIter(output.values());
   };
 };
