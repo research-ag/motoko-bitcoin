@@ -1,13 +1,12 @@
-import Text "mo:core/Text";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import Nat8 "mo:core/Nat8";
-import Nat "mo:core/Nat";
-import Nat32 "mo:core/Nat32";
 import Blob "mo:core/Blob";
-import List "mo:core/List";
-import Result "mo:core/Result";
 import Char "mo:core/Char";
+import Nat "mo:core/Nat";
+import Nat8 "mo:core/Nat8";
+import Nat32 "mo:core/Nat32";
+import Result "mo:core/Result";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
 
 module {
   public type Encoding = {
@@ -91,7 +90,7 @@ module {
       };
 
       if (not isInRange(c)) {
-        return #err("Found unexpected character: " # toText(c));
+        return #err("Found unexpected character: " # c.toText());
       };
 
     };
@@ -105,28 +104,27 @@ module {
       input.size() > 90 or separatorIndex == 0 or
       separatorIndex + 7 > input.size()
     ) {
-      return #err("Bad separator position: " # (Nat.toText(separatorIndex)));
+      return #err("Bad separator position: " # (separatorIndex.toText()));
     };
 
-    // Split into HRP and data.
-    let hrpBuffer = List.empty<Nat8>();
-    let valuesBuffer = List.empty<Nat8>();
+    // Extract HRP
+    let hrp = inputData.sliceToArray(0, separatorIndex).map(toLower);
 
-    for (i in Nat.range(0, separatorIndex)) {
-      hrpBuffer.add(toLower(inputData[i]));
+    // Extract value data
+    var error : ?Nat8 = null;
+    let values = inputData.sliceToArray(separatorIndex + 1, inputData.size()).map(
+      func(c) {
+        let mappedVal : Nat8 = reverseCharset[c.toNat()];
+        if (mappedVal == 255) error := ?c;
+        mappedVal;
+      }
+    );
+
+    // Return parsing error
+    switch (error) {
+      case (?c) return #err("Invalid character found: " # c.toText());
+      case null {};
     };
-
-    for (i in Nat.range(separatorIndex + 1, inputData.size())) {
-      let c : Nat8 = inputData[i];
-      let mappedVal : Nat8 = reverseCharset[Nat8.toNat(c)];
-
-      if (mappedVal == 255) {
-        return #err("Invalid character found: " # toText(c));
-      };
-      valuesBuffer.add(mappedVal);
-    };
-    let values : [Nat8] = List.toArray(valuesBuffer);
-    let hrp : [Nat8] = List.toArray(hrpBuffer);
 
     return switch (
       verifyChecksum(hrp, values),
@@ -136,11 +134,7 @@ module {
         #err(msg);
       };
       case (#ok(encodingType), ?hrp) {
-        // Remove checksum from data.
-        for (i in Nat.range(0, 6)) {
-          ignore (valuesBuffer.removeLast());
-        };
-        return #ok(encodingType, hrp, List.toArray(valuesBuffer));
+        return #ok(encodingType, hrp, values.sliceToArray(0, -6));
       };
       case _ {
         #err("Failed to decode HRP.");
@@ -156,11 +150,10 @@ module {
     let outputSize = hrpSize * 2 + 1;
     let output = VarArray.repeat<Nat8>(0, outputSize);
 
-    var i : Nat = 0;
-    for (currHrp in hrp.values()) {
+    for (i in hrp.keys()) {
+      let currHrp = hrp[i];
       output[i] := currHrp >> 5;
       output[i + hrpSize + 1] := currHrp & 0x1f;
-      i += 1;
     };
 
     return Array.fromVarArray(output);
@@ -187,7 +180,7 @@ module {
     let polyModValues : [Nat8] = Array.flatten([
       expandedHrp,
       data,
-      Array.repeat(0 : Nat8, 6),
+      [0, 0, 0, 0, 0, 0] : [Nat8],
     ]);
 
     let mod : Nat32 = polymod(polyModValues) ^ encodingConstant(encoding);
@@ -210,17 +203,7 @@ module {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
-    // Merge expandedHrp and values arrays.
-    let polyModValues = List.empty<Nat8>();
-
-    for (val in expandedHrp.values()) {
-      polyModValues.add(val);
-    };
-    for (val in values.values()) {
-      polyModValues.add(val);
-    };
-
-    let check : Nat32 = polymod(List.toArray(polyModValues));
+    let check : Nat32 = polymod(Array.concat(expandedHrp, values));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);
@@ -238,8 +221,8 @@ module {
     var c : Nat32 = 1;
 
     for (value in values.values()) {
-      let c0 : Nat8 = Nat8.fromIntWrap(Nat32.toNat(c >> 25));
-      c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(Nat8.toNat(value));
+      let c0 : Nat8 = Nat8.fromIntWrap((c >> 25).toNat());
+      c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(value.toNat());
 
       // Conditionally add in coefficients of the generator polynomial.
       if (c0 & 1 > 0) c ^= 0x3b6a57b2;
@@ -259,17 +242,6 @@ module {
     } else {
       c;
     };
-  };
-
-  // Convert given byte value to Text.
-  func toText(c : Nat8) : Text {
-    return Char.toText(
-      Char.fromNat32(
-        Nat32.fromNat(
-          Nat8.toNat(c)
-        )
-      )
-    );
   };
 
   // Returns true if given code corresponds to a lowercase character.
