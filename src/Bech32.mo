@@ -1,7 +1,6 @@
 import Text "mo:core/Text";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
 import Nat8 "mo:core/Nat8";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
@@ -61,23 +60,14 @@ module {
     let checksum : [Nat8] = createChecksum(encodedHrp, values, encoding);
 
     // hrp | '1' | values | checksum.
-    let totalSize = hrp.size() + 1 + values.size() + checksum.size();
-    let output = List.empty<Char>();
+    let output : [Char] = Array.flatten([
+      Text.toArray(hrp),
+      ['1'],
+      Array.map(values, func x = charset[Nat8.toNat(x)]),
+      Array.map(checksum, func x = charset[Nat8.toNat(x)]),
+    ]);
 
-    for (val in Text.toIter(hrp)) {
-      output.add(val);
-    };
-
-    output.add('1');
-
-    for (val in values.values()) {
-      output.add(charset[Nat8.toNat(val)]);
-    };
-    for (val in checksum.values()) {
-      output.add(charset[Nat8.toNat(val)]);
-    };
-
-    return Text.fromIter(output.values());
+    return Text.fromArray(output);
   };
 
   // Decode given text as Bech32 or Bech32m.
@@ -193,21 +183,13 @@ module {
 
     // Merge expandedHrp and data arrays and append 6 zeroes to get
     // [expandedHrp..., data..., 0, 0, 0, 0, 0, 0].
-    let polyModValues = List.empty<Nat8>();
+    let polyModValues : [Nat8] = Array.flatten([
+      expandedHrp,
+      data,
+      Array.repeat(0 : Nat8, 6),
+    ]);
 
-    for (val in expandedHrp.values()) {
-      polyModValues.add(val);
-    };
-    for (val in data.values()) {
-      polyModValues.add(val);
-    };
-
-    // Pad with 6 zeros.
-    for (_ in Nat.range(0, 6)) {
-      polyModValues.add(0 : Nat8);
-    };
-
-    let mod : Nat32 = polymod(List.toArray(polyModValues)) ^ encodingConstant(encoding);
+    let mod : Nat32 = polymod(polyModValues) ^ encodingConstant(encoding);
 
     // Convert the 5-bit groups in mod to checksum data.
     return Array.tabulate<Nat8>(
