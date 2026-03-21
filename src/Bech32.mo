@@ -52,11 +52,12 @@ module {
   // Encode input in Bech32 or a Bech32m.
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
     // Ensure HRP is lowercase.
-    let encodedHrp : [Nat8] = Blob.toArray(Text.encodeUtf8(hrp));
-    for (val in encodedHrp.values()) {
-      assert (val < CHAR_A or val > CHAR_Z);
+    for (c in hrp.chars()) {
+      assert (c <= '~' and c >= '!' and not (c <= 'Z' and c >= 'A'));
     };
 
+    // Calculate checksum
+    let encodedHrp : [Nat8] = Blob.toArray(Text.encodeUtf8(hrp));
     let checksum : [Nat8] = createChecksum(encodedHrp, values, encoding);
 
     // hrp | '1' | values | checksum.
