@@ -103,8 +103,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         |  len 0 |  len 5 | len 20 | len 32 |
 | :------ | -----: | -----: | -----: | -----: |
-| bech32  | 18_972 | 24_998 | 46_626 | 66_722 |
-| bech32m | 19_278 | 25_304 | 46_932 | 67_028 |
+| bech32  | 19_519 | 25_545 | 47_433 | 67_919 |
+| bech32m | 19_825 | 25_851 | 47_739 | 68_225 |
 
 
 **Heap**
@@ -117,10 +117,10 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 **Garbage Collection**
 
-|         |    len 0 |    len 5 |   len 20 |   len 32 |
-| :------ | -------: | -------: | -------: | -------: |
-| bech32  | 1.17 KiB | 1.37 KiB | 2.08 KiB | 2.73 KiB |
-| bech32m | 1.17 KiB | 1.37 KiB | 2.08 KiB | 2.73 KiB |
+|         |    len 0 |    len 5 |   len 20 |  len 32 |
+| :------ | -------: | -------: | -------: | ------: |
+| bech32  | 1.24 KiB | 1.43 KiB | 2.14 KiB | 2.8 KiB |
+| bech32m | 1.24 KiB | 1.43 KiB | 2.14 KiB | 2.8 KiB |
 
 
 </details>
