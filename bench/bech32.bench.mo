@@ -34,8 +34,8 @@ module {
         let hrp = hrps[i % hrps.size()];
         let v = values[i];
         switch (row) {
-          case ("bech32") { ignore Bech32.encode(hrp, v, #BECH32) };
-          case ("bech32m") { ignore Bech32.encode(hrp, v, #BECH32M) };
+          case ("bech32") { ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32)) };
+          case ("bech32m") { ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32M)) };
           case (_) {};
         };
       }
