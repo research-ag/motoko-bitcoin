@@ -36,8 +36,8 @@ module {
       case (?(#infinity(curve))) {
         ?(#infinity(curve));
       };
-      case (? #point(x, y, curve)) {
-        ? #point(x, y, curve.Fp(1), curve);
+      case (?#point(x, y, curve)) {
+        ?#point(x, y, curve.Fp(1), curve);
       };
     };
   };
