@@ -10,7 +10,6 @@ import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Iter "mo:core/Iter";
 import Text "mo:core/Text";
-import List "mo:core/List";
 import Nat32 "mo:core/Nat32";
 import Blob "mo:core/Blob";
 
@@ -140,7 +139,7 @@ module {
   // indices (e.g., m/0/1').
   func arrayPathFromString(path : Text) : ?[Nat32] {
     // Initial size most suitable for single-digit indices
-    let parsedPathBuffer = List.empty<Nat32>();
+    var parsedPath : [Nat32] = [];
 
     let sanitized : Text = Text.replace(
       path,
@@ -170,7 +169,7 @@ module {
 
       switch (Common.textToNat(token)) {
         case (?number) {
-          parsedPathBuffer.add(Nat32.fromNat(number));
+          parsedPath := parsedPath.concat([Nat32.fromNat(number)]);
           first := false;
         };
         case (null) {
@@ -178,7 +177,7 @@ module {
         };
       };
     };
-    return ?List.toArray(parsedPathBuffer);
+    return ?parsedPath;
   };
 
   // Representation of a BIP32 extended public key.
