@@ -4,10 +4,11 @@ import Types "../src/bitcoin/Types";
 import Transaction "../src/bitcoin/Transaction";
 import Witness "../src/bitcoin/Witness";
 import Bench "mo:bench-helper";
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
-import Nat32 "mo:base/Nat32";
-import Nat8 "mo:base/Nat8";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Blob "mo:core/Blob";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
 
 module {
   // Simple fixtures
@@ -56,7 +57,7 @@ module {
           case (1) {
             let tx = switch (Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000)) {
               case (#ok t) t;
-              case (#err _) Transaction.Transaction(1, [], [], Array.init<Witness.Witness>(0, Witness.EMPTY_WITNESS), 0);
+              case (#err _) Transaction.Transaction(1, [], [], VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, 0), 0);
             };
             let script = switch (P2pkh.makeScript(testnetP2pkh2)) {
               case (#ok s) s;

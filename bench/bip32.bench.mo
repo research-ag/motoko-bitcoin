@@ -1,6 +1,6 @@
 import Bip32 "../src/Bip32";
 import Bench "mo:bench-helper";
-import Debug "mo:base/Debug";
+import Runtime "mo:core/Runtime";
 
 module {
   public func init() : Bench.V1 {
@@ -13,7 +13,7 @@ module {
 
     // Test xpubs
     let xpub = "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8";
-    let ?ek = Bip32.parse(xpub, null) else Debug.trap("Invalid benchmark xpub");
+    let ?ek = Bip32.parse(xpub, null) else Runtime.trap("Invalid benchmark xpub");
 
     func run(ri : Nat, ci : Nat) {
         let res = switch (ri, ci) {

@@ -1,8 +1,8 @@
 import Bech32 "../src/Bech32";
 import Bench "mo:bench-helper";
-import Array "mo:base/Array";
-import Nat8 "mo:base/Nat8";
-import Text "mo:base/Text";
+import Array "mo:core/Array";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
 
 module {
   public func init() : Bench.V1 {

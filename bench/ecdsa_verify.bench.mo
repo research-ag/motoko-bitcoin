@@ -1,12 +1,13 @@
-import Array "mo:base/Array";
-import Text "mo:base/Text";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Text "mo:core/Text";
 
 import PublicKey "../src/ecdsa/Publickey";
 import Ecdsa "../src/ecdsa/Ecdsa";
 import Der "../src/ecdsa/Der";
 import Curves "../src/ec/Curves";
 import Bench "mo:bench-helper";
-import Blob "mo:base/Blob";
+import Blob "mo:core/Blob";
 
 module {
 
@@ -21,7 +22,7 @@ module {
     let b = Blob.toArray(Text.encodeUtf8(t));
     let n = b.size();
     if (n == 0) return [];
-    let out = Array.init<Nat8>((n + 1) / 2, 0);
+    let out = VarArray.repeat<Nat8>(0, (n + 1) / 2);
     var oi = 0;
     var i = 0;
     if (n % 2 == 1) {
@@ -36,7 +37,7 @@ module {
       oi += 1;
       i += 2;
     };
-    Array.freeze(out);
+    Array.fromVarArray(out);
   };
 
   let samples = [
