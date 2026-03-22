@@ -3,7 +3,7 @@ import P2pkh "../src/bitcoin/P2pkh";
 import Types "../src/bitcoin/Types";
 import Transaction "../src/bitcoin/Transaction";
 import Witness "../src/bitcoin/Witness";
-import Bench "mo:bench";
+import Bench "mo:bench-helper";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Nat32 "mo:base/Nat32";
@@ -33,29 +33,27 @@ module {
     );
   };
 
-  public func init() : Bench.Bench {
-    let bench = Bench.Bench();
+  public func init() : Bench.V1 {
+    let schema : Bench.Schema = {
+      name = "Bitcoin tx: build vs sighash";
+      description = "Compare building a simple tx vs computing P2PKH sighash";
+      rows = ["build", "sighash"];
+      cols = ["2 utxos", "4 utxos"];
+    };
 
-    bench.name("Bitcoin tx: build vs sighash");
-    bench.description("Compare building a simple tx vs computing P2PKH sighash");
-
-    bench.rows(["build", "sighash"]);
-    bench.cols(["2 utxos", "4 utxos"]);
-
-    bench.runner(
-      func(row : Text, col : Text) {
-        let utxoCount = if (col == "2 utxos") 2 else 4;
+    func run(ri : Nat, ci : Nat) {
+        let utxoCount = if (ci == 0) 2 else 4;
         let utxos = mkUtxos(utxoCount);
         let changeAddr : Types.Address = #p2pkh(testnetP2pkh1);
         let destinations : [(Types.Address, Types.Satoshi)] = [
           (#p2pkh(testnetP2pkh2), 100_000),
           (#p2pkh(testnetP2pkh1), 200_000),
         ];
-        switch (row) {
-          case ("build") {
+        switch (ri) {
+          case (0) {
             ignore Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000);
           };
-          case ("sighash") {
+          case (1) {
             let tx = switch (Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000)) {
               case (#ok t) t;
               case (#err _) Transaction.Transaction(1, [], [], Array.init<Witness.Witness>(0, Witness.EMPTY_WITNESS), 0);
@@ -72,9 +70,8 @@ module {
           };
           case (_) {};
         };
-      }
-    );
+    };
 
-    bench;
+    Bench.V1(schema, run);
   };
 };

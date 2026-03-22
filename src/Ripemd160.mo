@@ -1,7 +1,6 @@
 import Nat "mo:core/Nat";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
 import Nat64 "mo:core/Nat64";
 import Common "./Common";
 

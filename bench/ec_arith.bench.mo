@@ -1,42 +1,39 @@
 import Curves "../src/ec/Curves";
 import Jacobi "../src/ec/Jacobi";
 import Affine "../src/ec/Affine";
-import Bench "mo:bench";
+import Bench "mo:bench-helper";
 
 module {
-  public func init() : Bench.Bench {
-    let bench = Bench.Bench();
-
-    bench.name("EC scalar mul: base vs arbitrary point");
-    bench.description("Compare scalar multiplication using generator vs arbitrary point");
-
-    bench.rows(["mulBase", "mulPoint"]);
-    bench.cols(["k small", "k medium", "k large"]);
+  public func init() : Bench.V1 {
+    let schema : Bench.Schema = {
+      name = "EC scalar mul: base vs arbitrary point";
+      description = "Compare scalar multiplication using generator vs arbitrary point";
+      rows = ["mulBase", "mulPoint"];
+      cols = ["k small", "k medium", "k large"];
+    };
 
     let curve = Curves.secp256k1;
     let gAff : Affine.Point = #point(curve.Fp(curve.gx), curve.Fp(curve.gy), curve);
 
-    bench.runner(
-      func(row : Text, col : Text) {
-        let k = switch (col) {
-          case ("k small") 12345;
-          case ("k medium") 123456789;
-          case ("k large") 123456789123456789;
+    func run(ri : Nat, ci : Nat) {
+        let k = switch (ci) {
+          case (0) 12345;
+          case (1) 123456789;
+          case (2) 123456789123456789;
           case (_) 12345;
         };
-        switch (row) {
-          case ("mulBase") {
+        switch (ri) {
+          case (0) {
             ignore Jacobi.toAffine(Jacobi.mulBase(k, curve));
           };
-          case ("mulPoint") {
+          case (1) {
             let p = Jacobi.fromAffine(gAff);
             ignore Jacobi.toAffine(Jacobi.mul(p, k));
           };
           case (_) {};
         };
-      }
-    );
+    };
 
-    bench;
+    Bench.V1(schema, run);
   };
 };
