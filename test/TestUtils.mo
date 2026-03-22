@@ -1,5 +1,4 @@
 import Debug "mo:core/Debug";
-import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
 import { test } "mo:test";
 

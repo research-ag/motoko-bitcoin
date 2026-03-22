@@ -1,8 +1,6 @@
 import Nat "mo:core/Nat";
 import Segwit "../src/Segwit";
-import Debug "mo:core/Debug";
 import List "mo:core/List";
-import Iter "mo:core/Iter";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Nat8 "mo:core/Nat8";
