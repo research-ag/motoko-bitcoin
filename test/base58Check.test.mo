@@ -1,5 +1,4 @@
 import Nat "mo:core/Nat";
-import Iter "mo:core/Iter";
 import Base58Check "../src/Base58Check";
 import { test } "mo:test";
 

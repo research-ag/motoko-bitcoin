@@ -1,6 +1,5 @@
 import Nat "mo:core/Nat";
 import Blob "mo:core/Blob";
-import Iter "mo:core/Iter";
 import Hmac "../src/Hmac";
 import { test } "mo:test";
 
