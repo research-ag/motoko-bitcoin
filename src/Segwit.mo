@@ -123,7 +123,7 @@ module {
 
     var acc : Nat32 = 0;
     var bits : Nat32 = 0;
-    var maxv : Nat32 = (1 << to) - 1;
+    let maxv : Nat32 = (1 << to) - 1;
 
     for (value in data) {
       let v : Nat32 = Nat32.fromIntWrap(Nat8.toNat(value));
