@@ -11,8 +11,8 @@ core = "2.2.0"
 sha2 = "0.1.14"
 
 [dev-dependencies]
-test = "2.0.0"
-bench = "2.0.1"
+test = "2.1.2"
+bench-helper = "0.0.2"
 
 [toolchain]
 wasmtime = "42.0.1"

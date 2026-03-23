@@ -1,7 +1,6 @@
 import Nat "mo:core/Nat";
 import Bech32 "../src/Bech32";
 import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
 import Text "mo:core/Text";
 import Char "mo:core/Char";
 import { test } "mo:test";

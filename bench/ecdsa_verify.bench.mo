@@ -1,12 +1,13 @@
-import Array "mo:base/Array";
-import Text "mo:base/Text";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Text "mo:core/Text";
 
 import PublicKey "../src/ecdsa/Publickey";
 import Ecdsa "../src/ecdsa/Ecdsa";
 import Der "../src/ecdsa/Der";
 import Curves "../src/ec/Curves";
-import Bench "mo:bench";
-import Blob "mo:base/Blob";
+import Bench "mo:bench-helper";
+import Blob "mo:core/Blob";
 
 module {
 
@@ -21,7 +22,7 @@ module {
     let b = Blob.toArray(Text.encodeUtf8(t));
     let n = b.size();
     if (n == 0) return [];
-    let out = Array.init<Nat8>((n + 1) / 2, 0);
+    let out = VarArray.repeat<Nat8>(0, (n + 1) / 2);
     var oi = 0;
     var i = 0;
     if (n % 2 == 1) {
@@ -36,7 +37,7 @@ module {
       oi += 1;
       i += 2;
     };
-    Array.freeze(out);
+    Array.fromVarArray(out);
   };
 
   let samples = [
@@ -52,14 +53,13 @@ module {
     },
   ];
 
-  public func init() : Bench.Bench {
-    let bench = Bench.Bench();
-
-    bench.name("ECDSA verify: DER vs raw (DER decode cost)");
-    bench.description("Compare verifying using DER decode per run vs reusing parsed signature");
-
-    bench.rows(["DER+verify", "verify (preparsed)"]);
-    bench.cols(["sample 0", "sample 1"]);
+  public func init() : Bench.V1 {
+    let schema : Bench.Schema = {
+      name = "ECDSA verify: DER vs raw (DER decode cost)";
+      description = "Compare verifying using DER decode per run vs reusing parsed signature";
+      rows = ["DER+verify", "verify (preparsed)"];
+      cols = ["sample 0", "sample 1"];
+    };
 
     // Pre-parse signatures and keys
     let parsed = Array.tabulate<(Ecdsa.PublicKey, Ecdsa.Signature)>(
@@ -86,29 +86,26 @@ module {
       },
     );
 
-    bench.runner(
-      func(row : Text, col : Text) {
-        let i = if (col == "sample 0") 0 else 1;
-        let s = samples[i];
-        let msgBytes = decode(s.msg);
-        switch (row) {
-          case ("DER+verify") {
-            let keyBytes = decode(s.key);
-            let sigBytes = decode(s.sig);
-            switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
-              case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
-              case _ {};
-            };
+    func run(ri : Nat, ci : Nat) {
+      let s = samples[ci];
+      let msgBytes = decode(s.msg);
+      switch (ri) {
+        case (0) {
+          let keyBytes = decode(s.key);
+          let sigBytes = decode(s.sig);
+          switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
+            case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
+            case _ {};
           };
-          case ("verify (preparsed)") {
-            let (pk, sig) = parsed[i];
-            ignore Ecdsa.verify(sig, pk, msgBytes);
-          };
-          case (_) {};
         };
-      }
-    );
+        case (1) {
+          let (pk, sig) = parsed[ci];
+          ignore Ecdsa.verify(sig, pk, msgBytes);
+        };
+        case (_) {};
+      };
+    };
 
-    bench;
+    Bench.V1(schema, run);
   };
 };

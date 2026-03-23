@@ -1,10 +1,8 @@
 import Nat "mo:core/Nat";
 // @testmode wasi
 
-import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Blob "mo:core/Blob";
-import Iter "mo:core/Iter";
 import Text "mo:core/Text";
 import Ripemd160 "../src/Ripemd160";
 import { test } "mo:test";
