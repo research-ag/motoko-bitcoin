@@ -6,7 +6,6 @@
 //
 // Therefore, DO NOT use this code for any operations involving secrets.
 
-import Iter "mo:core/Iter";
 import Runtime "mo:core/Runtime";
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
@@ -159,7 +158,7 @@ module {
         let naf = Numbers.toNaf(other);
         let y2neg = y2.neg().value;
 
-        for (i in Iter.reverse(Nat.range(0, naf.size()))) {
+        for (i in Nat.rangeByInclusive(naf.size() - 1, 0, -1)) {
           let nafItem : Int = naf[i];
           p := doDouble(p.0, p.1, p.2, curve.a, curve.p);
           if (nafItem < 0) {
@@ -429,7 +428,7 @@ module {
       #infinity(getCurve(point));
     } else {
       point;
-    }
+    };
   };
 
   // Extracts the curve from the given point.
