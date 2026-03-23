@@ -19,7 +19,7 @@ module {
 
   let CHAR_a : Nat8 = 0x61;
   let CHAR_A : Nat8 = 0x41;
-  let CHAR_z : Nat8 = 0x71;
+  let CHAR_z : Nat8 = 0x7a;
   let CHAR_Z : Nat8 = 0x5a;
   let CHAR_1 : Nat8 = 0x31;
   // Code for '!'.
