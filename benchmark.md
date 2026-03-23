@@ -144,8 +144,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |       |     depth 3 |     depth 4 |     depth 5 |
 | :---- | ----------: | ----------: | ----------: |
-| text  | 544_573_162 | 725_444_680 | 909_951_013 |
-| array | 544_467_155 | 725_377_281 | 909_873_997 |
+| text  | 544_400_064 | 725_214_344 | 909_663_341 |
+| array | 544_294_228 | 725_146_945 | 909_586_028 |
 
 
 **Heap**
@@ -160,8 +160,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |       |   depth 3 |   depth 4 |   depth 5 |
 | :---- | --------: | --------: | --------: |
-| text  |  13.4 MiB | 17.85 MiB | 22.39 MiB |
-| array | 13.39 MiB | 17.84 MiB | 22.38 MiB |
+| text  | 13.37 MiB | 17.82 MiB | 22.35 MiB |
+| array | 13.37 MiB | 17.81 MiB | 22.34 MiB |
 
 
 </details>
@@ -226,8 +226,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |          |    k small |   k medium |    k large |
 | :------- | ---------: | ---------: | ---------: |
-| mulBase  | 10_060_767 | 17_925_704 | 36_231_046 |
-| mulPoint | 10_055_736 | 17_921_456 | 36_225_232 |
+| mulBase  | 10_059_083 | 17_922_564 | 36_224_483 |
+| mulPoint | 10_054_052 | 17_918_253 | 36_218_732 |
 
 
 **Heap**
@@ -242,8 +242,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |          |    k small |   k medium |    k large |
 | :------- | ---------: | ---------: | ---------: |
-| mulBase  | 323.25 KiB | 513.52 KiB | 976.96 KiB |
-| mulPoint | 322.61 KiB | 512.89 KiB | 976.33 KiB |
+| mulBase  | 322.99 KiB | 513.06 KiB | 976.04 KiB |
+| mulPoint | 322.36 KiB | 512.43 KiB |  975.4 KiB |
 
 
 </details>
@@ -267,8 +267,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |                    |    sample 0 |    sample 1 |
 | :----------------- | ----------: | ----------: |
-| DER+verify         |  28_924_110 |  28_829_931 |
-| verify (preparsed) | 151_602_348 | 152_871_988 |
+| DER+verify         |  28_894_974 |  28_801_023 |
+| verify (preparsed) | 151_573_382 | 152_842_861 |
 
 
 **Heap**
@@ -283,7 +283,7 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |                    |   sample 0 |   sample 1 |
 | :----------------- | ---------: | ---------: |
-| DER+verify         | 662.82 KiB | 656.87 KiB |
+| DER+verify         | 658.66 KiB | 652.77 KiB |
 | verify (preparsed) |   3.79 MiB |   3.82 MiB |
 
 
