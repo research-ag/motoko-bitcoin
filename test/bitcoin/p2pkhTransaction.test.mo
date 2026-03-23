@@ -5,7 +5,6 @@ import P2pkh "../../src/bitcoin/P2pkh";
 import Witness "../../src/bitcoin/Witness";
 import Curves "../../src/ec/Curves";
 import TestUtils "../TestUtils";
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";

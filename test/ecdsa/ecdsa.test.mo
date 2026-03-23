@@ -7,7 +7,6 @@ import TestUtils "../TestUtils";
 import Curves "../../src/ec/Curves";
 import Ecdsa "../../src/ecdsa/Ecdsa";
 import Der "../../src/ecdsa/Der";
-import Debug "mo:core/Debug";
 import Blob "mo:core/Blob";
 import Runtime "mo:core/Runtime";
 

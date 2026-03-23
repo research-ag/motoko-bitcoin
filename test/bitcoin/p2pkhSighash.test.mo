@@ -1,6 +1,5 @@
 // @testmode wasi
 
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Int32 "mo:core/Int32";

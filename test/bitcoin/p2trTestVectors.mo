@@ -1,6 +1,5 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Nat32 "mo:core/Nat32";
 import VarArray "mo:core/VarArray";

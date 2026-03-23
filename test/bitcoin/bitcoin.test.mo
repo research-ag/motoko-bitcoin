@@ -8,9 +8,7 @@ import TestUtils "../TestUtils";
 import Hex "../Hex";
 import BitcoinTestTools "./bitcoinTestTools";
 import Array "mo:core/Array";
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
 import Blob "mo:core/Blob";
 
 let runTest = TestUtils.runTestWithDefaults;

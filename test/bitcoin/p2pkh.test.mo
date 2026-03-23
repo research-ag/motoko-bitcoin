@@ -1,4 +1,3 @@
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Hash "../../src/Hash";
 import TestUtils "../TestUtils";

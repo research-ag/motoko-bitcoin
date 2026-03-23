@@ -1,7 +1,5 @@
 import Affine "../ec/Affine";
 import Curves "../ec/Curves";
-import Hash "../Hash";
-import Fp "../ec/Fp";
 import Result "mo:core/Result";
 import Types "./Types";
 

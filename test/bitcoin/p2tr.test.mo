@@ -3,7 +3,6 @@ import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Fp "../../src/ec/Fp";
 import P2tr "../../src/bitcoin/P2tr";

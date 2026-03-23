@@ -6,7 +6,6 @@ import Common "../../src/Common";
 import Wif "../../src/bitcoin/Wif";
 import P2pkh "../../src/bitcoin/P2pkh";
 import PublicKey "../../src/ecdsa/Publickey";
-import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
