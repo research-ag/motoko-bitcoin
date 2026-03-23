@@ -16,16 +16,16 @@ module {
     let ?ek = Bip32.parse(xpub, null) else Runtime.trap("Invalid benchmark xpub");
 
     func run(ri : Nat, ci : Nat) {
-        let res = switch (ri, ci) {
-          case (0, 0) ek.derivePath(#text "m/0/1/2");
-          case (0, 1) ek.derivePath(#text "m/0/1/2/2");
-          case (0, 2) ek.derivePath(#text "m/0/1/2/2/3");
-          case (1, 0) ek.derivePath(#array([0, 1, 2]));
-          case (1, 1) ek.derivePath(#array([0, 1, 2, 2]));
-          case (1, 2) ek.derivePath(#array([0, 1, 2, 2, 3]));
-          case _ null;
-        };
-        ignore res;
+      let res = switch (ri, ci) {
+        case (0, 0) ek.derivePath(#text "m/0/1/2");
+        case (0, 1) ek.derivePath(#text "m/0/1/2/2");
+        case (0, 2) ek.derivePath(#text "m/0/1/2/2/3");
+        case (1, 0) ek.derivePath(#array([0, 1, 2]));
+        case (1, 1) ek.derivePath(#array([0, 1, 2, 2]));
+        case (1, 2) ek.derivePath(#array([0, 1, 2, 2, 3]));
+        case _ null;
+      };
+      ignore res;
     };
 
     Bench.V1(schema, run);

@@ -28,11 +28,11 @@ module {
     let encs : [Text] = Array.map<[Nat8], Text>(inputs, func a { Base58.encode(a) });
 
     func run(ri : Nat, ci : Nat) {
-        switch (ri) {
-          case (0) { ignore Base58.encode(inputs[ci]) };
-          case (1) { ignore Base58.decode(encs[ci]) };
-          case (_) {};
-        };
+      switch (ri) {
+        case (0) { ignore Base58.encode(inputs[ci]) };
+        case (1) { ignore Base58.decode(encs[ci]) };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);

@@ -23,20 +23,20 @@ module {
     ];
 
     func run(ri : Nat, ci : Nat) {
-        let msg = datas[ci];
-        switch (ri) {
-          case (0) {
-            let h = Hmac.sha256(key);
-            h.writeArray(msg);
-            ignore Blob.toArray(h.sum());
-          };
-          case (1) {
-            let h = Hmac.sha512(key);
-            h.writeArray(msg);
-            ignore Blob.toArray(h.sum());
-          };
-          case (_) {};
+      let msg = datas[ci];
+      switch (ri) {
+        case (0) {
+          let h = Hmac.sha256(key);
+          h.writeArray(msg);
+          ignore Blob.toArray(h.sum());
         };
+        case (1) {
+          let h = Hmac.sha512(key);
+          h.writeArray(msg);
+          ignore Blob.toArray(h.sum());
+        };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);

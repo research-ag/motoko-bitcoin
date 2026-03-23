@@ -16,22 +16,22 @@ module {
     let gAff : Affine.Point = #point(curve.Fp(curve.gx), curve.Fp(curve.gy), curve);
 
     func run(ri : Nat, ci : Nat) {
-        let k = switch (ci) {
-          case (0) 12345;
-          case (1) 123456789;
-          case (2) 123456789123456789;
-          case (_) 12345;
+      let k = switch (ci) {
+        case (0) 12345;
+        case (1) 123456789;
+        case (2) 123456789123456789;
+        case (_) 12345;
+      };
+      switch (ri) {
+        case (0) {
+          ignore Jacobi.toAffine(Jacobi.mulBase(k, curve));
         };
-        switch (ri) {
-          case (0) {
-            ignore Jacobi.toAffine(Jacobi.mulBase(k, curve));
-          };
-          case (1) {
-            let p = Jacobi.fromAffine(gAff);
-            ignore Jacobi.toAffine(Jacobi.mul(p, k));
-          };
-          case (_) {};
+        case (1) {
+          let p = Jacobi.fromAffine(gAff);
+          ignore Jacobi.toAffine(Jacobi.mul(p, k));
         };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);

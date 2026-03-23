@@ -87,23 +87,23 @@ module {
     );
 
     func run(ri : Nat, ci : Nat) {
-        let s = samples[ci];
-        let msgBytes = decode(s.msg);
-        switch (ri) {
-          case (0) {
-            let keyBytes = decode(s.key);
-            let sigBytes = decode(s.sig);
-            switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
-              case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
-              case _ {};
-            };
+      let s = samples[ci];
+      let msgBytes = decode(s.msg);
+      switch (ri) {
+        case (0) {
+          let keyBytes = decode(s.key);
+          let sigBytes = decode(s.sig);
+          switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
+            case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
+            case _ {};
           };
-          case (1) {
-            let (pk, sig) = parsed[ci];
-            ignore Ecdsa.verify(sig, pk, msgBytes);
-          };
-          case (_) {};
         };
+        case (1) {
+          let (pk, sig) = parsed[ci];
+          ignore Ecdsa.verify(sig, pk, msgBytes);
+        };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);

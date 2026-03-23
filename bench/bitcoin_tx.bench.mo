@@ -43,34 +43,34 @@ module {
     };
 
     func run(ri : Nat, ci : Nat) {
-        let utxoCount = if (ci == 0) 2 else 4;
-        let utxos = mkUtxos(utxoCount);
-        let changeAddr : Types.Address = #p2pkh(testnetP2pkh1);
-        let destinations : [(Types.Address, Types.Satoshi)] = [
-          (#p2pkh(testnetP2pkh2), 100_000),
-          (#p2pkh(testnetP2pkh1), 200_000),
-        ];
-        switch (ri) {
-          case (0) {
-            ignore Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000);
-          };
-          case (1) {
-            let tx = switch (Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000)) {
-              case (#ok t) t;
-              case (#err _) Transaction.Transaction(1, [], [], VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, 0), 0);
-            };
-            let script = switch (P2pkh.makeScript(testnetP2pkh2)) {
-              case (#ok s) s;
-              case (#err _) [];
-            };
-            var i : Nat = 0;
-            while (i < tx.txInputs.size()) {
-              ignore tx.createP2pkhSignatureHash(script, Nat32.fromNat(i), Types.SIGHASH_ALL);
-              i += 1;
-            };
-          };
-          case (_) {};
+      let utxoCount = if (ci == 0) 2 else 4;
+      let utxos = mkUtxos(utxoCount);
+      let changeAddr : Types.Address = #p2pkh(testnetP2pkh1);
+      let destinations : [(Types.Address, Types.Satoshi)] = [
+        (#p2pkh(testnetP2pkh2), 100_000),
+        (#p2pkh(testnetP2pkh1), 200_000),
+      ];
+      switch (ri) {
+        case (0) {
+          ignore Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000);
         };
+        case (1) {
+          let tx = switch (Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000)) {
+            case (#ok t) t;
+            case (#err _) Transaction.Transaction(1, [], [], VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, 0), 0);
+          };
+          let script = switch (P2pkh.makeScript(testnetP2pkh2)) {
+            case (#ok s) s;
+            case (#err _) [];
+          };
+          var i : Nat = 0;
+          while (i < tx.txInputs.size()) {
+            ignore tx.createP2pkhSignatureHash(script, Nat32.fromNat(i), Types.SIGHASH_ALL);
+            i += 1;
+          };
+        };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);

@@ -22,17 +22,17 @@ module {
     ];
 
     func run(ri : Nat, ci : Nat) {
-        let hrp = hrps[ci % hrps.size()];
-        let v = values[ci];
-        switch (ri) {
-          case (0) {
-            ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32));
-          };
-          case (1) {
-            ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32M));
-          };
-          case (_) {};
+      let hrp = hrps[ci % hrps.size()];
+      let v = values[ci];
+      switch (ri) {
+        case (0) {
+          ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32));
         };
+        case (1) {
+          ignore Bech32.decode(Bech32.encode(hrp, v, #BECH32M));
+        };
+        case (_) {};
+      };
     };
 
     Bench.V1(schema, run);
