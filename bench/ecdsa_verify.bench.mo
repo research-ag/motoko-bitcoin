@@ -1,5 +1,6 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
+import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
 
@@ -9,6 +10,7 @@ import Curves "../src/ec/Curves";
 import Der "../src/ecdsa/Der";
 import Ecdsa "../src/ecdsa/Ecdsa";
 import PublicKey "../src/ecdsa/Publickey";
+import TestVectors "../test/ecdsa/wycheproofEcdsaSecp256k1TestVectors";
 
 module {
 
@@ -41,19 +43,6 @@ module {
     Array.fromVarArray(out);
   };
 
-  let samples = [
-    {
-      key = "0387d82042d93447008dfe2af762068a1e53ff394a5bf8f68a045fa642b99ea5d1";
-      sig = "30440220112233445566778899aabbccddeeff00112233445566778899aabbccddee0220112233445566778899aabbccddeeff00112233445566778899aabbccddef";
-      msg = "48656c6c6f2c206563647361212121";
-    },
-    {
-      key = "02ad5efbc62010894e5219f2709fa5a1007b51fdf370c1f00cc0ee0425e41dd5cd";
-      sig = "3045022100dff1d77f2a671c5f962f7a9a7f1f8f5b9c3c1b6a2f29905f3b1c3a50b5bc2d7c02206b12d606a26f6f6b8b3e6b3a4f1a1b0c3d4e5f6a7b8c9dad0e0f1a2b3c4d5";
-      msg = "000102030405060708090a0b0c0d0e0f";
-    },
-  ];
-
   public func init() : Bench.V1 {
     let schema : Bench.Schema = {
       name = "ECDSA verify: DER vs raw (DER decode cost)";
@@ -61,6 +50,8 @@ module {
       rows = ["DER+verify", "verify (preparsed)"];
       cols = ["sample 0", "sample 1"];
     };
+
+    let samples = [TestVectors.testVectors[0], TestVectors.testVectors[2]];
 
     // Pre-parse signatures and keys
     let parsed = Array.tabulate<(Ecdsa.PublicKey, Ecdsa.Signature)>(
@@ -71,17 +62,11 @@ module {
         let sigBytes = decode(s.sig);
         let pk = switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1))) {
           case (#ok v) v;
-          case _ {
-            let curve = Curves.secp256k1;
-            {
-              coords = { x = curve.Fp(curve.gx); y = curve.Fp(curve.gy) };
-              curve = curve;
-            };
-          };
+          case (_) Runtime.trap("Invalid ECDSA benchmark public key fixture");
         };
         let sig = switch (Der.decodeSignature(Blob.fromArray(sigBytes))) {
           case (#ok v) v;
-          case _ { { r = 1; s = 1 } };
+          case (_) Runtime.trap("Invalid ECDSA benchmark signature fixture");
         };
         (pk, sig);
       },
@@ -96,7 +81,7 @@ module {
           let sigBytes = decode(s.sig);
           switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
             case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
-            case _ {};
+            case (_) {};
           };
         };
         case (1) {

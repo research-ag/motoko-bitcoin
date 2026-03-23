@@ -2,15 +2,13 @@ import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
-import VarArray "mo:core/VarArray";
+import Runtime "mo:core/Runtime";
 
 import Bench "mo:bench-helper";
 
 import Bitcoin "../src/bitcoin/Bitcoin";
 import P2pkh "../src/bitcoin/P2pkh";
-import Transaction "../src/bitcoin/Transaction";
 import Types "../src/bitcoin/Types";
-import Witness "../src/bitcoin/Witness";
 
 module {
   // Simple fixtures
@@ -19,7 +17,7 @@ module {
 
   func mkOutPoint(n : Nat32) : Types.OutPoint {
     // 32-byte txid filled with n
-    let txid = Blob.fromArray(Array.tabulate<Nat8>(32, func i { Nat8.fromNat(Nat32.toNat(n & 0xff)) }));
+    let txid = Blob.fromArray(Array.tabulate<Nat8>(32, func _ { Nat8.fromNat(Nat32.toNat(n & 0xff)) }));
     { txid = txid; vout = n };
   };
 
@@ -59,11 +57,11 @@ module {
         case (1) {
           let tx = switch (Bitcoin.buildTransaction(1, utxos, destinations, changeAddr, 1_000)) {
             case (#ok t) t;
-            case (#err _) Transaction.Transaction(1, [], [], VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, 0), 0);
+            case (#err _) Runtime.trap("buildTransaction failed");
           };
           let script = switch (P2pkh.makeScript(testnetP2pkh2)) {
             case (#ok s) s;
-            case (#err _) [];
+            case (#err _) Runtime.trap("buildTransaction failed");
           };
           var i : Nat = 0;
           while (i < tx.txInputs.size()) {
