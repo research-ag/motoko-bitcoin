@@ -43,7 +43,7 @@ module {
 
     // Compute sqrt(value) mod n.
     public func sqrt() : Fp {
-      return Fp(Field.pow(value, (n + 1) / 4, n), n);
+      Fp(Field.pow(value, (n + 1) / 4, n), n)
     };
   };
 };

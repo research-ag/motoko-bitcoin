@@ -425,11 +425,11 @@ module {
 
   // Normalizes infinity point of the form #point (_, _, 0, _) to #infinity.
   func normalizeInfinity(point : Point) : Point {
-    return if (isInfinity(point)) {
+    if (isInfinity(point)) {
       #infinity(getCurve(point));
     } else {
       point;
-    };
+    }
   };
 
   // Extracts the curve from the given point.

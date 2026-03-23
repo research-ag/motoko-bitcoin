@@ -35,7 +35,7 @@ module {
 
   // Construct HMAC from an arbitrary digest function.
   public func new(key : [Nat8], digestFactory : DigestFactory) : Hmac {
-    return HmacImpl(key, digestFactory);
+    HmacImpl(key, digestFactory)
   };
 
   // Construct HMAC from the given digest function:

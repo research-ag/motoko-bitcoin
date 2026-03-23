@@ -10,19 +10,19 @@ module {
 
   // Map network to WIF version prefix.
   func _encodeVersion(network : Types.Network) : Nat8 {
-    return switch (network) {
+    switch (network) {
       case (#Mainnet) {
         0x80;
       };
       case (#Regtest or #Testnet) {
         0xef;
       };
-    };
+    }
   };
 
   // Map WIF version prefix to network.
   func decodeVersion(version : Nat8) : ?Types.Network {
-    return switch (version) {
+    switch (version) {
       case (0x80) {
         ?(#Mainnet);
       };
@@ -32,7 +32,7 @@ module {
       case _ {
         null;
       };
-    };
+    }
   };
 
   // Decode WIF private key to extract network, private key,

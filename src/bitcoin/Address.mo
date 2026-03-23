@@ -28,7 +28,7 @@ module {
   public func scriptPubKey(
     address : Types.Address
   ) : Result.Result<Script.Script, Text> {
-    return switch (address) {
+    switch (address) {
       case (#p2pkh p2pkhAddr) {
         return P2pkh.makeScript(p2pkhAddr);
       };
@@ -38,7 +38,7 @@ module {
       case (_) {
         return #err "Calling scriptPubKey on an unknown address type";
       };
-    };
+    }
   };
 
   // Check if the given addresses are equal.
@@ -46,7 +46,7 @@ module {
     address1 : Types.Address,
     address2 : Types.Address,
   ) : Bool {
-    return switch (address1, address2) {
+    switch (address1, address2) {
       case (#p2pkh address1, #p2pkh address2) {
         address1 == address2;
       };
@@ -59,6 +59,6 @@ module {
       case (_) {
         false;
       };
-    };
+    }
   };
 };

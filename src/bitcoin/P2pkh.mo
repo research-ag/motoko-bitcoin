@@ -21,7 +21,7 @@ module {
 
   // Create P2PKH script for the given P2PKH address.
   public func makeScript(address : Address) : Result.Result<Script, Text> {
-    return switch (decodeAddress(address)) {
+    switch (decodeAddress(address)) {
       case (#ok { network = _; publicKeyHash }) {
         #ok([
           #opcode(#OP_DUP),
@@ -34,19 +34,19 @@ module {
       case (#err msg) {
         #err msg;
       };
-    };
+    }
   };
 
   // Map given network to its id.
   func encodeVersion(network : Types.Network) : Nat8 {
-    return switch (network) {
+    switch (network) {
       case (#Mainnet) {
         0x00;
       };
       case (#Regtest or #Testnet) {
         0x6f;
       };
-    };
+    }
   };
 
   // Derive P2PKH address from given public key.

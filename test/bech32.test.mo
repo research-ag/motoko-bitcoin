@@ -74,7 +74,7 @@ let invalidChecksumBech32m : [Text] = [
 ];
 
 func toLower(text : Text) : Text {
-  return Text.map(
+  Text.map(
     text,
     func(c) {
       if (c >= 'A' and c <= 'Z') {
@@ -82,7 +82,7 @@ func toLower(text : Text) : Text {
       };
       return c;
     },
-  );
+  )
 };
 
 // Test checksum creation and validation.

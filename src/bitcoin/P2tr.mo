@@ -27,7 +27,7 @@ module {
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
   /// for more details).
   public func makeScriptFromP2trKeyAddress(address : P2trKeyAddress) : Result.Result<Script, Text> {
-    return switch (Segwit.decode(address)) {
+    switch (Segwit.decode(address)) {
       case (#ok(_, { version = _; program })) {
         #ok([
           #opcode(#OP_1),
@@ -39,7 +39,7 @@ module {
       case (#err msg) {
         #err msg;
       };
-    };
+    }
   };
 
   // Create script for the given P2TR key spend address.

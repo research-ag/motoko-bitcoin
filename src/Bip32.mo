@@ -130,7 +130,7 @@ module {
   };
 
   func isHardenedIndex(index : Nat32) : Bool {
-    return index >= 0x80000000; // 2**31
+    index >= 0x80000000 // 2**31
   };
 
   // Parses a Text path in the form "m/a/b/c/..." for unsigned integers
@@ -198,7 +198,7 @@ module {
     // Derive a child public key with path relative to this instance. Returns
     // null if path is #text and cannot be parsed.
     public func derivePath(path : Path) : ?ExtendedPublicKey {
-      return do ? {
+      do ? {
         // Normalize the given path as an array of indices.
         let pathArray : [Nat32] = switch (path) {
           case (#array path) {
@@ -222,7 +222,7 @@ module {
           target := target.deriveChild(childIndex)!;
         };
         target;
-      };
+      }
     };
 
     // Derive child at the given index. Valid indices are in the range

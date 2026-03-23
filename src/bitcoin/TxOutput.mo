@@ -11,7 +11,7 @@ module {
   // Deserialize TxOutput from data with layout:
   // | amount | serialized script |
   public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxOutput, Text> {
-    return switch (ByteUtils.readLE64(data), Script.fromBytes(data, true)) {
+    switch (ByteUtils.readLE64(data), Script.fromBytes(data, true)) {
       case (?amount, #ok script) {
         #ok(TxOutput(amount, script));
       };
@@ -21,7 +21,7 @@ module {
       case (null, _) {
         #err "Could not read TxOut amount";
       };
-    };
+    }
   };
 
   public func toBytes(txout : TxOutput) : [Nat8] {

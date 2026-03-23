@@ -161,14 +161,14 @@ module {
 
   // Constant value associated to the given encoding.
   func encodingConstant(encoding : Encoding) : Nat32 {
-    return switch (encoding) {
+    switch (encoding) {
       case (#BECH32) {
         1;
       };
       case (#BECH32M) {
         0x2bc830a3;
       };
-    };
+    }
   };
 
   // Compute the checksum values for given hrp and data.
@@ -237,25 +237,25 @@ module {
   // If input corresponds to code of uppercase character, return code of its
   // lowercase version.
   func toLower(c : Nat8) : Nat8 {
-    return if (c >= CHAR_A and c <= CHAR_Z) {
+    if (c >= CHAR_A and c <= CHAR_Z) {
       c + 0x20;
     } else {
       c;
-    };
+    }
   };
 
   // Returns true if given code corresponds to a lowercase character.
   func isLowercase(c : Nat8) : Bool {
-    return (c >= CHAR_a and c <= CHAR_z);
+    (c >= CHAR_a and c <= CHAR_z)
   };
 
   // Returns true if given code corresponds to an uppercase character.
   func isUppercase(c : Nat8) : Bool {
-    return (c >= CHAR_A and c <= CHAR_Z);
+    (c >= CHAR_A and c <= CHAR_Z)
   };
 
   // Check if given code is within range of human-readable characters.
   func isInRange(c : Nat8) : Bool {
-    return (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
+    (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT)
   };
 };

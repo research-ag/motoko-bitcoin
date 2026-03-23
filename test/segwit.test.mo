@@ -172,7 +172,7 @@ func scriptPubKey({ version; program } : Segwit.WitnessProgram) : [Nat8] {
 };
 
 func toLower(text : Text) : Text {
-  return Text.map(
+  Text.map(
     text,
     func(c) {
       if (c >= 'A' and c <= 'Z') {
@@ -180,7 +180,7 @@ func toLower(text : Text) : Text {
       };
       return c;
     },
-  );
+  )
 };
 
 // Test whether valid addresses decode to the correct output.

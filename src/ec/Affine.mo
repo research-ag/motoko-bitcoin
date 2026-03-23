@@ -13,7 +13,7 @@ module {
 
   // Check if the given point is valid.
   public func isOnCurve(point : Point) : Bool {
-    return switch point {
+    switch point {
       case (#infinity(_)) {
         true;
       };
@@ -24,12 +24,12 @@ module {
           )
         ).add(curve.Fp(curve.b)).isEqual(y.sqr());
       };
-    };
+    }
   };
 
   // Check if the two given affine points are equal.
   public func isEqual(point1 : Point, point2 : Point) : Bool {
-    return switch (point1, point2) {
+    switch (point1, point2) {
       case (#infinity(curve1), #infinity(curve2)) {
         Curves.isEqual(curve1, curve2);
       };
@@ -39,7 +39,7 @@ module {
       case _ {
         false;
       };
-    };
+    }
   };
 
   // Deserialize given data into a point on the given curve. This supports

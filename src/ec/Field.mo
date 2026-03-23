@@ -48,24 +48,24 @@ module {
 
   // Compute a * b  mod n.
   public func mul(a : Nat, b : Nat, n : Nat) : Nat {
-    return (a * b) % n;
+    (a * b) % n
   };
 
   // Compute a - b  mod n.
   public func sub(a : Nat, b : Nat, n : Nat) : Nat {
-    return if (a >= b) {
+    if (a >= b) {
       a - b;
     } else {
-      a + n - b;
-    };
+      (a + n) - b;
+    }
   };
 
   // Compute -a  mod n.
   public func neg(a : Nat, n : Nat) : Nat {
-    return if (a == 0) {
+    if (a == 0) {
       0;
     } else {
       n - a;
-    };
+    }
   };
 };

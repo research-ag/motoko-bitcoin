@@ -167,7 +167,7 @@ module Script {
 
   // Convert given opcode to its byte representation.
   func encodeOpcode(opcode : Opcode) : Nat8 {
-    return switch (opcode) {
+    switch (opcode) {
       case (#OP_0) {
         0x00;
       };
@@ -312,12 +312,12 @@ module Script {
       case _ {
         Runtime.trap(debug_show ("Unsupported opcode", opcode));
       };
-    };
+    }
   };
 
   // Decode given opcode id.
   func decodeOpcode(id : Nat8) : ?Opcode {
-    return do ? {
+    do ? {
       switch id {
         case 0x4c {
           #OP_PUSHDATA1;
@@ -482,7 +482,7 @@ module Script {
           null!;
         };
       };
-    };
+    }
   };
 
   // Deserialize Script from data. If readSize is true, will read and use the
