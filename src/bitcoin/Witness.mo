@@ -25,7 +25,7 @@ module {
       buffer.add(size);
       buffer.add(witness_element);
     };
-    Array.flatten<Nat8>(List.toArray(buffer));
+    buffer.toArray().flatten<Nat8>();
 
   };
 

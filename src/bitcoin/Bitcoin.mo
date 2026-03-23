@@ -49,7 +49,7 @@ module {
   ) : Result<Transaction.Transaction, Text> {
 
     if (version != 1 and version != 2) {
-      return #err("Unexpected version number: " # Nat32.toText(version));
+      return #err("Unexpected version number: " # version.toText());
     };
 
     // Collect TxOutputs, making space for a potential extra output for change.
@@ -106,9 +106,9 @@ module {
     return #ok(
       Transaction.Transaction(
         version,
-        List.toArray(txInputs),
-        List.toArray(txOutputs),
-        VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, List.size(txInputs)),
+        txInputs.toArray(),
+        txOutputs.toArray(),
+        VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, txInputs.size()),
         0,
       )
     );
@@ -142,9 +142,7 @@ module {
               Blob.fromArray(sighash),
               derivationPath,
             );
-            let encodedSignature : [Nat8] = Blob.toArray(
-              Der.encodeSignature(signature)
-            );
+            let encodedSignature : [Nat8] = Der.encodeSignature(signature).toArray();
             // Append the sighash type.
             let encodedSignatureWithSighashType = Array.tabulate<Nat8>(
               encodedSignature.size() + 1,
@@ -152,7 +150,7 @@ module {
                 if (n < encodedSignature.size()) {
                   encodedSignature[n];
                 } else {
-                  Nat8.fromNat(Nat32.toNat(Types.SIGHASH_ALL));
+                  Nat8.fromNat(Types.SIGHASH_ALL.toNat());
                 };
               },
             );
@@ -161,7 +159,7 @@ module {
             // ScriptSig = <Signature> <Public Key>.
             [
               #data encodedSignatureWithSighashType,
-              #data(Blob.toArray(ecdsaProxy.publicKey().0)),
+              #data(ecdsaProxy.publicKey().0.toArray()),
             ];
           },
         );

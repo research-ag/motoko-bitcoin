@@ -60,7 +60,7 @@ module {
       let output = VarArray.repeat<Nat8>(0, totalSize);
       var outputOffset = 0;
 
-      let prevTxId = Blob.toArray(prevOutput.txid);
+      let prevTxId = prevOutput.txid.toArray();
 
       // Write prevTxId.
       Common.copy(output, outputOffset, prevTxId, 0, 32);

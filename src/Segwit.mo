@@ -35,7 +35,7 @@ module {
 
     let bech32Result : Text = Bech32.encode(
       hrp,
-      List.toArray(bech32Input),
+      bech32Input.toArray(),
       encoding,
     );
 
@@ -81,7 +81,7 @@ module {
     let convertedData = List.empty<Nat8>();
     switch (convertBits(dataIter, convertedData, 5, 8, false)) {
       case (#ok) {
-        let convertedDataSize : Nat = List.size(convertedData);
+        let convertedDataSize : Nat = convertedData.size();
 
         if (convertedDataSize < 2 or convertedDataSize > 40) {
           return #err("Wrong output size.");
@@ -104,7 +104,7 @@ module {
           return #err("Encoding does not match witness version.");
         };
 
-        return #ok(decodedHrp, { version; program = List.toArray(convertedData) });
+        return #ok(decodedHrp, { version; program = convertedData.toArray() });
       };
       case _ {
         return #err("Convert bits failed.");
@@ -126,10 +126,10 @@ module {
     let maxv : Nat32 = (1 << to) - 1;
 
     for (value in data) {
-      let v : Nat32 = Nat32.fromIntWrap(Nat8.toNat(value));
+      let v : Nat32 = Nat32.fromIntWrap(value.toNat());
 
       if ((v >> from) != 0) {
-        return #err("Invalid input value: " # Nat.toText(Nat8.toNat(value)));
+        return #err("Invalid input value: " # value.toNat().toText());
       };
 
       acc := (acc << from) | v;
@@ -139,7 +139,7 @@ module {
         bits -= to;
         output.add(
           Nat8.fromIntWrap(
-            Nat32.toNat((acc >> bits) & maxv)
+            ((acc >> bits) & maxv).toNat()
           )
         );
       };
@@ -149,7 +149,7 @@ module {
       if (bits > 0) {
         output.add(
           Nat8.fromIntWrap(
-            Nat32.toNat((acc << (to - bits)) & maxv)
+            ((acc << (to - bits)) & maxv).toNat()
           )
         );
       };

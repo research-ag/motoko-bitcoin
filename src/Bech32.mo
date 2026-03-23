@@ -58,16 +58,16 @@ module {
     };
 
     // Calculate checksum
-    let encodedHrp : [Nat8] = Blob.toArray(Text.encodeUtf8(hrp));
+    let encodedHrp : [Nat8] = hrp.encodeUtf8().toArray();
     let checksum : [Nat8] = createChecksum(encodedHrp, values, encoding);
 
     // hrp | '1' | values | checksum.
-    let output : [Char] = Array.flatten([
-      Text.toArray(hrp),
+    let output : [Char] = [
+      hrp.toArray(),
       ['1'],
-      Array.map(values, func x = charset[Nat8.toNat(x)]),
-      Array.map(checksum, func x = charset[Nat8.toNat(x)]),
-    ]);
+      values.map( func x = charset[x.toNat()]),
+      checksum.map( func x = charset[x.toNat()]),
+    ].flatten();
 
     assert output.size() <= 90;
 
@@ -80,7 +80,7 @@ module {
     var separatorIndex : Nat = 0;
     var lowercase : Bool = false;
     var uppercase : Bool = false;
-    let inputData : [Nat8] = Blob.toArray(Text.encodeUtf8(input));
+    let inputData : [Nat8] = input.encodeUtf8().toArray();
 
     for (i in Nat.range(0, inputData.size())) {
       let c : Nat8 = inputData[i];
@@ -132,7 +132,7 @@ module {
 
     return switch (
       verifyChecksum(hrp, values),
-      Text.decodeUtf8(Blob.fromArray(hrp)),
+      Blob.fromArray(hrp).decodeUtf8(),
     ) {
       case (#err(msg), _) {
         #err(msg);
@@ -181,11 +181,11 @@ module {
 
     // Merge expandedHrp and data arrays and append 6 zeroes to get
     // [expandedHrp..., data..., 0, 0, 0, 0, 0, 0].
-    let polyModValues : [Nat8] = Array.flatten([
+    let polyModValues : [Nat8] = [
       expandedHrp,
       data,
       [0, 0, 0, 0, 0, 0] : [Nat8],
-    ]);
+    ].flatten();
 
     let mod : Nat32 = polymod(polyModValues) ^ encodingConstant(encoding);
 
@@ -194,9 +194,7 @@ module {
       6,
       func(i) {
         Nat8.fromIntWrap(
-          Nat32.toNat(
-            (mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31
-          )
+          ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat()
         );
       },
     );
@@ -207,7 +205,7 @@ module {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
-    let check : Nat32 = polymod(Array.concat(expandedHrp, values));
+    let check : Nat32 = polymod(expandedHrp.concat( values));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);

@@ -27,7 +27,7 @@ module {
 
       for (i in Nat.range(0, data.size())) {
         // We are looking for the first non-zero byte.
-        if (List.size(outputBuf) == 0) {
+        if (outputBuf.size() == 0) {
           // Check whether the current byte is a non-zero.
           if (data[i] != 0) {
             // Check whether the current byte has its msb set.
@@ -45,7 +45,7 @@ module {
         };
       };
 
-      return List.toArray(outputBuf);
+      return outputBuf.toArray();
     };
 
     let output = List.empty<Nat8>();
@@ -91,7 +91,7 @@ module {
       output.add(i);
     };
 
-    return Blob.fromArray(List.toArray(output));
+    return Blob.fromArray(output.toArray());
   };
 
   // Accepts a Blob containing the concatenation of the 32-byte big endian
@@ -99,7 +99,7 @@ module {
   // Outputs DER encoding of the signature:
   // 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
   public func encodeSignature(signature : Blob) : DerSignature {
-    let data : [Nat8] = Blob.toArray(signature);
+    let data : [Nat8] = signature.toArray();
     let rdata = VarArray.repeat<Nat8>(0, 32);
     let sdata = VarArray.repeat<Nat8>(0, 32);
     Common.copy(rdata, 0, data, 0, 32);
@@ -128,7 +128,7 @@ module {
     };
 
     let (rData, sLen) = switch (
-      ByteUtils.read(data, Nat8.toNat(rLen), false),
+      ByteUtils.read(data, rLen.toNat(), false),
       ByteUtils.readOne(data),
       ByteUtils.readOne(data),
     ) {
@@ -138,7 +138,7 @@ module {
       };
     };
 
-    let sData = switch (ByteUtils.read(data, Nat8.toNat(sLen), false)) {
+    let sData = switch (ByteUtils.read(data, sLen.toNat(), false)) {
       case (?sData) {
         sData;
       };

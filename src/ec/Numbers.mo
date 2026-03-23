@@ -22,7 +22,7 @@ module {
       number /= 2;
     };
 
-    return List.toArray(bitsBuffer);
+    return bitsBuffer.toArray();
   };
 
   // Convert given number to binary represented as an array of Bool.
@@ -55,6 +55,6 @@ module {
       input /= 2;
     };
 
-    return List.toArray(output);
+    return output.toArray();
   };
 };

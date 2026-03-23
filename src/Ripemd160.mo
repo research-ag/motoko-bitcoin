@@ -714,7 +714,7 @@ module {
     };
 
     public func write(data : [Nat8]) {
-      var bufsize : Nat = Nat64.toNat(bytes % 64);
+      var bufsize : Nat = (bytes % 64).toNat();
       var transformOffset : Nat = 0;
 
       // Check if the incoming data is enough to fill the buffer
@@ -751,7 +751,7 @@ module {
     public func sum() : [Nat8] {
       let pad : [var Nat8] = VarArray.repeat<Nat8>(
         0,
-        Nat64.toNat(1 + ((119 - (bytes % 64)) % 64)),
+        (1 + ((119 - (bytes % 64)) % 64)).toNat(),
       );
       pad[0] := 0x80;
 

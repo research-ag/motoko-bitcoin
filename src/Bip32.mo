@@ -142,8 +142,7 @@ module {
     // Initial size most suitable for single-digit indices
     var parsedPath : [Nat32] = [];
 
-    let sanitized : Text = Text.replace(
-      path,
+    let sanitized : Text = path.replace(
       #predicate(
         func(c) {
           c == '\n' or c == ' ' or c == '\r';
@@ -152,7 +151,7 @@ module {
       "",
     );
 
-    let tokens : Iter<Text> = Text.tokens(sanitized, #char '/');
+    let tokens : Iter<Text> = sanitized.tokens( #char '/');
     var first : Bool = true;
 
     label tokensloop for (token in tokens) {
@@ -164,7 +163,7 @@ module {
         return null;
       };
       // Find whether it is hardened
-      if (Text.contains(token, #char '\'')) {
+      if (token.contains( #char '\'')) {
         return null;
       };
 
@@ -242,7 +241,7 @@ module {
       Common.writeBE32(hmacData, 33, index);
       let hmacSha512 : Hmac.Hmac = Hmac.sha512(chaincode);
       hmacSha512.writeArray(Array.fromVarArray(hmacData));
-      let fullNode : [Nat8] = Blob.toArray(hmacSha512.sum());
+      let fullNode : [Nat8] = hmacSha512.sum().toArray();
 
       // Split HMAC output into two 32-byte sequences.
       let left : [Nat8] = Array.tabulate<Nat8>(

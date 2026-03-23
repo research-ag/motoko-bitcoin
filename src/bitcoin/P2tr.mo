@@ -46,7 +46,7 @@ module {
   // Create script for the given P2TR key spend address.
   public func leafScript(bip340_spender_public_key : [Nat8]) : Result<Script, Text> {
     if (bip340_spender_public_key.size() != 32) {
-      return #err("Invalid BIP-340 public key length: expected 32 but got " # Nat.toText(bip340_spender_public_key.size()));
+      return #err("Invalid BIP-340 public key length: expected 32 but got " # bip340_spender_public_key.size().toText());
     };
     #ok([
       // #opcode(#OP_PUSHBYTES_32) is implicit and added by the
@@ -60,7 +60,7 @@ module {
     // BIP-342 tapscript
     let TAPROOT_LEAF_TAPSCRIPT : [Nat8] = [0xc0];
     let script_bytes = Script.toBytes(leaf_script);
-    Hash.taggedHash(Array.flatten([TAPROOT_LEAF_TAPSCRIPT, script_bytes]), "TapLeaf");
+    Hash.taggedHash([TAPROOT_LEAF_TAPSCRIPT, script_bytes].flatten(), "TapLeaf");
   };
 
   /// Computes a tweak from the internal key and a hash. Corresponds to
@@ -73,12 +73,12 @@ module {
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
   public func tweakFromKeyAndHash(internal_key : [Nat8], hash : [Nat8]) : Result<Fp.Fp, Text> {
     if (internal_key.size() != 32) {
-      return #err("Failed to compute tweak, invalid internal key length: expected 32 but got " # Nat.toText(internal_key.size()));
+      return #err("Failed to compute tweak, invalid internal key length: expected 32 but got " # internal_key.size().toText());
     } else if (hash.size() != 32) {
-      return #err("Failed to compute tweak, invalid hash length: expected 32 but got " # Nat.toText(hash.size()));
+      return #err("Failed to compute tweak, invalid hash length: expected 32 but got " # hash.size().toText());
     };
 
-    let tagged_hash = Hash.taggedHash(Array.flatten([internal_key, hash]), "TapTweak");
+    let tagged_hash = Hash.taggedHash([internal_key, hash].flatten(), "TapTweak");
 
     let tweak = Common.readBE256(tagged_hash, 0);
 
@@ -101,7 +101,7 @@ module {
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
   public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result<PublicKey, Text> {
     let even_point_flag : [Nat8] = [0x02];
-    let public_key_sec1_bytes = Array.flatten([even_point_flag, public_key_bip340_bytes]);
+    let public_key_sec1_bytes = [even_point_flag, public_key_bip340_bytes].flatten();
     let public_key_point = switch (Jacobi.fromBytes(public_key_sec1_bytes, Curves.secp256k1)) {
       case (?point) {
         switch (point) {
@@ -127,7 +127,7 @@ module {
 
     let tweaked_public_key_sec1_bytes = Jacobi.toBytes(tweaked_public_key, true);
     #ok({
-      bip340_public_key = Array.sliceToArray(tweaked_public_key_sec1_bytes, 1, 33);
+      bip340_public_key = tweaked_public_key_sec1_bytes.sliceToArray( 1, 33);
       is_even = tweaked_public_key_sec1_bytes[0] == 0x02;
     });
   };

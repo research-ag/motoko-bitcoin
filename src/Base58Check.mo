@@ -12,7 +12,7 @@ module {
   // Convert the given Base256 input to Base58 with checksum.
   public func encode(input : [Nat8]) : Text {
     // Add 4-byte hash check to the end.
-    let hash : [Nat8] = Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, input)));
+    let hash : [Nat8] = Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, input)).toArray();
     let inputWithCheck : [var Nat8] = VarArray.repeat<Nat8>(0, input.size() + 4);
 
     for (i in Nat.range(0, input.size())) {
@@ -41,7 +41,7 @@ module {
     );
 
     // Re-calculate checksum, ensure it matches the included 4-byte checksum.
-    let hash : [Nat8] = Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, output)));
+    let hash : [Nat8] = Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, output)).toArray();
 
     for (i in Nat.range(0, 4)) {
       if (hash[i] != decoded[decoded.size() - 4 + i]) {

@@ -522,7 +522,7 @@ module Script {
         if (encodedVal < opPushData1) {
           // Everything below OP_PUSHDATA1 is treated as the size of data to
           // read next.
-          let dataSize = Nat8.toNat(encodedVal);
+          let dataSize = encodedVal.toNat();
           totalReadCount += dataSize;
           (#data(ByteUtils.read(data, dataSize, false)!));
         } else {
@@ -536,19 +536,19 @@ module Script {
       let readResult = do ? {
         switch (instruction) {
           case (?(#opcode(#OP_PUSHDATA1))) {
-            let dataSize = Nat8.toNat(ByteUtils.readOne(data)!);
+            let dataSize = ByteUtils.readOne(data)!.toNat();
             totalReadCount += dataSize + 1;
             instructionsBuf.add(#opcode(#OP_PUSHDATA1));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
           case (?(#opcode(#OP_PUSHDATA2))) {
-            let dataSize = Nat16.toNat(ByteUtils.readLE16(data)!);
+            let dataSize = ByteUtils.readLE16(data)!.toNat();
             totalReadCount += dataSize + 2;
             instructionsBuf.add(#opcode(#OP_PUSHDATA2));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
           case (?(#opcode(#OP_PUSHDATA4))) {
-            let dataSize = Nat32.toNat(ByteUtils.readLE32(data)!);
+            let dataSize = ByteUtils.readLE32(data)!.toNat();
             totalReadCount += dataSize + 4;
             instructionsBuf.add(#opcode(#OP_PUSHDATA4));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
@@ -557,7 +557,7 @@ module Script {
             instructionsBuf.add(instruction);
           };
           case (null) {
-            return #err("Could not decode opcode: " # Nat8.toText(encodedVal));
+            return #err("Could not decode opcode: " # encodedVal.toText());
           };
         };
       };
@@ -577,13 +577,13 @@ module Script {
     if (readSize and totalReadCount < size) {
       return #err "Truncated script.";
     };
-    return #ok(List.toArray(instructionsBuf));
+    return #ok(instructionsBuf.toArray());
   };
 
   // Serialize given script to bytes.
   public func toBytes(script : Script) : [Nat8] {
     let buf = List.empty<Nat8>();
-    let opPushData1 : Nat = Nat8.toNat(encodeOpcode(#OP_PUSHDATA1));
+    let opPushData1 : Nat = encodeOpcode(#OP_PUSHDATA1).toNat();
 
     for (instruction in script.values()) {
       switch (instruction) {

@@ -87,16 +87,14 @@ module {
           break l;
         };
         case (?value) {
-          var carry : Nat = Nat8.toNat(
-            mapBase58[Nat32.toNat(Char.toNat32(value))]
-          );
+          var carry : Nat = mapBase58[value.toNat32().toNat()].toNat();
           assert (carry != 0xff);
 
           var i : Nat = 0;
           var b256Pointer : Nat = b256.size() - 1;
           label reverseIter while (carry != 0 or i < length) {
 
-            carry += 58 * Nat8.toNat(b256[b256Pointer]);
+            carry += 58 * b256[b256Pointer].toNat();
             b256[b256Pointer] := Nat8.fromNat(carry % 256);
             carry /= 256;
             i += 1;
@@ -166,12 +164,12 @@ module {
     let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
 
     while (inputPointer < input.size()) {
-      var carry : Nat = Nat8.toNat(input[inputPointer]);
+      var carry : Nat = input[inputPointer].toNat();
       var i : Nat = 0;
       // Apply "b58 = b58 * 256 + ch".
       var b58Pointer : Nat = b58.size() - 1;
       label reverseIter while (carry != 0 or i < length) {
-        carry += 256 * Nat8.toNat((b58[b58Pointer]));
+        carry += 256 * (b58[b58Pointer]).toNat();
         b58[b58Pointer] := Nat8.fromNat(carry % 58);
         carry /= 58;
         i += 1;
@@ -195,7 +193,7 @@ module {
         if (i < zeroes) {
           Char.fromNat32(0x31);
         } else {
-          base58Alphabet[Nat8.toNat(b58[i + b58Pointer - zeroes])];
+          base58Alphabet[b58[i + b58Pointer - zeroes].toNat()];
         };
       },
     );

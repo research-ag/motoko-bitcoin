@@ -47,7 +47,7 @@ module {
   public func readLE16(data : Iter<Nat8>) : ?Nat16 {
     do ? {
       let (a, b) = (data.next()!, data.next()!);
-      Nat16.fromIntWrap(Nat8.toNat(b)) << 8 | Nat16.fromIntWrap(Nat8.toNat(a));
+      Nat16.fromIntWrap(b.toNat()) << 8 | Nat16.fromIntWrap(a.toNat());
     };
   };
 
@@ -56,7 +56,7 @@ module {
   public func readLE32(data : Iter<Nat8>) : ?Nat32 {
     do ? {
       let (a, b, c, d) = (data.next()!, data.next()!, data.next()!, data.next()!);
-      Nat32.fromIntWrap(Nat8.toNat(d)) << 24 | Nat32.fromIntWrap(Nat8.toNat(c)) << 16 | Nat32.fromIntWrap(Nat8.toNat(b)) << 8 | Nat32.fromIntWrap(Nat8.toNat(a));
+      Nat32.fromIntWrap(d.toNat()) << 24 | Nat32.fromIntWrap(c.toNat()) << 16 | Nat32.fromIntWrap(b.toNat()) << 8 | Nat32.fromIntWrap(a.toNat());
     };
   };
 
@@ -75,7 +75,7 @@ module {
         data.next()!,
       );
 
-      Nat64.fromIntWrap(Nat8.toNat(h)) << 56 | Nat64.fromIntWrap(Nat8.toNat(g)) << 48 | Nat64.fromIntWrap(Nat8.toNat(f)) << 40 | Nat64.fromIntWrap(Nat8.toNat(e)) << 32 | Nat64.fromIntWrap(Nat8.toNat(d)) << 24 | Nat64.fromIntWrap(Nat8.toNat(c)) << 16 | Nat64.fromIntWrap(Nat8.toNat(b)) << 8 | Nat64.fromIntWrap(Nat8.toNat(a));
+      Nat64.fromIntWrap(h.toNat()) << 56 | Nat64.fromIntWrap(g.toNat()) << 48 | Nat64.fromIntWrap(f.toNat()) << 40 | Nat64.fromIntWrap(e.toNat()) << 32 | Nat64.fromIntWrap(d.toNat()) << 24 | Nat64.fromIntWrap(c.toNat()) << 16 | Nat64.fromIntWrap(b.toNat()) << 8 | Nat64.fromIntWrap(a.toNat());
     };
   };
 
@@ -91,16 +91,16 @@ module {
     do ? {
       switch (readOne(data)!) {
         case 0xfd {
-          Nat16.toNat(readLE16(data)!);
+          readLE16(data)!.toNat();
         };
         case 0xfe {
-          Nat32.toNat(readLE32(data)!);
+          readLE32(data)!.toNat();
         };
         case 0xff {
-          Nat64.toNat(readLE64(data)!);
+          readLE64(data)!.toNat();
         };
         case (length) {
-          Nat8.toNat(length);
+          length.toNat();
         };
       };
     };
