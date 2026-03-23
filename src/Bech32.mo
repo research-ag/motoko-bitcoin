@@ -50,6 +50,8 @@ module {
 
   // Encode input in Bech32 or a Bech32m.
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
+    assert hrp.size() > 0;
+
     // Ensure HRP is lowercase.
     for (c in hrp.chars()) {
       assert (c <= '~' and c >= '!' and not (c <= 'Z' and c >= 'A'));
@@ -66,6 +68,8 @@ module {
       Array.map(values, func x = charset[Nat8.toNat(x)]),
       Array.map(checksum, func x = charset[Nat8.toNat(x)]),
     ]);
+
+    assert output.size() <= 90;
 
     return Text.fromArray(output);
   };
