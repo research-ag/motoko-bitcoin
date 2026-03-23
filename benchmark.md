@@ -329,3 +329,44 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 
 </details>
+
+<details>
+
+<summary>bench/segwit.bench.mo $({\color{gray}0\%})$</summary>
+
+### SegWit (address encode/decode)
+
+_Benchmark SegWit Bech32/Bech32m address encode/decode for common versions and program lengths_
+
+
+Instructions: ${\color{gray}0\\%}$
+Heap: ${\color{gray}0\\%}$
+Stable Memory: ${\color{gray}0\\%}$
+Garbage Collection: ${\color{gray}0\\%}$
+
+
+**Instructions**
+
+|        | bc v0/20 | bc v0/32 | bc v1/32 | tb v0/20 | tb v0/32 | tb v1/32 |
+| :----- | -------: | -------: | -------: | -------: | -------: | -------: |
+| encode |  180_953 |  255_865 |  255_821 |  180_906 |  255_929 |  255_914 |
+| decode |   83_387 |  120_367 |  120_342 |   83_372 |  120_427 |  120_399 |
+
+
+**Heap**
+
+|        | bc v0/20 | bc v0/32 | bc v1/32 | tb v0/20 | tb v0/32 | tb v1/32 |
+| :----- | -------: | -------: | -------: | -------: | -------: | -------: |
+| encode |    272 B |    272 B |    272 B |    272 B |    272 B |    272 B |
+| decode |    272 B |    272 B |    272 B |    272 B |    272 B |    272 B |
+
+
+**Garbage Collection**
+
+|        | bc v0/20 | bc v0/32 | bc v1/32 | tb v0/20 | tb v0/32 | tb v1/32 |
+| :----- | -------: | -------: | -------: | -------: | -------: | -------: |
+| encode | 5.29 KiB | 6.76 KiB | 6.76 KiB | 5.29 KiB | 6.76 KiB | 6.76 KiB |
+| decode | 2.23 KiB | 2.75 KiB | 2.75 KiB | 2.23 KiB | 2.75 KiB | 2.75 KiB |
+
+
+</details>
