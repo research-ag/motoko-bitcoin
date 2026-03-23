@@ -629,7 +629,7 @@ module Script {
         if (i < encodedBufSize.size()) {
           encodedBufSize[i];
         } else {
-          buf.at(i - encodedBufSize.size());
+          buf.at(i - encodedBufSize.size() : Nat);
         };
       },
     );
