@@ -8,7 +8,7 @@ import Jacobi "./ec/Jacobi";
 import Affine "./ec/Affine";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
+import { type Iter } "mo:core/Types";
 import Text "mo:core/Text";
 import Nat32 "mo:core/Nat32";
 import Blob "mo:core/Blob";
@@ -151,7 +151,7 @@ module {
       "",
     );
 
-    let tokens : Iter.Iter<Text> = Text.tokens(sanitized, #char '/');
+    let tokens : Iter<Text> = Text.tokens(sanitized, #char '/');
     var first : Bool = true;
 
     label tokensloop for (token in tokens) {

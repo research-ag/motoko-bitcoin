@@ -2,7 +2,7 @@ import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
-import Iter "mo:core/Iter";
+import { type Iter } "mo:core/Types";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Common "./Common";
@@ -12,7 +12,7 @@ module {
   // reverse is true, will read return the elements in reverse order.
   // Returns null if the iterator does not produce enough data.
   public func read(
-    data : Iter.Iter<Nat8>,
+    data : Iter<Nat8>,
     count : Nat,
     reverse : Bool,
   ) : ?[Nat8] {
@@ -43,7 +43,7 @@ module {
 
   // Read little endian 16-bit natural number starting at offset.
   // Returns null if the iterator does not produce enough data.
-  public func readLE16(data : Iter.Iter<Nat8>) : ?Nat16 {
+  public func readLE16(data : Iter<Nat8>) : ?Nat16 {
     do ? {
       let (a, b) = (data.next()!, data.next()!);
       Nat16.fromIntWrap(Nat8.toNat(b)) << 8 | Nat16.fromIntWrap(Nat8.toNat(a));
@@ -52,7 +52,7 @@ module {
 
   // Read little endian 32-bit natural number starting at offset.
   // Returns null if the iterator does not produce enough data.
-  public func readLE32(data : Iter.Iter<Nat8>) : ?Nat32 {
+  public func readLE32(data : Iter<Nat8>) : ?Nat32 {
     do ? {
       let (a, b, c, d) = (data.next()!, data.next()!, data.next()!, data.next()!);
       Nat32.fromIntWrap(Nat8.toNat(d)) << 24 | Nat32.fromIntWrap(Nat8.toNat(c)) << 16 | Nat32.fromIntWrap(Nat8.toNat(b)) << 8 | Nat32.fromIntWrap(Nat8.toNat(a));
@@ -61,7 +61,7 @@ module {
 
   // Read little endian 64-bit natural number starting at offset.
   // Returns null if the iterator does not produce enough data.
-  public func readLE64(data : Iter.Iter<Nat8>) : ?Nat64 {
+  public func readLE64(data : Iter<Nat8>) : ?Nat64 {
     do ? {
       let (a, b, c, d, e, f, g, h) = (
         data.next()!,
@@ -80,13 +80,13 @@ module {
 
   // Read one element from the given iterator.
   // Returns null if the iterator does not produce enough data.
-  public func readOne(data : Iter.Iter<Nat8>) : ?Nat8 {
+  public func readOne(data : Iter<Nat8>) : ?Nat8 {
     data.next()
   };
 
   // Read and return a varint encoded integer from data.
   // Returns null if the iterator does not produce enough data.
-  public func readVarint(data : Iter.Iter<Nat8>) : ?Nat {
+  public func readVarint(data : Iter<Nat8>) : ?Nat {
     do ? {
       switch (readOne(data)!) {
         case 0xfd {

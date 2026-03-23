@@ -1,7 +1,6 @@
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
-import Result "mo:core/Result";
+import { type Iter; type Result } "mo:core/Types";
 import Script "./Script";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
@@ -10,7 +9,7 @@ import Types "./Types";
 module {
   // Deserialize TxOutput from data with layout:
   // | amount | serialized script |
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxOutput, Text> {
+  public func fromBytes(data : Iter<Nat8>) : Result<TxOutput, Text> {
     switch (ByteUtils.readLE64(data), Script.fromBytes(data, true)) {
       case (?amount, #ok script) {
         #ok(TxOutput(amount, script));

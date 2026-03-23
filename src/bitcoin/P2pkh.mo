@@ -6,8 +6,7 @@ import ByteUtils "../ByteUtils";
 import Hash "../Hash";
 import Script "./Script";
 import Array "mo:core/Array";
-import Result "mo:core/Result";
-import Iter "mo:core/Iter";
+import { type Result; type Iter } "mo:core/Types";
 
 module {
   type PublicKey = Ecdsa.PublicKey;
@@ -20,7 +19,7 @@ module {
   };
 
   // Create P2PKH script for the given P2PKH address.
-  public func makeScript(address : Address) : Result.Result<Script, Text> {
+  public func makeScript(address : Address) : Result<Script, Text> {
     switch (decodeAddress(address)) {
       case (#ok { network = _; publicKeyHash }) {
         #ok([
@@ -71,9 +70,9 @@ module {
   };
 
   // Decode P2PKH hash into its network and public key hash components.
-  public func decodeAddress(address : Address) : Result.Result<DecodedAddress, Text> {
+  public func decodeAddress(address : Address) : Result<DecodedAddress, Text> {
 
-    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(address)) {
+    let decoded : Iter<Nat8> = switch (Base58Check.decode(address)) {
       case (?b58decoded) {
         b58decoded.values();
       };

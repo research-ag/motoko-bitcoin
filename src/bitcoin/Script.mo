@@ -1,6 +1,6 @@
 import List "mo:core/List";
 import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
+import { type Iter; type Result } "mo:core/Types";
 import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
@@ -8,7 +8,6 @@ import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
-import Result "mo:core/Result";
 
 module Script {
   let maxNat8 = 0xff;
@@ -489,7 +488,7 @@ module Script {
   // script size from data. Reading size is required when deserializing scripts
   // that were serialized as part of transactions. If readSize is false, will
   // read all bytes in data.
-  public func fromBytes(data : Iter.Iter<Nat8>, readSize : Bool) : Result.Result<Script, Text> {
+  public func fromBytes(data : Iter<Nat8>, readSize : Bool) : Result<Script, Text> {
     let size = if (readSize) {
       switch (ByteUtils.readVarint(data)) {
         case (?size) {

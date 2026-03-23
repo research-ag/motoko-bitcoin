@@ -3,7 +3,7 @@ import List "mo:core/List";
 import Blob "mo:core/Blob";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Transaction "./Transaction";
@@ -45,7 +45,7 @@ module {
     destinations : [(Types.Address, Satoshi)],
     changeAddress : Types.Address,
     fees : Satoshi,
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     if (version != 1 and version != 2) {
       return #err("Unexpected version number: " # Nat32.toText(version));
@@ -122,7 +122,7 @@ module {
     transaction : Transaction.Transaction,
     ecdsaProxy : EcdsaProxy,
     derivationPath : [Blob],
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     // Obtain the scriptPubKey of the source address which is also the
     // scriptPubKey of the Tx output being spent.
@@ -197,7 +197,7 @@ module {
     destinations : [(Types.Address, Satoshi)],
     changeAddress : Types.Address,
     fees : Satoshi,
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     return switch (
       buildTransaction(

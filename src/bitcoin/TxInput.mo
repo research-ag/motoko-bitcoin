@@ -1,8 +1,7 @@
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
+import { type Iter; type Result } "mo:core/Types";
 import Blob "mo:core/Blob";
-import Result "mo:core/Result";
 import Script "./Script";
 import Common "../Common";
 import ByteUtils "../ByteUtils";
@@ -11,7 +10,7 @@ import Types "./Types";
 module {
   // Deserialize a TxInput  from bytes with layout:
   // | prevTxId | prevTx output index | script | sequence |
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxInput, Text> {
+  public func fromBytes(data : Iter<Nat8>) : Result<TxInput, Text> {
     let (prevTxId, prevTxOutputIndex, script, sequence) = switch (
       ByteUtils.read(data, 32, false),
       ByteUtils.readLE32(data),

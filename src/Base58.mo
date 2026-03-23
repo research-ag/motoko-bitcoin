@@ -4,7 +4,7 @@ import Nat8 "mo:core/Nat8";
 import Nat32 "mo:core/Nat32";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
+import { type Iter } "mo:core/Types";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
@@ -38,7 +38,7 @@ module {
 
   // Convert the given Base58 input to Base256.
   public func decode(input : Text) : [Nat8] {
-    let inputIter : Iter.Iter<Char> = input.chars();
+    let inputIter : Iter<Char> = input.chars();
     var current : ?Char = inputIter.next();
     var spaces : Nat = 0;
 

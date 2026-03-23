@@ -6,7 +6,7 @@ import Curves "../../src/ec/Curves";
 import Runtime "mo:core/Runtime";
 import Fp "../../src/ec/Fp";
 import P2tr "../../src/bitcoin/P2tr";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Script "../../src/bitcoin/Script";
 import { expect; test } "mo:test";
 
@@ -25,8 +25,8 @@ test(
   },
 );
 
-func assert_tweak_res_eq(expected : Result.Result<Fp.Fp, Text>, computed : Result.Result<Fp.Fp, Text>) {
-  type Res = Result.Result<Fp.Fp, Text>;
+func assert_tweak_res_eq(expected : Result<Fp.Fp, Text>, computed : Result<Fp.Fp, Text>) {
+  type Res = Result<Fp.Fp, Text>;
   func show(a : Res) : Text = switch (a) {
     case (#ok(tweak)) { debug_show (tweak.value) };
     case (#err(text)) { text };
@@ -53,7 +53,7 @@ test(
     let hash : [Nat8] = [121, 89, 72, 255, 55, 49, 57, 37, 229, 20, 144, 247, 94, 100, 207, 182, 103, 190, 68, 196, 13, 225, 177, 166, 254, 123, 145, 71, 129, 171, 15, 191];
     expect.nat(hash.size()).equal(32);
 
-    let computed_tweak : Result.Result<Fp.Fp, Text> = P2tr.tweakFromKeyAndHash(internal_key, hash);
+    let computed_tweak : Result<Fp.Fp, Text> = P2tr.tweakFromKeyAndHash(internal_key, hash);
 
     assert_tweak_res_eq(computed_tweak, #ok expected_tweak);
   },

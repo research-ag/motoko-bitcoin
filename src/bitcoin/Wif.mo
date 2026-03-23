@@ -1,5 +1,4 @@
-import Iter "mo:core/Iter";
-import Result "mo:core/Result";
+import { type Iter; type Result } "mo:core/Types";
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
@@ -37,8 +36,8 @@ module {
 
   // Decode WIF private key to extract network, private key,
   // and compression flag.
-  public func decode(key : WifPrivateKey) : Result.Result<Types.BitcoinPrivateKey, Text> {
-    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(key)) {
+  public func decode(key : WifPrivateKey) : Result<Types.BitcoinPrivateKey, Text> {
+    let decoded : Iter<Nat8> = switch (Base58Check.decode(key)) {
       case (?b58decoded) {
         b58decoded.values();
       };

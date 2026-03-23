@@ -1,6 +1,6 @@
 import Affine "../ec/Affine";
 import Curves "../ec/Curves";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Types "./Types";
 
 module {
@@ -8,7 +8,7 @@ module {
   type EncodedPublicKey = Types.EncodedPublicKey;
 
   // Decode a public key from several possible forms.
-  public func decode(pk : EncodedPublicKey) : Result.Result<Types.PublicKey, Text> {
+  public func decode(pk : EncodedPublicKey) : Result<Types.PublicKey, Text> {
     switch (pk) {
       case (#point(point)) {
         fromPoint(point);
@@ -23,7 +23,7 @@ module {
   // uncompressed SEC-1 formats.
   // Returns error result if deserialize fails or deserialized point is at
   // infinity.
-  func fromBytes(data : [Nat8], curve : Curves.Curve) : Result.Result<PublicKey, Text> {
+  func fromBytes(data : [Nat8], curve : Curves.Curve) : Result<PublicKey, Text> {
 
     switch (Affine.fromBytes(data, curve)) {
       case (null) {
@@ -37,7 +37,7 @@ module {
 
   // Creates a PublicKey out of given point.
   // Returns error if point is at infinity or not on curve.
-  func fromPoint(point : Affine.Point) : Result.Result<PublicKey, Text> {
+  func fromPoint(point : Affine.Point) : Result<PublicKey, Text> {
     switch (point) {
       case (#infinity(_)) {
         #err("Can't create public key from point at infinity.");

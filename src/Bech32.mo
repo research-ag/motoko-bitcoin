@@ -4,7 +4,7 @@ import Char "mo:core/Char";
 import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
 import Nat32 "mo:core/Nat32";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
 
@@ -71,7 +71,7 @@ module {
   };
 
   // Decode given text as Bech32 or Bech32m.
-  public func decode(input : Text) : Result.Result<DecodeResult, Text> {
+  public func decode(input : Text) : Result<DecodeResult, Text> {
     // Locate the '1' separator.
     var separatorIndex : Nat = 0;
     var lowercase : Bool = false;
@@ -199,7 +199,7 @@ module {
   };
 
   // Verify the checksum for the given bech32 data.
-  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result.Result<Encoding, Text> {
+  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result<Encoding, Text> {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 

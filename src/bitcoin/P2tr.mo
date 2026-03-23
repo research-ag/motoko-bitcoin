@@ -2,7 +2,7 @@ import Common "../Common";
 import Curves "../ec/Curves";
 import Fp "../ec/Fp";
 import Hash "../Hash";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Array "mo:core/Array";
 import Nat "mo:core/Nat";
 import Script "./Script";
@@ -26,7 +26,7 @@ module {
   /// Create script for the given P2TR key spend address (see
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
   /// for more details).
-  public func makeScriptFromP2trKeyAddress(address : P2trKeyAddress) : Result.Result<Script, Text> {
+  public func makeScriptFromP2trKeyAddress(address : P2trKeyAddress) : Result<Script, Text> {
     switch (Segwit.decode(address)) {
       case (#ok(_, { version = _; program })) {
         #ok([
@@ -43,7 +43,7 @@ module {
   };
 
   // Create script for the given P2TR key spend address.
-  public func leafScript(bip340_spender_public_key : [Nat8]) : Result.Result<Script, Text> {
+  public func leafScript(bip340_spender_public_key : [Nat8]) : Result<Script, Text> {
     if (bip340_spender_public_key.size() != 32) {
       return #err("Invalid BIP-340 public key length: expected 32 but got " # Nat.toText(bip340_spender_public_key.size()));
     };
@@ -70,7 +70,7 @@ module {
   /// ```
   /// in `taproot_tweak_pubkey` function in
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
-  public func tweakFromKeyAndHash(internal_key : [Nat8], hash : [Nat8]) : Result.Result<Fp.Fp, Text> {
+  public func tweakFromKeyAndHash(internal_key : [Nat8], hash : [Nat8]) : Result<Fp.Fp, Text> {
     if (internal_key.size() != 32) {
       return #err("Failed to compute tweak, invalid internal key length: expected 32 but got " # Nat.toText(internal_key.size()));
     } else if (hash.size() != 32) {
@@ -98,7 +98,7 @@ module {
   /// ```
   /// `taproot_tweak_pubkey` function in
   /// [BIP341](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki).
-  public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result.Result<PublicKey, Text> {
+  public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result<PublicKey, Text> {
     let even_point_flag : [Nat8] = [0x02];
     let public_key_sec1_bytes = Array.flatten([even_point_flag, public_key_bip340_bytes]);
     let public_key_point = switch (Jacobi.fromBytes(public_key_sec1_bytes, Curves.secp256k1)) {

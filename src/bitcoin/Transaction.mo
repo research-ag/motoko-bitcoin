@@ -1,12 +1,11 @@
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
 import List "mo:core/List";
-import Iter "mo:core/Iter";
+import { type Iter; type Result } "mo:core/Types";
 import Nat32 "mo:core/Nat32";
 import Nat "mo:core/Nat";
 import Blob "mo:core/Blob";
 import Text "mo:core/Text";
-import Result "mo:core/Result";
 import Hash "../Hash";
 import Script "./Script";
 import Common "../Common";
@@ -21,7 +20,7 @@ module {
   // Deserialize transaction from data with the following layout:
   // | version | maybe witness flags | len(txIns) | txIns | len(txOuts) | txOuts
   // | locktime | witness if witness flags present |
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<Transaction, Text> {
+  public func fromBytes(data : Iter<Nat8>) : Result<Transaction, Text> {
 
     var has_witness = false;
 

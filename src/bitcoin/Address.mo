@@ -3,10 +3,10 @@ import P2tr "./P2tr";
 import Script "./Script";
 import Segwit "../Segwit";
 import Types "./Types";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 
 module {
-  public func addressFromText(address : Text) : Result.Result<Types.Address, Text> {
+  public func addressFromText(address : Text) : Result<Types.Address, Text> {
     switch (Segwit.decode(address)) {
       case (#ok _) {
         return #ok(#p2tr_key(address));
@@ -27,7 +27,7 @@ module {
   // Obtain scriptPubKey from given address.
   public func scriptPubKey(
     address : Types.Address
-  ) : Result.Result<Script.Script, Text> {
+  ) : Result<Script.Script, Text> {
     switch (address) {
       case (#p2pkh p2pkhAddr) {
         return P2pkh.makeScript(p2pkhAddr);
