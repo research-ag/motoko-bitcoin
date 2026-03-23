@@ -307,7 +307,7 @@ module {
         Array.map<TxOutput.TxOutput, [Nat8]>(
           txOutputs,
           func(txout : TxOutput.TxOutput) {
-            TxOutput.toBytes(txout);
+            txout.toBytes();
           },
         )
       );

@@ -24,12 +24,14 @@ module {
     };
   };
 
+  /*
   public func toBytes(txout : TxOutput) : [Nat8] {
     let amount_bytes = VarArray.repeat<Nat8>(0, 8);
     Common.writeLE64(amount_bytes, 0, txout.amount);
     let script_bytes = Script.toBytes(txout.scriptPubKey);
     Array.concat<Nat8>(Array.fromVarArray(amount_bytes), script_bytes);
   };
+  */
 
   // Representation of a TxOutput of a Bitcoin transaction. A TxOutput locks
   // specified amount of Satoshi with the given script.
