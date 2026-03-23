@@ -1,6 +1,7 @@
+import { type Result } "mo:core/Types";
+
 import Affine "../ec/Affine";
 import Curves "../ec/Curves";
-import { type Result } "mo:core/Types";
 import Types "./Types";
 
 module {

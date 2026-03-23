@@ -1,6 +1,6 @@
 import Affine "../ec/Affine";
-import Fp "../ec/Fp";
 import Curves "../ec/Curves";
+import Fp "../ec/Fp";
 
 module {
   public type PrivateKey = Nat;

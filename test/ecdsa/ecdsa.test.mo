@@ -1,14 +1,15 @@
 // @testmode wasi
 
-import PublicKey "../../src/ecdsa/Publickey";
-import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
-import Hex "../Hex";
-import TestUtils "../TestUtils";
-import Curves "../../src/ec/Curves";
-import Ecdsa "../../src/ecdsa/Ecdsa";
-import Der "../../src/ecdsa/Der";
 import Blob "mo:core/Blob";
 import Runtime "mo:core/Runtime";
+
+import Curves "../../src/ec/Curves";
+import Der "../../src/ecdsa/Der";
+import Ecdsa "../../src/ecdsa/Ecdsa";
+import Hex "../Hex";
+import PublicKey "../../src/ecdsa/Publickey";
+import TestUtils "../TestUtils";
+import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
 
 type WycheproofEcdsaTestCase = WycheproofEcdsaTestVectors.WycheproofEcdsaTestCase;
 let runTest = TestUtils.runTestWithDefaults;

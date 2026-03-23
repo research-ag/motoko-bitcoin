@@ -1,5 +1,6 @@
 import Debug "mo:core/Debug";
 import Nat "mo:core/Nat";
+
 import { test } "mo:test";
 
 // A mini test runner to facilitate debugging and benchmarking.

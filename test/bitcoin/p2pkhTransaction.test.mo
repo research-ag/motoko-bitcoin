@@ -1,13 +1,14 @@
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Runtime "mo:core/Runtime";
+
+import Curves "../../src/ec/Curves";
+import P2pkh "../../src/bitcoin/P2pkh";
+import TestUtils "../TestUtils";
 import Transaction "../../src/bitcoin/Transaction";
 import TxInput "../../src/bitcoin/TxInput";
 import TxOutput "../../src/bitcoin/TxOutput";
-import P2pkh "../../src/bitcoin/P2pkh";
 import Witness "../../src/bitcoin/Witness";
-import Curves "../../src/ec/Curves";
-import TestUtils "../TestUtils";
-import Runtime "mo:core/Runtime";
-import Array "mo:core/Array";
-import Blob "mo:core/Blob";
 
 type TxInput = {
   txid : [Nat8];

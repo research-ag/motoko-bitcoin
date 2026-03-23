@@ -1,14 +1,16 @@
-import Bitcoin "../src/bitcoin/Bitcoin";
-import P2pkh "../src/bitcoin/P2pkh";
-import Types "../src/bitcoin/Types";
-import Transaction "../src/bitcoin/Transaction";
-import Witness "../src/bitcoin/Witness";
-import Bench "mo:bench-helper";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
 import Blob "mo:core/Blob";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
+import VarArray "mo:core/VarArray";
+
+import Bench "mo:bench-helper";
+
+import Bitcoin "../src/bitcoin/Bitcoin";
+import P2pkh "../src/bitcoin/P2pkh";
+import Transaction "../src/bitcoin/Transaction";
+import Types "../src/bitcoin/Types";
+import Witness "../src/bitcoin/Witness";
 
 module {
   // Simple fixtures

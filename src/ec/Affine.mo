@@ -1,8 +1,9 @@
-import FpBase "./Fp";
-import Curves "./Curves";
-import Common "../Common";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
+
+import Common "../Common";
+import Curves "./Curves";
+import FpBase "./Fp";
 
 module {
   type Fp = FpBase.Fp;

@@ -1,9 +1,10 @@
 import Runtime "mo:core/Runtime";
-import Hash "../../src/Hash";
-import TestUtils "../TestUtils";
+
 import Curves "../../src/ec/Curves";
-import Script "../../src/bitcoin/Script";
+import Hash "../../src/Hash";
 import P2pkh "../../src/bitcoin/P2pkh";
+import Script "../../src/bitcoin/Script";
+import TestUtils "../TestUtils";
 import Types "../../src/bitcoin/Types";
 
 type AddressTestCase = {

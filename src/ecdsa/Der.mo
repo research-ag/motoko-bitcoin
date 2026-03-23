@@ -1,13 +1,14 @@
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import List "mo:core/List";
 import { type Result; type Iter } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
-import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import List "mo:core/List";
-import Blob "mo:core/Blob";
-import Types "./Types";
-import Common "../Common";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
+import Types "./Types";
 
 module {
   type DerSignature = Types.DerSignature;

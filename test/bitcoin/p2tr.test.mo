@@ -1,14 +1,16 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
+import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+
+import { expect; test } "mo:test";
+
 import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
-import Runtime "mo:core/Runtime";
 import Fp "../../src/ec/Fp";
 import P2tr "../../src/bitcoin/P2tr";
-import { type Result } "mo:core/Types";
 import Script "../../src/bitcoin/Script";
-import { expect; test } "mo:test";
 
 let bip340_key_byte_len : Nat = 32;
 

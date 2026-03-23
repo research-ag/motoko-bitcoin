@@ -1,17 +1,18 @@
-import Jacobi "../../src/ec/Jacobi";
-import Curves "../../src/ec/Curves";
-import Fp "../../src/ec/Fp";
-import Types "../../src/bitcoin/Types";
-import Common "../../src/Common";
-import Wif "../../src/bitcoin/Wif";
-import P2pkh "../../src/bitcoin/P2pkh";
-import PublicKey "../../src/ecdsa/Publickey";
-import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import Nat8 "mo:core/Nat8";
 import Blob "mo:core/Blob";
 import Int "mo:core/Int";
+import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
+import VarArray "mo:core/VarArray";
+
+import Common "../../src/Common";
+import Curves "../../src/ec/Curves";
+import Fp "../../src/ec/Fp";
+import Jacobi "../../src/ec/Jacobi";
+import P2pkh "../../src/bitcoin/P2pkh";
+import PublicKey "../../src/ecdsa/Publickey";
+import Types "../../src/bitcoin/Types";
+import Wif "../../src/bitcoin/Wif";
 
 module {
   public type Signature = { r : Nat; s : Nat };

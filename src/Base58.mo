@@ -1,10 +1,10 @@
-import Text "mo:core/Text";
-import Char "mo:core/Char";
-import Nat8 "mo:core/Nat8";
-import Nat32 "mo:core/Nat32";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Char "mo:core/Char";
 import { type Iter } "mo:core/Types";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".

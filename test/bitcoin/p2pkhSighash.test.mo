@@ -1,12 +1,13 @@
 // @testmode wasi
 
-import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Int32 "mo:core/Int32";
-import TestCases "./p2pkhSighashTestVectors";
-import TestUtils "../TestUtils";
+import Runtime "mo:core/Runtime";
+
 import Hex "../Hex";
 import Script "../../src/bitcoin/Script";
+import TestCases "./p2pkhSighashTestVectors";
+import TestUtils "../TestUtils";
 import Transaction "../../src/bitcoin/Transaction";
 import Types "../../src/bitcoin/Types";
 

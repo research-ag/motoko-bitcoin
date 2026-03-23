@@ -1,7 +1,8 @@
+import Bench "mo:bench-helper";
+
+import Affine "../src/ec/Affine";
 import Curves "../src/ec/Curves";
 import Jacobi "../src/ec/Jacobi";
-import Affine "../src/ec/Affine";
-import Bench "mo:bench-helper";
 
 module {
   public func init() : Bench.V1 {

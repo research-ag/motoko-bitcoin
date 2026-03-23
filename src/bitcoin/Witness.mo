@@ -1,9 +1,10 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
 import List "mo:core/List";
-import ByteUtils "../ByteUtils";
 import { type Result; type Iter } "mo:core/Types";
+import Nat "mo:core/Nat";
+import VarArray "mo:core/VarArray";
+
+import ByteUtils "../ByteUtils";
 
 module {
   // Witness consists of a sequence of byte arrays.

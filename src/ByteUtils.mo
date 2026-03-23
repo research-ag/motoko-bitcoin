@@ -1,10 +1,11 @@
-import Nat8 "mo:core/Nat8";
+import Array "mo:core/Array";
+import { type Iter } "mo:core/Types";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
-import { type Iter } "mo:core/Types";
-import Array "mo:core/Array";
+import Nat8 "mo:core/Nat8";
 import VarArray "mo:core/VarArray";
+
 import Common "./Common";
 
 module {

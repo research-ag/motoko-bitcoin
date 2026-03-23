@@ -6,11 +6,12 @@
 //
 // Therefore, DO NOT use this code for any operations involving secrets.
 
-import Runtime "mo:core/Runtime";
 import Int "mo:core/Int";
 import Nat "mo:core/Nat";
-import BaseFp "./Fp";
+import Runtime "mo:core/Runtime";
+
 import Affine "./Affine";
+import BaseFp "./Fp";
 import Curves "./Curves";
 import Numbers "./Numbers";
 

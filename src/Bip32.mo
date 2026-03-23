@@ -1,17 +1,18 @@
-import Nat "mo:core/Nat";
-import Common "./Common";
-import Hmac "./Hmac";
-import Hash "./Hash";
-import Base58Check "./Base58Check";
-import Curves "./ec/Curves";
-import Jacobi "./ec/Jacobi";
-import Affine "./ec/Affine";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import { type Iter } "mo:core/Types";
-import Text "mo:core/Text";
-import Nat32 "mo:core/Nat32";
 import Blob "mo:core/Blob";
+import { type Iter } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
+import Affine "./ec/Affine";
+import Base58Check "./Base58Check";
+import Common "./Common";
+import Curves "./ec/Curves";
+import Hash "./Hash";
+import Hmac "./Hmac";
+import Jacobi "./ec/Jacobi";
 
 module {
   public type Path = {

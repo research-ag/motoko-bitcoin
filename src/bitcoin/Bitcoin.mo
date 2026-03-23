@@ -1,17 +1,18 @@
-import Nat "mo:core/Nat";
-import List "mo:core/List";
-import Blob "mo:core/Blob";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Blob "mo:core/Blob";
+import List "mo:core/List";
 import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
-import Transaction "./Transaction";
+import VarArray "mo:core/VarArray";
+
+import Address "./Address";
 import Der "../ecdsa/Der";
 import Script "./Script";
+import Transaction "./Transaction";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
-import Address "./Address";
 import Types "./Types";
 import Witness "./Witness";
 

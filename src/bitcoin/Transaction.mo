@@ -1,20 +1,22 @@
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Blob "mo:core/Blob";
 import List "mo:core/List";
 import { type Iter; type Result } "mo:core/Types";
-import Nat32 "mo:core/Nat32";
 import Nat "mo:core/Nat";
-import Blob "mo:core/Blob";
+import Nat32 "mo:core/Nat32";
 import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
+import Sha256 "mo:sha2/Sha256";
+
+import ByteUtils "../ByteUtils";
+import Common "../Common";
 import Hash "../Hash";
 import Script "./Script";
-import Common "../Common";
-import ByteUtils "../ByteUtils";
-import Types "./Types";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
+import Types "./Types";
 import Witness "Witness";
-import Sha256 "mo:sha2/Sha256";
 
 module {
   // Deserialize transaction from data with the following layout:

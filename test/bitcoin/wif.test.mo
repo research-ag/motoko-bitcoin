@@ -1,5 +1,5 @@
-import Wif "../../src/bitcoin/Wif";
 import TestUtils "../TestUtils";
+import Wif "../../src/bitcoin/Wif";
 
 type ValidWifTestCase = {
   wif : Text;

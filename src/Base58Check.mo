@@ -1,8 +1,10 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
 import Blob "mo:core/Blob";
+import Nat "mo:core/Nat";
+import VarArray "mo:core/VarArray";
+
 import Sha256 "mo:sha2/Sha256";
+
 import Base58 "./Base58";
 
 module {

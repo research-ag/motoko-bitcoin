@@ -1,13 +1,14 @@
+import Array "mo:core/Array";
 import List "mo:core/List";
-import Runtime "mo:core/Runtime";
 import { type Iter; type Result } "mo:core/Types";
-import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
-import Array "mo:core/Array";
+import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
 import VarArray "mo:core/VarArray";
-import Common "../Common";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
 
 module Script {
   let maxNat8 = 0xff;

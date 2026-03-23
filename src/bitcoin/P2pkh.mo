@@ -1,12 +1,13 @@
-import Types "./Types";
-import EcdsaTypes "../ecdsa/Types";
-import Ecdsa "../ecdsa/Ecdsa";
-import Base58Check "../Base58Check";
-import ByteUtils "../ByteUtils";
-import Hash "../Hash";
-import Script "./Script";
 import Array "mo:core/Array";
 import { type Result; type Iter } "mo:core/Types";
+
+import Base58Check "../Base58Check";
+import ByteUtils "../ByteUtils";
+import Ecdsa "../ecdsa/Ecdsa";
+import EcdsaTypes "../ecdsa/Types";
+import Hash "../Hash";
+import Script "./Script";
+import Types "./Types";
 
 module {
   type PublicKey = Ecdsa.PublicKey;

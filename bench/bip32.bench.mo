@@ -1,6 +1,8 @@
-import Bip32 "../src/Bip32";
-import Bench "mo:bench-helper";
 import Runtime "mo:core/Runtime";
+
+import Bench "mo:bench-helper";
+
+import Bip32 "../src/Bip32";
 
 module {
   public func init() : Bench.V1 {

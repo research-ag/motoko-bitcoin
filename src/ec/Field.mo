@@ -1,6 +1,7 @@
-import Nat "mo:core/Nat";
-import Numbers "./Numbers";
 import Int "mo:core/Int";
+import Nat "mo:core/Nat";
+
+import Numbers "./Numbers";
 
 module {
   // Compute a ** -1 mod n.

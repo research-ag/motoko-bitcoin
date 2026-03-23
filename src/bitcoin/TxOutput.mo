@@ -1,9 +1,10 @@
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
 import { type Iter; type Result } "mo:core/Types";
-import Script "./Script";
-import Common "../Common";
+import VarArray "mo:core/VarArray";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
+import Script "./Script";
 import Types "./Types";
 
 module {

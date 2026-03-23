@@ -1,10 +1,10 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Char "mo:core/Char";
-import Nat "mo:core/Nat";
-import Nat8 "mo:core/Nat8";
-import Nat32 "mo:core/Nat32";
 import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
 

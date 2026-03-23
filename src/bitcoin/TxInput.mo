@@ -1,10 +1,11 @@
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import { type Iter; type Result } "mo:core/Types";
 import Blob "mo:core/Blob";
-import Script "./Script";
-import Common "../Common";
+import { type Iter; type Result } "mo:core/Types";
+import VarArray "mo:core/VarArray";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
+import Script "./Script";
 import Types "./Types";
 
 module {

@@ -1,13 +1,15 @@
-import Nat "mo:core/Nat";
-import Segwit "../src/Segwit";
-import List "mo:core/List";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import Nat8 "mo:core/Nat8";
-import Text "mo:core/Text";
 import Char "mo:core/Char";
+import List "mo:core/List";
+import Nat "mo:core/Nat";
+import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
 import { test } "mo:test";
+
+import Segwit "../src/Segwit";
 
 type ValidAddressTestCase = {
   address : Text;

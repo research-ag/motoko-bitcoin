@@ -1,13 +1,14 @@
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import Text "mo:core/Text";
-
-import PublicKey "../src/ecdsa/Publickey";
-import Ecdsa "../src/ecdsa/Ecdsa";
-import Der "../src/ecdsa/Der";
-import Curves "../src/ec/Curves";
-import Bench "mo:bench-helper";
 import Blob "mo:core/Blob";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
+import Bench "mo:bench-helper";
+
+import Curves "../src/ec/Curves";
+import Der "../src/ecdsa/Der";
+import Ecdsa "../src/ecdsa/Ecdsa";
+import PublicKey "../src/ecdsa/Publickey";
 
 module {
 

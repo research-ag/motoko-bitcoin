@@ -1,8 +1,10 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
+import Nat "mo:core/Nat";
 import VarArray "mo:core/VarArray";
-import Common "../src/Common";
+
 import { test } "mo:test";
+
+import Common "../src/Common";
 
 let testData : [{
   offset : Nat;

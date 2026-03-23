@@ -1,7 +1,9 @@
-import Nat "mo:core/Nat";
 import Blob "mo:core/Blob";
-import Hmac "../src/Hmac";
+import Nat "mo:core/Nat";
+
 import { test } "mo:test";
+
+import Hmac "../src/Hmac";
 
 let testData : [{
   desc : Text;
