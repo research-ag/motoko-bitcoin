@@ -1,17 +1,18 @@
-import Nat "mo:core/Nat";
-import Common "./Common";
-import Hmac "./Hmac";
-import Hash "./Hash";
-import Base58Check "./Base58Check";
-import Curves "./ec/Curves";
-import Jacobi "./ec/Jacobi";
-import Affine "./ec/Affine";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
-import Iter "mo:core/Iter";
-import Text "mo:core/Text";
-import Nat32 "mo:core/Nat32";
 import Blob "mo:core/Blob";
+import { type Iter } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
+import Affine "./ec/Affine";
+import Base58Check "./Base58Check";
+import Common "./Common";
+import Curves "./ec/Curves";
+import Hash "./Hash";
+import Hmac "./Hmac";
+import Jacobi "./ec/Jacobi";
 
 module {
   public type Path = {
@@ -130,7 +131,7 @@ module {
   };
 
   func isHardenedIndex(index : Nat32) : Bool {
-    return index >= 0x80000000; // 2**31
+    index >= 0x80000000 // 2**31
   };
 
   // Parses a Text path in the form "m/a/b/c/..." for unsigned integers
@@ -151,7 +152,7 @@ module {
       "",
     );
 
-    let tokens : Iter.Iter<Text> = Text.tokens(sanitized, #char '/');
+    let tokens : Iter<Text> = Text.tokens(sanitized, #char '/');
     var first : Bool = true;
 
     label tokensloop for (token in tokens) {
@@ -198,7 +199,7 @@ module {
     // Derive a child public key with path relative to this instance. Returns
     // null if path is #text and cannot be parsed.
     public func derivePath(path : Path) : ?ExtendedPublicKey {
-      return do ? {
+      do ? {
         // Normalize the given path as an array of indices.
         let pathArray : [Nat32] = switch (path) {
           case (#array path) {

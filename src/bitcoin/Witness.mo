@@ -1,10 +1,10 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
 import List "mo:core/List";
+import { type Result; type Iter } "mo:core/Types";
+import Nat "mo:core/Nat";
+import VarArray "mo:core/VarArray";
+
 import ByteUtils "../ByteUtils";
-import Iter "mo:core/Iter";
-import Result "mo:core/Result";
 
 module {
   // Witness consists of a sequence of byte arrays.
@@ -20,7 +20,7 @@ module {
     let numElements = witness.size();
     let buffer = List.empty<[Nat8]>();
     buffer.add(ByteUtils.writeVarint(numElements));
-    for (witness_element in Iter.fromArray(witness)) {
+    for (witness_element in witness.values()) {
       let size = ByteUtils.writeVarint(witness_element.size());
       buffer.add(size);
       buffer.add(witness_element);
@@ -29,7 +29,7 @@ module {
 
   };
 
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<Witness, Text> {
+  public func fromBytes(data : Iter<Nat8>) : Result<Witness, Text> {
     let numElements = switch (ByteUtils.readVarint(data)) {
       case (?numElements) { numElements };
       case (null) {

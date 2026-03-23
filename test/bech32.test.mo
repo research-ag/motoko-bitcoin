@@ -1,9 +1,11 @@
+import Char "mo:core/Char";
 import Nat "mo:core/Nat";
-import Bech32 "../src/Bech32";
 import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
-import Char "mo:core/Char";
+
 import { test } "mo:test";
+
+import Bech32 "../src/Bech32";
 
 let validChecksumBech32 : [Text] = [
   "A12UEL5L",
@@ -74,7 +76,7 @@ let invalidChecksumBech32m : [Text] = [
 ];
 
 func toLower(text : Text) : Text {
-  return Text.map(
+  Text.map(
     text,
     func(c) {
       if (c >= 'A' and c <= 'Z') {

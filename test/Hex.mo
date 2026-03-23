@@ -7,7 +7,7 @@ import VarArray "mo:core/VarArray";
 import Char "mo:core/Char";
 import Iter "mo:core/Iter";
 import Nat8 "mo:core/Nat8";
-import Result "mo:core/Result";
+import { type Result } "mo:core/Types";
 import Text "mo:core/Text";
 
 module {
@@ -46,7 +46,7 @@ module {
   public type Hex = Text;
   // Converts the given hexadecimal character to its corresponding binary format.
   // NOTE: a hexadecimal char is just an 4-bit natural number.
-  public func decodeChar(c : Char) : Result.Result<Nat8, Text> {
+  public func decodeChar(c : Char) : Result<Nat8, Text> {
     for (i in hex.keys()) {
       let h = hex[i];
       if (h == c or h == toLower(c)) {
@@ -57,7 +57,7 @@ module {
   };
 
   // Converts the given hexidecimal text to its corresponding binary format.
-  public func decode(t : Hex) : Result.Result<[Nat8], Text> {
+  public func decode(t : Hex) : Result<[Nat8], Text> {
     let t_ = if (t.size() % 2 == 0) { t } else { "0" # t };
     let cs = Iter.toArray(t_.chars());
     let ns = VarArray.repeat<Nat8>(0, t_.size() / 2);

@@ -1,5 +1,5 @@
-import Iter "mo:core/Iter";
-import Result "mo:core/Result";
+import { type Iter; type Result } "mo:core/Types";
+
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
@@ -10,7 +10,7 @@ module {
 
   // Map network to WIF version prefix.
   func _encodeVersion(network : Types.Network) : Nat8 {
-    return switch (network) {
+    switch (network) {
       case (#Mainnet) {
         0x80;
       };
@@ -22,7 +22,7 @@ module {
 
   // Map WIF version prefix to network.
   func decodeVersion(version : Nat8) : ?Types.Network {
-    return switch (version) {
+    switch (version) {
       case (0x80) {
         ?(#Mainnet);
       };
@@ -37,8 +37,8 @@ module {
 
   // Decode WIF private key to extract network, private key,
   // and compression flag.
-  public func decode(key : WifPrivateKey) : Result.Result<Types.BitcoinPrivateKey, Text> {
-    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(key)) {
+  public func decode(key : WifPrivateKey) : Result<Types.BitcoinPrivateKey, Text> {
+    let decoded : Iter<Nat8> = switch (Base58Check.decode(key)) {
       case (?b58decoded) {
         b58decoded.values();
       };

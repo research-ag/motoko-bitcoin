@@ -1,8 +1,9 @@
-import FpBase "./Fp";
-import Curves "./Curves";
-import Common "../Common";
 import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
+
+import Common "../Common";
+import Curves "./Curves";
+import FpBase "./Fp";
 
 module {
   type Fp = FpBase.Fp;
@@ -13,7 +14,7 @@ module {
 
   // Check if the given point is valid.
   public func isOnCurve(point : Point) : Bool {
-    return switch point {
+    switch point {
       case (#infinity(_)) {
         true;
       };
@@ -29,7 +30,7 @@ module {
 
   // Check if the two given affine points are equal.
   public func isEqual(point1 : Point, point2 : Point) : Bool {
-    return switch (point1, point2) {
+    switch (point1, point2) {
       case (#infinity(curve1), #infinity(curve2)) {
         Curves.isEqual(curve1, curve2);
       };

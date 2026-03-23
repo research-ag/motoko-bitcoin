@@ -1,10 +1,10 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Char "mo:core/Char";
+import { type Result } "mo:core/Types";
 import Nat "mo:core/Nat";
-import Nat8 "mo:core/Nat8";
 import Nat32 "mo:core/Nat32";
-import Result "mo:core/Result";
+import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
 
@@ -71,7 +71,7 @@ module {
   };
 
   // Decode given text as Bech32 or Bech32m.
-  public func decode(input : Text) : Result.Result<DecodeResult, Text> {
+  public func decode(input : Text) : Result<DecodeResult, Text> {
     // Locate the '1' separator.
     var separatorIndex : Nat = 0;
     var lowercase : Bool = false;
@@ -161,7 +161,7 @@ module {
 
   // Constant value associated to the given encoding.
   func encodingConstant(encoding : Encoding) : Nat32 {
-    return switch (encoding) {
+    switch (encoding) {
       case (#BECH32) {
         1;
       };
@@ -199,7 +199,7 @@ module {
   };
 
   // Verify the checksum for the given bech32 data.
-  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result.Result<Encoding, Text> {
+  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result<Encoding, Text> {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
@@ -237,7 +237,7 @@ module {
   // If input corresponds to code of uppercase character, return code of its
   // lowercase version.
   func toLower(c : Nat8) : Nat8 {
-    return if (c >= CHAR_A and c <= CHAR_Z) {
+    if (c >= CHAR_A and c <= CHAR_Z) {
       c + 0x20;
     } else {
       c;
@@ -245,17 +245,13 @@ module {
   };
 
   // Returns true if given code corresponds to a lowercase character.
-  func isLowercase(c : Nat8) : Bool {
-    return (c >= CHAR_a and c <= CHAR_z);
-  };
+  func isLowercase(c : Nat8) : Bool { (c >= CHAR_a and c <= CHAR_z) };
 
   // Returns true if given code corresponds to an uppercase character.
-  func isUppercase(c : Nat8) : Bool {
-    return (c >= CHAR_A and c <= CHAR_Z);
-  };
+  func isUppercase(c : Nat8) : Bool { (c >= CHAR_A and c <= CHAR_Z) };
 
   // Check if given code is within range of human-readable characters.
   func isInRange(c : Nat8) : Bool {
-    return (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
+    (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
   };
 };

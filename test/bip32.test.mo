@@ -1,8 +1,10 @@
 // @testmode wasi
 
-import Bip32 "../src/Bip32";
 import Iter "mo:core/Iter";
+
 import { test } "mo:test";
+
+import Bip32 "../src/Bip32";
 
 type DerivationVector = {
   xPublicKey : Text;

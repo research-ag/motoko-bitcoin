@@ -1,16 +1,15 @@
-import Debug "mo:core/Debug";
-import Nat "mo:core/Nat";
-import Iter "mo:core/Iter";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
-import TestUtils "../TestUtils";
+import VarArray "mo:core/VarArray";
+
 import Common "../../src/Common";
-import Secp256k1TestVectors "./Secp256k1TestVectors";
-import WycheproofEcdhTestVectors "./wycheproofEcdhTestVectors";
 import Curves "../../src/ec/Curves";
-import Jacobi "../../src/ec/Jacobi";
 import Hex "../Hex";
+import Jacobi "../../src/ec/Jacobi";
+import Secp256k1TestVectors "./Secp256k1TestVectors";
+import TestUtils "../TestUtils";
+import WycheproofEcdhTestVectors "./wycheproofEcdhTestVectors";
 
 type DoublingVector = Secp256k1TestVectors.DoublingVector;
 type MultiplicationVector = Secp256k1TestVectors.MultiplicationVector;

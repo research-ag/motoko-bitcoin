@@ -1,10 +1,10 @@
-import Nat "mo:core/Nat";
-import Nat8 "mo:core/Nat8";
-import Nat32 "mo:core/Nat32";
-import Result "mo:core/Result";
 import List "mo:core/List";
-import Iter "mo:core/Iter";
+import { type Result; type Iter } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
+
 import Bech32 "../src/Bech32";
 
 module {
@@ -15,7 +15,7 @@ module {
   };
 
   // Convert a Witness Program to a SegWit Address.
-  public func encode(hrp : Text, { version; program } : WitnessProgram) : Result.Result<Text, Text> {
+  public func encode(hrp : Text, { version; program } : WitnessProgram) : Result<Text, Text> {
 
     let bech32Input = List.empty<Nat8>();
     bech32Input.add(version);
@@ -53,7 +53,7 @@ module {
 
   // Convert a segwit address into a numan-readable part (HRP) and a Witness Program.
   // Decodes using Bech32.
-  public func decode(address : Text) : Result.Result<(Text, WitnessProgram), Text> {
+  public func decode(address : Text) : Result<(Text, WitnessProgram), Text> {
     let (encoding, decodedHrp, data) = switch (Bech32.decode(address)) {
       case (#ok res) {
         res;
@@ -68,7 +68,7 @@ module {
     };
 
     // Split into version and program.
-    let dataIter : Iter.Iter<Nat8> = data.values();
+    let dataIter : Iter<Nat8> = data.values();
     let version : Nat8 = switch (dataIter.next()) {
       case (?val) {
         val;
@@ -114,12 +114,12 @@ module {
 
   // Convert between two bases that are power of 2.
   func convertBits(
-    data : Iter.Iter<Nat8>,
+    data : Iter<Nat8>,
     output : List.List<Nat8>,
     from : Nat32,
     to : Nat32,
     pad : Bool,
-  ) : Result.Result<(), Text> {
+  ) : Result<(), Text> {
 
     var acc : Nat32 = 0;
     var bits : Nat32 = 0;

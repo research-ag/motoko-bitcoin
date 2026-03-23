@@ -1,17 +1,16 @@
-import Nat "mo:core/Nat";
-import Bitcoin "../../src/bitcoin/Bitcoin";
-import Types "../../src/bitcoin/Types";
-import Script "../../src/bitcoin/Script";
-import Address "../../src/bitcoin/Address";
-import Wif "../../src/bitcoin/Wif";
-import TestUtils "../TestUtils";
-import Hex "../Hex";
-import BitcoinTestTools "./bitcoinTestTools";
 import Array "mo:core/Array";
-import Debug "mo:core/Debug";
-import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
 import Blob "mo:core/Blob";
+import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+
+import Address "../../src/bitcoin/Address";
+import Bitcoin "../../src/bitcoin/Bitcoin";
+import BitcoinTestTools "./bitcoinTestTools";
+import Hex "../Hex";
+import Script "../../src/bitcoin/Script";
+import TestUtils "../TestUtils";
+import Types "../../src/bitcoin/Types";
+import Wif "../../src/bitcoin/Wif";
 
 let runTest = TestUtils.runTestWithDefaults;
 

@@ -1,7 +1,8 @@
-import Nat "mo:core/Nat";
 import Array "mo:core/Array";
-import VarArray "mo:core/VarArray";
+import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
+import VarArray "mo:core/VarArray";
+
 import Common "./Common";
 
 module {

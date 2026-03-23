@@ -1,6 +1,8 @@
 import Nat "mo:core/Nat";
-import Base58Check "../src/Base58Check";
+
 import { test } "mo:test";
+
+import Base58Check "../src/Base58Check";
 
 let testData : [(?[Nat8], Text)] = [
   (

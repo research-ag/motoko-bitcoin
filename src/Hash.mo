@@ -1,18 +1,20 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Ripemd160 "./Ripemd160";
-import Sha256 "mo:sha2/Sha256";
 import Text "mo:core/Text";
+
+import Sha256 "mo:sha2/Sha256";
+
+import Ripemd160 "./Ripemd160";
 
 module {
   // Applies SHA256 followed by RIPEMD160 on the given data.
   public func hash160(data : [Nat8]) : [Nat8] {
-    return Ripemd160.hash(Blob.toArray(Sha256.fromArray(#sha256, data)));
+    Ripemd160.hash(Blob.toArray(Sha256.fromArray(#sha256, data)));
   };
 
   // Applies double SHA256 to input.
   public func doubleSHA256(data : [Nat8]) : [Nat8] {
-    return Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, data)));
+    Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, data)));
   };
 
   public func taggedHash(data : [Nat8], tag : Text) : [Nat8] {

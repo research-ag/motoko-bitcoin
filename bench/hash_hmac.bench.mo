@@ -1,8 +1,10 @@
-import Hmac "../src/Hmac";
-import Bench "mo:bench-helper";
 import Array "mo:core/Array";
-import Nat8 "mo:core/Nat8";
 import Blob "mo:core/Blob";
+import Nat8 "mo:core/Nat8";
+
+import Bench "mo:bench-helper";
+
+import Hmac "../src/Hmac";
 
 module {
   public func init() : Bench.V1 {

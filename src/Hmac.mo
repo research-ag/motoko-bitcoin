@@ -1,5 +1,6 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
+
 import Sha256 "mo:sha2/Sha256";
 import Sha512 "mo:sha2/Sha512";
 
@@ -35,7 +36,7 @@ module {
 
   // Construct HMAC from an arbitrary digest function.
   public func new(key : [Nat8], digestFactory : DigestFactory) : Hmac {
-    return HmacImpl(key, digestFactory);
+    HmacImpl(key, digestFactory);
   };
 
   // Construct HMAC from the given digest function:

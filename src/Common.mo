@@ -1,9 +1,8 @@
 import Nat "mo:core/Nat";
-import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
-import Iter "mo:core/Iter";
+import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
 
 module {

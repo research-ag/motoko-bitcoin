@@ -1,9 +1,11 @@
-import Segwit "../src/Segwit";
-import Bench "mo:bench-helper";
 import Array "mo:core/Array";
 import Nat8 "mo:core/Nat8";
-import Text "mo:core/Text";
 import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
+
+import Bench "mo:bench-helper";
+
+import Segwit "../src/Segwit";
 
 module {
   public func init() : Bench.V1 {

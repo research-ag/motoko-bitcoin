@@ -1,5 +1,5 @@
-import List "mo:core/List";
 import Array "mo:core/Array";
+import List "mo:core/List";
 
 module {
   // Extended Euclidean Algorithm.

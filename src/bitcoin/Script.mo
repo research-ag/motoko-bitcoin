@@ -1,14 +1,14 @@
+import Array "mo:core/Array";
 import List "mo:core/List";
-import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
-import Nat8 "mo:core/Nat8";
+import { type Iter; type Result } "mo:core/Types";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
-import Array "mo:core/Array";
+import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
 import VarArray "mo:core/VarArray";
-import Common "../Common";
+
 import ByteUtils "../ByteUtils";
-import Result "mo:core/Result";
+import Common "../Common";
 
 module Script {
   let maxNat8 = 0xff;
@@ -167,7 +167,7 @@ module Script {
 
   // Convert given opcode to its byte representation.
   func encodeOpcode(opcode : Opcode) : Nat8 {
-    return switch (opcode) {
+    switch (opcode) {
       case (#OP_0) {
         0x00;
       };
@@ -317,7 +317,7 @@ module Script {
 
   // Decode given opcode id.
   func decodeOpcode(id : Nat8) : ?Opcode {
-    return do ? {
+    do ? {
       switch id {
         case 0x4c {
           #OP_PUSHDATA1;
@@ -489,7 +489,7 @@ module Script {
   // script size from data. Reading size is required when deserializing scripts
   // that were serialized as part of transactions. If readSize is false, will
   // read all bytes in data.
-  public func fromBytes(data : Iter.Iter<Nat8>, readSize : Bool) : Result.Result<Script, Text> {
+  public func fromBytes(data : Iter<Nat8>, readSize : Bool) : Result<Script, Text> {
     let size = if (readSize) {
       switch (ByteUtils.readVarint(data)) {
         case (?size) {
@@ -629,7 +629,7 @@ module Script {
         if (i < encodedBufSize.size()) {
           encodedBufSize[i];
         } else {
-          buf.at(i - encodedBufSize.size());
+          buf.at(i - encodedBufSize.size() : Nat);
         };
       },
     );

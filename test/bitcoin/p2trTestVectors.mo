@@ -1,18 +1,18 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Debug "mo:core/Debug";
-import Runtime "mo:core/Runtime";
 import Nat32 "mo:core/Nat32";
+import Runtime "mo:core/Runtime";
 import VarArray "mo:core/VarArray";
-import Types "../../src/bitcoin/Types";
-import TxInput "../../src/bitcoin/TxInput";
-import Script "../../src/bitcoin/Script";
-import P2tr "../../src/bitcoin/P2tr";
+
 import P2pkh "../../src/bitcoin/P2pkh";
-import TxOutput "../../src/bitcoin/TxOutput";
-import Transaction "../../src/bitcoin/Transaction";
-import Witness "../../src/bitcoin/Witness";
+import P2tr "../../src/bitcoin/P2tr";
+import Script "../../src/bitcoin/Script";
 import Segwit "../../src/Segwit";
+import Transaction "../../src/bitcoin/Transaction";
+import TxInput "../../src/bitcoin/TxInput";
+import TxOutput "../../src/bitcoin/TxOutput";
+import Types "../../src/bitcoin/Types";
+import Witness "../../src/bitcoin/Witness";
 
 // The expected sighashes in this test were generated using the Rust `bitcoin` crate.
 module {

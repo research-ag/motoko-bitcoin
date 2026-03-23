@@ -1,14 +1,14 @@
-import Result "mo:core/Result";
-import Iter "mo:core/Iter";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import List "mo:core/List";
+import { type Result; type Iter } "mo:core/Types";
 import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
-import Array "mo:core/Array";
 import VarArray "mo:core/VarArray";
-import List "mo:core/List";
-import Blob "mo:core/Blob";
-import Types "./Types";
-import Common "../Common";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
+import Types "./Types";
 
 module {
   type DerSignature = Types.DerSignature;
@@ -110,8 +110,8 @@ module {
 
   // Decode signature in DER format.
   // 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
-  public func decodeSignature(signature : DerSignature) : Result.Result<Signature, Text> {
-    let data : Iter.Iter<Nat8> = signature.values();
+  public func decodeSignature(signature : DerSignature) : Result<Signature, Text> {
+    let data : Iter<Nat8> = signature.values();
 
     let (totalLen, rLen) = switch (
       ByteUtils.readOne(data),
