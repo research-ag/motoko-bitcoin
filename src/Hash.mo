@@ -7,12 +7,12 @@ import Text "mo:core/Text";
 module {
   // Applies SHA256 followed by RIPEMD160 on the given data.
   public func hash160(data : [Nat8]) : [Nat8] {
-    Ripemd160.hash(Blob.toArray(Sha256.fromArray(#sha256, data)))
+    Ripemd160.hash(Blob.toArray(Sha256.fromArray(#sha256, data)));
   };
 
   // Applies double SHA256 to input.
   public func doubleSHA256(data : [Nat8]) : [Nat8] {
-    Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, data)))
+    Blob.toArray(Sha256.fromBlob(#sha256, Sha256.fromArray(#sha256, data)));
   };
 
   public func taggedHash(data : [Nat8], tag : Text) : [Nat8] {

@@ -38,7 +38,7 @@ module {
       case (_) {
         return #err "Calling scriptPubKey on an unknown address type";
       };
-    }
+    };
   };
 
   // Check if the given addresses are equal.
@@ -59,6 +59,6 @@ module {
       case (_) {
         false;
       };
-    }
+    };
   };
 };

@@ -180,7 +180,7 @@ func toLower(text : Text) : Text {
       };
       return c;
     },
-  )
+  );
 };
 
 // Test whether valid addresses decode to the correct output.

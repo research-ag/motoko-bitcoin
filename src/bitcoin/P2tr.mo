@@ -39,7 +39,7 @@ module {
       case (#err msg) {
         #err msg;
       };
-    }
+    };
   };
 
   // Create script for the given P2TR key spend address.

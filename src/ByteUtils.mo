@@ -38,7 +38,7 @@ module {
       };
 
       Array.fromVarArray(readData);
-    }
+    };
   };
 
   // Read little endian 16-bit natural number starting at offset.
@@ -47,7 +47,7 @@ module {
     do ? {
       let (a, b) = (data.next()!, data.next()!);
       Nat16.fromIntWrap(Nat8.toNat(b)) << 8 | Nat16.fromIntWrap(Nat8.toNat(a));
-    }
+    };
   };
 
   // Read little endian 32-bit natural number starting at offset.
@@ -56,7 +56,7 @@ module {
     do ? {
       let (a, b, c, d) = (data.next()!, data.next()!, data.next()!, data.next()!);
       Nat32.fromIntWrap(Nat8.toNat(d)) << 24 | Nat32.fromIntWrap(Nat8.toNat(c)) << 16 | Nat32.fromIntWrap(Nat8.toNat(b)) << 8 | Nat32.fromIntWrap(Nat8.toNat(a));
-    }
+    };
   };
 
   // Read little endian 64-bit natural number starting at offset.
@@ -75,13 +75,13 @@ module {
       );
 
       Nat64.fromIntWrap(Nat8.toNat(h)) << 56 | Nat64.fromIntWrap(Nat8.toNat(g)) << 48 | Nat64.fromIntWrap(Nat8.toNat(f)) << 40 | Nat64.fromIntWrap(Nat8.toNat(e)) << 32 | Nat64.fromIntWrap(Nat8.toNat(d)) << 24 | Nat64.fromIntWrap(Nat8.toNat(c)) << 16 | Nat64.fromIntWrap(Nat8.toNat(b)) << 8 | Nat64.fromIntWrap(Nat8.toNat(a));
-    }
+    };
   };
 
   // Read one element from the given iterator.
   // Returns null if the iterator does not produce enough data.
   public func readOne(data : Iter<Nat8>) : ?Nat8 {
-    data.next()
+    data.next();
   };
 
   // Read and return a varint encoded integer from data.
@@ -102,7 +102,7 @@ module {
           Nat8.toNat(length);
         };
       };
-    }
+    };
   };
 
   // Encode value as varint.

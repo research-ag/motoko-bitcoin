@@ -168,7 +168,7 @@ module {
       case (#BECH32M) {
         0x2bc830a3;
       };
-    }
+    };
   };
 
   // Compute the checksum values for given hrp and data.
@@ -241,21 +241,17 @@ module {
       c + 0x20;
     } else {
       c;
-    }
+    };
   };
 
   // Returns true if given code corresponds to a lowercase character.
-  func isLowercase(c : Nat8) : Bool {
-    (c >= CHAR_a and c <= CHAR_z)
-  };
+  func isLowercase(c : Nat8) : Bool { (c >= CHAR_a and c <= CHAR_z) };
 
   // Returns true if given code corresponds to an uppercase character.
-  func isUppercase(c : Nat8) : Bool {
-    (c >= CHAR_A and c <= CHAR_Z)
-  };
+  func isUppercase(c : Nat8) : Bool { (c >= CHAR_A and c <= CHAR_Z) };
 
   // Check if given code is within range of human-readable characters.
   func isInRange(c : Nat8) : Bool {
-    (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT)
+    (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
   };
 };

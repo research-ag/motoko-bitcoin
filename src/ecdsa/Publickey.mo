@@ -16,7 +16,7 @@ module {
       case (#sec1(data, curve)) {
         fromBytes(data, curve);
       };
-    }
+    };
   };
 
   // Deserialize given data to public key. This supports compressed and
@@ -32,7 +32,7 @@ module {
       case (?(point)) {
         fromPoint(point);
       };
-    }
+    };
   };
 
   // Creates a PublicKey out of given point.
@@ -56,7 +56,7 @@ module {
           #err("Point not on curve.");
         };
       };
-    }
+    };
   };
 
   // Converts given public key to SEC1 format.

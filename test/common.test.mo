@@ -123,7 +123,7 @@ test(
       let expected = Array.tabulate<Nat8>(
         4,
         func(i) {
-          currentData.big32[offset + i]
+          currentData.big32[offset + i];
         },
       );
       Common.writeBE32(output, 0, currentData.nat32);
@@ -142,7 +142,7 @@ test(
       let expected = Array.tabulate<Nat8>(
         8,
         func(i) {
-          currentData.big64[offset + i]
+          currentData.big64[offset + i];
         },
       );
       Common.writeBE64(output, 0, currentData.nat64);
@@ -161,7 +161,7 @@ test(
       let expected = Array.tabulate<Nat8>(
         16,
         func(i) {
-          currentData.big128[offset + i]
+          currentData.big128[offset + i];
         },
       );
       Common.writeBE128(output, 0, currentData.nat128);
@@ -180,7 +180,7 @@ test(
       let expected = Array.tabulate<Nat8>(
         32,
         func(i) {
-          currentData.big256[offset + i]
+          currentData.big256[offset + i];
         },
       );
       Common.writeBE256(output, 0, currentData.nat256);

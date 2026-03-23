@@ -24,7 +24,7 @@ module {
           )
         ).add(curve.Fp(curve.b)).isEqual(y.sqr());
       };
-    }
+    };
   };
 
   // Check if the two given affine points are equal.
@@ -39,7 +39,7 @@ module {
       case _ {
         false;
       };
-    }
+    };
   };
 
   // Deserialize given data into a point on the given curve. This supports

@@ -311,7 +311,7 @@ module Script {
       case _ {
         Runtime.trap(debug_show ("Unsupported opcode", opcode));
       };
-    }
+    };
   };
 
   // Decode given opcode id.
@@ -481,7 +481,7 @@ module Script {
           null!;
         };
       };
-    }
+    };
   };
 
   // Deserialize Script from data. If readSize is true, will read and use the

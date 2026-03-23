@@ -20,7 +20,7 @@ module {
       case (null, _) {
         #err "Could not read TxOut amount";
       };
-    }
+    };
   };
 
   public func toBytes(txout : TxOutput) : [Nat8] {

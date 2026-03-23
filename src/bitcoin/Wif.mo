@@ -16,7 +16,7 @@ module {
       case (#Regtest or #Testnet) {
         0xef;
       };
-    }
+    };
   };
 
   // Map WIF version prefix to network.
@@ -31,7 +31,7 @@ module {
       case _ {
         null;
       };
-    }
+    };
   };
 
   // Decode WIF private key to extract network, private key,

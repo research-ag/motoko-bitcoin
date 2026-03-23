@@ -19,7 +19,7 @@ module {
 
   // Helper function for operating modulo the curve order.
   func Fr(value : Nat) : Fp.Fp {
-    Fp.Fp(value, curve.r)
+    Fp.Fp(value, curve.r);
   };
 
   // Helper class for assisting with signing with predetermined nonces.

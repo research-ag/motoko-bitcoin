@@ -33,7 +33,7 @@ module {
       case (#err msg) {
         #err msg;
       };
-    }
+    };
   };
 
   // Map given network to its id.
@@ -45,7 +45,7 @@ module {
       case (#Regtest or #Testnet) {
         0x6f;
       };
-    }
+    };
   };
 
   // Derive P2PKH address from given public key.

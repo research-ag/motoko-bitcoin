@@ -82,7 +82,7 @@ func toLower(text : Text) : Text {
       };
       return c;
     },
-  )
+  );
 };
 
 // Test checksum creation and validation.

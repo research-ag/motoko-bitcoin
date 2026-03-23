@@ -222,7 +222,7 @@ module {
           target := target.deriveChild(childIndex)!;
         };
         target;
-      }
+      };
     };
 
     // Derive child at the given index. Valid indices are in the range
