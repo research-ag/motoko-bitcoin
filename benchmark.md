@@ -101,26 +101,32 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 **Instructions**
 
-|         |  len 0 |  len 5 | len 20 |  len 32 |
-| :------ | -----: | -----: | -----: | ------: |
-| bech32  | 29_744 | 41_643 | 84_271 | 123_548 |
-| bech32m | 29_823 | 41_722 | 84_338 | 123_591 |
+|                |  len 0 |  len 5 | len 20 | len 32 |
+| :------------- | -----: | -----: | -----: | -----: |
+| encode bech32  | 18_366 | 24_167 | 41_530 | 55_474 |
+| encode bech32m | 18_398 | 24_199 | 41_562 | 55_506 |
+| decode bech32  | 11_467 | 17_577 | 35_342 | 49_586 |
+| decode bech32m | 11_541 | 17_675 | 35_416 | 49_648 |
 
 
 **Heap**
 
-|         | len 0 | len 5 | len 20 | len 32 |
-| :------ | ----: | ----: | -----: | -----: |
-| bech32  | 272 B | 272 B |  272 B |  272 B |
-| bech32m | 272 B | 272 B |  272 B |  272 B |
+|                | len 0 | len 5 | len 20 | len 32 |
+| :------------- | ----: | ----: | -----: | -----: |
+| encode bech32  | 272 B | 272 B |  272 B |  272 B |
+| encode bech32m | 272 B | 272 B |  272 B |  272 B |
+| decode bech32  | 272 B | 272 B |  272 B |  272 B |
+| decode bech32m | 272 B | 272 B |  272 B |  272 B |
 
 
 **Garbage Collection**
 
-|         |    len 0 | len 5 |   len 20 |   len 32 |
-| :------ | -------: | ----: | -------: | -------: |
-| bech32  | 1.68 KiB | 2 KiB | 3.09 KiB | 4.11 KiB |
-| bech32m | 1.68 KiB | 2 KiB | 3.09 KiB | 4.11 KiB |
+|                |    len 0 |    len 5 |   len 20 |   len 32 |
+| :------------- | -------: | -------: | -------: | -------: |
+| encode bech32  | 1.16 KiB | 1.36 KiB | 1.94 KiB | 2.41 KiB |
+| encode bech32m | 1.16 KiB | 1.36 KiB | 1.94 KiB | 2.41 KiB |
+| decode bech32  |    824 B |    956 B | 1.24 KiB | 1.49 KiB |
+| decode bech32m |    824 B |    956 B | 1.24 KiB | 1.49 KiB |
 
 
 </details>
