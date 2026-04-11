@@ -138,7 +138,9 @@ module {
         #err(msg);
       };
       case (#ok(encodingType), ?hrp) {
-        return #ok(encodingType, hrp, values.sliceToArray(0, -6));
+        // Strip the 6 checksum values from the end of the data.
+        let output = values.sliceToArray(0, -6);
+        return #ok(encodingType, hrp, output);
       };
       case _ {
         #err("Failed to decode HRP.");
