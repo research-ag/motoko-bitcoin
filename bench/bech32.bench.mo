@@ -8,7 +8,7 @@ import Bech32 "../src/Bech32";
 module {
   public func init() : Bench.V1 {
     let schema : Bench.Schema = {
-      name = "Bech32 vs Bech32m (encode)";
+      name = "Bech32 vs Bech32m";
       description = "Compare Bech32 and Bech32m encoding across sizes";
       rows = ["encode bech32", "encode bech32m", "decode bech32", "decode bech32m"];
       cols = ["len 0", "len 5", "len 20", "len 32"];
