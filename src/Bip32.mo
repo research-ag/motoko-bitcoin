@@ -164,8 +164,14 @@ module {
       tokens.map(
         func(token) {
           switch (Nat.fromText(token)) {
-            case (?number) { Nat32.fromNat(number) };
-            case (null) { valid := false; 0 : Nat32 };
+            case (?number) {
+              if (number >= 2 ** 32) valid := false;
+              Nat32.fromIntWrap(number);
+            };
+            case (null) {
+              valid := false;
+              0 : Nat32;
+            };
           };
         }
       )

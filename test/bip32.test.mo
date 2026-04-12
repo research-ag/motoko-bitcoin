@@ -127,6 +127,10 @@ let derivationVectors : [DerivationVector] = [
         derivePath = #text "m/0/4294967295";
         serialized = null;
       },
+      {
+        derivePath = #text "m/0/4294967296";
+        serialized = null;
+      },
     ];
   },
   {
