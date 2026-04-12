@@ -36,6 +36,20 @@ let derivationVectors : [DerivationVector] = [
         );
       },
       {
+        derivePath = #text "m//0/1";
+        serialized = ?(
+          "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSw"
+          # "FMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr"
+        );
+      },
+      {
+        derivePath = #text "m/0//1";
+        serialized = ?(
+          "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSw"
+          # "FMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr"
+        );
+      },
+      {
         derivePath = #text "m/0/1/2";
         serialized = ?(
           "xpub6BqyndF6rhZqmgktFCBcapkwubGxPqoAZtQaYewJHXVKZcLdnqBVC8N6f6FS"
