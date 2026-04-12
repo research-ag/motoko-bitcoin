@@ -112,6 +112,21 @@ let derivationVectors : [DerivationVector] = [
           # "GEgAMsDy4jEvNTWtxLyqqHY9C12gaBmgUdk2CGmwachwnWK"
         );
       },
+      {
+        derivePath = #text "m/0/2147483647";
+        serialized = ?(
+          "xpub6ASAVgeWMg4pmutghzHG3BohahjwNwPmy2DgM6W9wGegtPrvNgjBwuZRD7hS"
+          # "DFhYfunq8vDgwG4ah1gVzZysgp3UsKz7VNjCnSUJJ5T4fdD"
+        );
+      },
+      {
+        derivePath = #text "m/0/2147483648";
+        serialized = null;
+      },
+      {
+        derivePath = #text "m/0/4294967295";
+        serialized = null;
+      },
     ];
   },
   {
