@@ -1,6 +1,7 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import { type Iter } "mo:core/Types";
+import Iter "mo:core/Iter";
 import Nat "mo:core/Nat";
 import Nat32 "mo:core/Nat32";
 import Text "mo:core/Text";
@@ -138,9 +139,8 @@ module {
   // a,b,c,... and returns an array [a, b, c, ...]. Parsing fails and returns
   // null if input is not in the expected format or if it contains hardened
   // indices (e.g., m/0/1').
-  func arrayPathFromString(path : Text) : ?[Nat32] {
+  public func arrayPathFromString(path : Text) : ?[Nat32] {
     // Initial size most suitable for single-digit indices
-    var parsedPath : [Nat32] = [];
 
     let sanitized : Text = path.replace(
       #predicate(
@@ -151,33 +151,27 @@ module {
       "",
     );
 
-    let tokens : Iter<Text> = sanitized.tokens( #char '/');
-    var first : Bool = true;
-
-    label tokensloop for (token in tokens) {
-      if (token == "m") {
-        if (first) {
-          first := false;
-          continue tokensloop;
-        };
-        return null;
-      };
-      // Find whether it is hardened
-      if (token.contains( #char '\'')) {
-        return null;
-      };
-
-      switch (Common.textToNat(token)) {
-        case (?number) {
-          parsedPath := parsedPath.concat([Nat32.fromNat(number)]);
-          first := false;
-        };
-        case (null) {
-          return null;
-        };
-      };
+    let trimmed : Text = switch (Text.stripStart(sanitized, #char 'm')) {
+      case (?t) t;
+      case (null) sanitized;
     };
-    return ?parsedPath;
+
+    let tokens : Iter<Text> = trimmed.tokens(#char '/');
+
+    var valid = true;
+
+    let res = ?Array.fromIter(
+      tokens.map(
+        func(token) {
+          switch (Common.textToNat(token)) {
+            case (?number) { Nat32.fromNat(number) };
+            case (null) { valid := false; 0 : Nat32 };
+          };
+        }
+      )
+    );
+
+    if (valid) res else null;
   };
 
   // Representation of a BIP32 extended public key.
