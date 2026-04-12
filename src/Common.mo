@@ -3,7 +3,6 @@ import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
 import Nat8 "mo:core/Nat8";
-import Text "mo:core/Text";
 
 module {
   // Read big endian 32-bit natural number starting at offset.
@@ -113,21 +112,5 @@ module {
     for (i in Nat.range(0, count)) {
       dest[destOffset + i] := src[srcOffset + i];
     };
-  };
-
-  // Parses given text as unsigned integer, returns null if it contains
-  // non-number characters.
-  public func textToNat(input : Text) : ?Nat {
-    var result : Nat = 0;
-    for (asciiVal in input.encodeUtf8().values()) {
-      if (asciiVal < 0x30 or asciiVal > 0x39) {
-        return null;
-      };
-
-      result *= 10;
-      result += (asciiVal - 48).toNat();
-    };
-
-    return ?result;
   };
 };

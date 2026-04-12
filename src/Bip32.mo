@@ -163,7 +163,7 @@ module {
     let res = ?Array.fromIter(
       tokens.map(
         func(token) {
-          switch (Common.textToNat(token)) {
+          switch (Nat.fromText(token)) {
             case (?number) { Nat32.fromNat(number) };
             case (null) { valid := false; 0 : Nat32 };
           };

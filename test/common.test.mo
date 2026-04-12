@@ -192,7 +192,7 @@ test(
 );
 
 test(
-  "textToNat",
+  "Nat.fromText",
   func() {
     let testData : [(Text, ?Nat)] = [
       ("0", ?0),
@@ -213,10 +213,12 @@ test(
       ("5/", null),
       (":5", null),
       ("5:", null),
+      ("'5", null),
+      ("5'", null),
     ];
 
     for ((input, output) in testData.values()) {
-      let actual = Common.textToNat(input);
+      let actual = Nat.fromText(input);
       assert (actual == output);
     };
   },
