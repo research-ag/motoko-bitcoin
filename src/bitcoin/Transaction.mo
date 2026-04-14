@@ -195,7 +195,7 @@ module {
       txInputs[txInputIndex.toNat()].script := scriptPubKey.filter<Script.Instruction>(
         func(instruction) {
           instruction != #opcode(#OP_CODESEPARATOR);
-        },
+        }
       );
 
       // Serialize transaction and append SighashType.
@@ -257,7 +257,7 @@ module {
             Array.fromVarArray(vout_buffer),
           ].flatten();
           prevout;
-        },
+        }
       );
       assert prevouts.size() == txInputs.size();
 
@@ -272,12 +272,12 @@ module {
       let sha_prevouts : [Nat8] = Sha256.fromArray(#sha256, prevouts.flatten()).toArray();
 
       let amounts_bytes = amounts.map<Nat64, [Nat8]>(
-          func(amount) {
-            let amount_bytes = VarArray.repeat<Nat8>(0, 8);
-            Common.writeLE64(amount_bytes, 0, amount);
-            Array.fromVarArray(amount_bytes);
-          },
-        ).flatten();
+        func(amount) {
+          let amount_bytes = VarArray.repeat<Nat8>(0, 8);
+          Common.writeLE64(amount_bytes, 0, amount);
+          Array.fromVarArray(amount_bytes);
+        }
+      ).flatten();
       let sha_amounts : [Nat8] = Sha256.fromArray(#sha256, amounts_bytes).toArray();
 
       let scriptpubkeys = VarArray.repeat<[Nat8]>(Script.toBytes(scriptPubKey), txInputs.size());
@@ -292,16 +292,16 @@ module {
           let sequence_buffer = VarArray.repeat<Nat8>(0, 4);
           Common.writeLE32(sequence_buffer, 0, txin.sequence);
           Array.fromVarArray(sequence_buffer);
-        },
+        }
       );
       let sequences = sequences_buffer.flatten();
       let sha_sequences : [Nat8] = Sha256.fromArray(#sha256, sequences).toArray();
 
       let outputs_bytes = txOutputs.map<TxOutput.TxOutput, [Nat8]>(
-          func(txout : TxOutput.TxOutput) {
-            txout.toBytes();
-          },
-        ).flatten();
+        func(txout : TxOutput.TxOutput) {
+          txout.toBytes();
+        }
+      ).flatten();
 
       let sha_outputs : [Nat8] = Sha256.fromArray(#sha256, outputs_bytes).toArray();
 
@@ -360,14 +360,14 @@ module {
       let serializedTxIns : [[Nat8]] = txInputs.map<TxInput.TxInput, [Nat8]>(
         func(txInput) {
           txInput.toBytes();
-        },
+        }
       );
 
       // Serialize TxOutputs to bytes.
       let serializedTxOuts : [[Nat8]] = txOutputs.map<TxOutput.TxOutput, [Nat8]>(
         func(txOutput) {
           txOutput.toBytes();
-        },
+        }
       );
 
       // Encode the sizes of TxIns and TxOuts as varint.
@@ -505,14 +505,14 @@ module {
       let serializedTxIns : [[Nat8]] = txInputs.map<TxInput.TxInput, [Nat8]>(
         func(txInput) {
           txInput.toBytes();
-        },
+        }
       );
 
       // Serialize TxOutputs to bytes.
       let serializedTxOuts : [[Nat8]] = txOutputs.map<TxOutput.TxOutput, [Nat8]>(
         func(txOutput) {
           txOutput.toBytes();
-        },
+        }
       );
 
       // Encode the sizes of TxIns and TxOuts as varint.

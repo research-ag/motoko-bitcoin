@@ -65,8 +65,8 @@ module {
     let output : [Char] = [
       hrp.toArray(),
       ['1'],
-      values.map( func x = charset[x.toNat()]),
-      checksum.map( func x = charset[x.toNat()]),
+      values.map(func x = charset[x.toNat()]),
+      checksum.map(func x = charset[x.toNat()]),
     ].flatten();
 
     assert output.size() <= 90;
@@ -207,7 +207,7 @@ module {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
-    let check : Nat32 = polymod(expandedHrp.concat( values));
+    let check : Nat32 = polymod(expandedHrp.concat(values));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);

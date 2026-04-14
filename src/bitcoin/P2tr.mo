@@ -127,7 +127,7 @@ module {
 
     let tweaked_public_key_sec1_bytes = Jacobi.toBytes(tweaked_public_key, true);
     #ok({
-      bip340_public_key = tweaked_public_key_sec1_bytes.sliceToArray( 1, 33);
+      bip340_public_key = tweaked_public_key_sec1_bytes.sliceToArray(1, 33);
       is_even = tweaked_public_key_sec1_bytes[0] == 0x02;
     });
   };

@@ -85,7 +85,7 @@ module {
       let outerPaddedKey = blockSizedKey.map<Nat8, Nat8>(
         func(byte) {
           byte ^ outerPad;
-        },
+        }
       );
       outerDigest.writeArray(outerPaddedKey);
 
@@ -93,7 +93,7 @@ module {
       let innerPaddedKey = blockSizedKey.map<Nat8, Nat8>(
         func(byte) {
           byte ^ innerPad;
-        },
+        }
       );
       innerDigest.writeArray(innerPaddedKey);
     };
