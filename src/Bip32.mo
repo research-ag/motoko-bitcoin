@@ -151,12 +151,12 @@ module {
       "",
     );
 
-    let trimmed : Text = switch (Text.stripStart(sanitized, #char 'm')) {
+    let trimmed : Text = switch (Text.stripStart(sanitized, #text "m/")) {
       case (?t) t;
       case (null) sanitized;
     };
 
-    let tokens : Iter<Text> = trimmed.tokens(#char '/');
+    let tokens : Iter<Text> = trimmed.split(#char '/');
 
     var valid = true;
 
