@@ -1,4 +1,3 @@
-import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Int "mo:core/Int";
 import Nat8 "mo:core/Nat8";
@@ -53,7 +52,7 @@ module {
       let encodedOutput : [var Nat8] = VarArray.repeat<Nat8>(0, 64);
       Common.writeBE256(encodedOutput, 0, signature.r);
       Common.writeBE256(encodedOutput, 32, signature.s);
-      return Blob.fromArray(Array.fromVarArray(encodedOutput));
+      return Blob.fromArray(encodedOutput.toArray());
     };
 
     // Returns the public key associated to `bitcoinPrivateKey`.

@@ -1,4 +1,3 @@
-import Array "mo:core/Array";
 import Char "mo:core/Char";
 import List "mo:core/List";
 import Nat "mo:core/Nat";
@@ -230,7 +229,7 @@ func testInvalidAddress(testCase : Text) {
 
 // Test whether address encoding fails on invalid input.
 func testInvalidAddressEncoding(testCase : InvalidAddressEncodingTestCase) {
-  let program = Array.fromVarArray(VarArray.repeat<Nat8>(0, testCase.programSize));
+  let program = VarArray.repeat<Nat8>(0, testCase.programSize).toArray();
   switch (Segwit.encode(testCase.hrp, { version = testCase.version; program })) {
     case (# ok(_)) {
       Runtime.trap("Encode succeeds on invalid input.");
