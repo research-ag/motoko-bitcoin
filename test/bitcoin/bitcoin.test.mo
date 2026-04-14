@@ -1,15 +1,16 @@
-import Bitcoin "../../src/bitcoin/Bitcoin";
-import Types "../../src/bitcoin/Types";
-import Script "../../src/bitcoin/Script";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+
 import Address "../../src/bitcoin/Address";
-import Wif "../../src/bitcoin/Wif";
-import TestUtils "../TestUtils";
-import Hex "../Hex";
+import Bitcoin "../../src/bitcoin/Bitcoin";
 import BitcoinTestTools "./bitcoinTestTools";
-import Array "mo:base/Array";
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
-import Blob "mo:base/Blob";
+import Hex "../Hex";
+import Script "../../src/bitcoin/Script";
+import TestUtils "../TestUtils";
+import Types "../../src/bitcoin/Types";
+import Wif "../../src/bitcoin/Wif";
 
 let runTest = TestUtils.runTestWithDefaults;
 
@@ -424,7 +425,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -449,7 +450,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -466,7 +467,7 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
           };
         };
         case _ {
-          Debug.trap("Failed to decode test case");
+          Runtime.trap("Failed to decode test case");
         };
       };
     },
@@ -492,12 +493,12 @@ func testSignTransaction(testCase : SignTransactionTestCase) {
   ) {
     case (#ok tx, true, #ok data) {
       assert (tx.txInputs.size() == expectedInputs.size());
-      for (i in Iter.range(0, expectedInputs.size() - 1)) {
+      for (i in Nat.range(0, expectedInputs.size())) {
         assert (tx.txInputs[i].prevOutput.txid == expectedInputs[i].txid);
         assert (tx.txInputs[i].prevOutput.vout == expectedInputs[i].vout);
       };
       assert (tx.txOutputs.size() == testCase.expectedOutputs.size());
-      for (i in Iter.range(0, testCase.expectedOutputs.size() - 1)) {
+      for (i in Nat.range(0, testCase.expectedOutputs.size())) {
         assert (tx.txOutputs[i].amount == testCase.expectedOutputs[i].amount);
         assert (tx.txOutputs[i].scriptPubKey == expectedOutputs[i].script);
       };

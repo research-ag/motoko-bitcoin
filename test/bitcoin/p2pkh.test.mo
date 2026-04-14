@@ -1,9 +1,10 @@
-import Debug "mo:base/Debug";
-import Hash "../../src/Hash";
-import TestUtils "../TestUtils";
+import Runtime "mo:core/Runtime";
+
 import Curves "../../src/ec/Curves";
-import Script "../../src/bitcoin/Script";
+import Hash "../../src/Hash";
 import P2pkh "../../src/bitcoin/P2pkh";
+import Script "../../src/bitcoin/Script";
+import TestUtils "../TestUtils";
 import Types "../../src/bitcoin/Types";
 
 type AddressTestCase = {
@@ -68,7 +69,7 @@ func testP2pkhDecodeAddress(testCase : AddressTestCase) {
       assert (Hash.hash160(testCase.key) == publicKeyHash);
     };
     case (#err msg) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };
@@ -79,7 +80,7 @@ func testMakeScript(testCase : MakeScriptTestCase) {
       assert (testCase.expectedBytes == Script.toBytes(script));
     };
     case (#err msg) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };

@@ -1,9 +1,9 @@
+import Nat "mo:core/Nat";
 // @testmode wasi
 
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
-import Iter "mo:base/Iter";
-import Text "mo:base/Text";
+import VarArray "mo:core/VarArray";
+import Blob "mo:core/Blob";
+import Text "mo:core/Text";
 import Ripemd160 "../src/Ripemd160";
 import { test } "mo:test";
 
@@ -65,7 +65,7 @@ let testData : [(Text, [Nat8])] = [
     ]
   ),
   (
-    Text.fromIter(Array.init<Char>(1000000, 'a').vals()),
+    Text.fromIter(VarArray.repeat<Char>('a', 1000000).values()),
     // prettier-ignore
     [
       0x52, 0x78, 0x32, 0x43, 0xc1, 0x69, 0x7b, 0xdb, 0xe1, 0x6d, 0x37, 0xf9, 0x7f,
@@ -77,7 +77,7 @@ let testData : [(Text, [Nat8])] = [
 test(
   "quick hash",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
       let expected : [Nat8] = testData[i].1;
       let actual : [Nat8] = Ripemd160.hash(input);
@@ -91,7 +91,7 @@ test(
   "write and reset",
   func() {
     let digest : Ripemd160.Digest = Ripemd160.Digest();
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let input : [Nat8] = Blob.toArray(Text.encodeUtf8(testData[i].0));
       let expected : [Nat8] = testData[i].1;
 

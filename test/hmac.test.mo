@@ -1,7 +1,9 @@
-import Blob "mo:base/Blob";
-import Iter "mo:base/Iter";
-import Hmac "../src/Hmac";
+import Blob "mo:core/Blob";
+import Nat "mo:core/Nat";
+
 import { test } "mo:test";
+
+import Hmac "../src/Hmac";
 
 let testData : [{
   desc : Text;
@@ -238,7 +240,7 @@ let testData : [{
 test(
   "SHA256",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let hmac : Hmac.Hmac = Hmac.sha256(testData[i].key);
       hmac.writeArray(testData[i].message);
 
@@ -251,7 +253,7 @@ test(
 test(
   "SHA512",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let hmac : Hmac.Hmac = Hmac.sha512(testData[i].key);
       hmac.writeArray(testData[i].message);
 

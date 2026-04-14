@@ -1,13 +1,14 @@
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
-import Nat8 "mo:base/Nat8";
-import Nat16 "mo:base/Nat16";
-import Nat32 "mo:base/Nat32";
-import Array "mo:base/Array";
-import Common "../Common";
+import Array "mo:core/Array";
+import List "mo:core/List";
+import { type Iter; type Result } "mo:core/Types";
+import Nat16 "mo:core/Nat16";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
+import VarArray "mo:core/VarArray";
+
 import ByteUtils "../ByteUtils";
-import Debug "mo:base/Debug";
-import Result "mo:base/Result";
+import Common "../Common";
 
 module Script {
   let maxNat8 = 0xff;
@@ -166,7 +167,7 @@ module Script {
 
   // Convert given opcode to its byte representation.
   func encodeOpcode(opcode : Opcode) : Nat8 {
-    return switch (opcode) {
+    switch (opcode) {
       case (#OP_0) {
         0x00;
       };
@@ -309,14 +310,14 @@ module Script {
         0xb2;
       };
       case _ {
-        Debug.trap(debug_show ("Unsupported opcode", opcode));
+        Runtime.trap(debug_show ("Unsupported opcode", opcode));
       };
     };
   };
 
   // Decode given opcode id.
   func decodeOpcode(id : Nat8) : ?Opcode {
-    return do ? {
+    do ? {
       switch id {
         case 0x4c {
           #OP_PUSHDATA1;
@@ -488,7 +489,7 @@ module Script {
   // script size from data. Reading size is required when deserializing scripts
   // that were serialized as part of transactions. If readSize is false, will
   // read all bytes in data.
-  public func fromBytes(data : Iter.Iter<Nat8>, readSize : Bool) : Result.Result<Script, Text> {
+  public func fromBytes(data : Iter<Nat8>, readSize : Bool) : Result<Script, Text> {
     let size = if (readSize) {
       switch (ByteUtils.readVarint(data)) {
         case (?size) {
@@ -510,7 +511,7 @@ module Script {
     // There is no trivial way of estimating the number of instructions
     // expected to be read. Thus, will assume 5, which is the p2pkh script
     // expected to be the common scenario.
-    let instructionsBuf = Buffer.Buffer<Instruction>(5);
+    let instructionsBuf = List.empty<Instruction>();
     // Keep traack of total bytes read to not go beyond size if it was set.
     var totalReadCount : Nat = 0;
     let opPushData1 : Nat8 = encodeOpcode(#OP_PUSHDATA1);
@@ -521,7 +522,7 @@ module Script {
         if (encodedVal < opPushData1) {
           // Everything below OP_PUSHDATA1 is treated as the size of data to
           // read next.
-          let dataSize = Nat8.toNat(encodedVal);
+          let dataSize = encodedVal.toNat();
           totalReadCount += dataSize;
           (#data(ByteUtils.read(data, dataSize, false)!));
         } else {
@@ -535,19 +536,19 @@ module Script {
       let readResult = do ? {
         switch (instruction) {
           case (?(#opcode(#OP_PUSHDATA1))) {
-            let dataSize = Nat8.toNat(ByteUtils.readOne(data)!);
+            let dataSize = ByteUtils.readOne(data)!.toNat();
             totalReadCount += dataSize + 1;
             instructionsBuf.add(#opcode(#OP_PUSHDATA1));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
           case (?(#opcode(#OP_PUSHDATA2))) {
-            let dataSize = Nat16.toNat(ByteUtils.readLE16(data)!);
+            let dataSize = ByteUtils.readLE16(data)!.toNat();
             totalReadCount += dataSize + 2;
             instructionsBuf.add(#opcode(#OP_PUSHDATA2));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
           };
           case (?(#opcode(#OP_PUSHDATA4))) {
-            let dataSize = Nat32.toNat(ByteUtils.readLE32(data)!);
+            let dataSize = ByteUtils.readLE32(data)!.toNat();
             totalReadCount += dataSize + 4;
             instructionsBuf.add(#opcode(#OP_PUSHDATA4));
             instructionsBuf.add(#data(ByteUtils.read(data, dataSize, false)!));
@@ -556,7 +557,7 @@ module Script {
             instructionsBuf.add(instruction);
           };
           case (null) {
-            return #err("Could not decode opcode: " # Nat8.toText(encodedVal));
+            return #err("Could not decode opcode: " # encodedVal.toText());
           };
         };
       };
@@ -576,15 +577,15 @@ module Script {
     if (readSize and totalReadCount < size) {
       return #err "Truncated script.";
     };
-    return #ok(Buffer.toArray(instructionsBuf));
+    return #ok(instructionsBuf.toArray());
   };
 
   // Serialize given script to bytes.
   public func toBytes(script : Script) : [Nat8] {
-    let buf : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(script.size());
-    let opPushData1 : Nat = Nat8.toNat(encodeOpcode(#OP_PUSHDATA1));
+    let buf = List.empty<Nat8>();
+    let opPushData1 : Nat = encodeOpcode(#OP_PUSHDATA1).toNat();
 
-    for (instruction in script.vals()) {
+    for (instruction in script.values()) {
       switch (instruction) {
         case (#opcode(opcode)) {
           buf.add(encodeOpcode(opcode));
@@ -597,23 +598,23 @@ module Script {
             buf.add(Nat8.fromIntWrap(data.size()));
           } else if (data.size() <= maxNat16) {
             // Data for OP_PUSHDATA2.
-            let sizeData = Array.init<Nat8>(2, 0);
+            let sizeData = VarArray.repeat<Nat8>(0, 2);
             Common.writeLE16(sizeData, 0, Nat16.fromIntWrap(data.size()));
-            for (item in sizeData.vals()) {
+            for (item in sizeData.values()) {
               buf.add(item);
             };
           } else if (data.size() <= maxNat32) {
             // Data for OP_PUSHDATA4.
-            let sizeData = Array.init<Nat8>(4, 0);
+            let sizeData = VarArray.repeat<Nat8>(0, 4);
             Common.writeLE32(sizeData, 0, Nat32.fromIntWrap(data.size()));
-            for (item in sizeData.vals()) {
+            for (item in sizeData.values()) {
               buf.add(item);
             };
           } else {
-            Debug.trap("Data too long to encode.");
+            Runtime.trap("Data too long to encode.");
           };
           // Copy data into buffer.
-          for (item in data.vals()) {
+          for (item in data.values()) {
             buf.add(item);
           };
         };
@@ -628,7 +629,7 @@ module Script {
         if (i < encodedBufSize.size()) {
           encodedBufSize[i];
         } else {
-          buf.get(i - encodedBufSize.size());
+          buf.at(i - encodedBufSize.size() : Nat);
         };
       },
     );

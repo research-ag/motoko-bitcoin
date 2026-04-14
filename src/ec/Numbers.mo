@@ -1,5 +1,5 @@
-import Buffer "mo:base/Buffer";
-import Array "mo:base/Array";
+import Array "mo:core/Array";
+import List "mo:core/List";
 
 module {
   // Extended Euclidean Algorithm.
@@ -14,7 +14,7 @@ module {
   // Convert given number to binary represented as an array of Bool in reverse
   // order.
   public func toBinaryReversed(a : Nat) : [Bool] {
-    let bitsBuffer = Buffer.Buffer<Bool>(256);
+    let bitsBuffer = List.empty<Bool>();
     var number : Nat = a;
 
     while (number != 0) {
@@ -22,7 +22,7 @@ module {
       number /= 2;
     };
 
-    return Buffer.toArray(bitsBuffer);
+    return bitsBuffer.toArray();
   };
 
   // Convert given number to binary represented as an array of Bool.
@@ -39,7 +39,7 @@ module {
   // Compute the Non-adjacent form representiation of the given integer.
   public func toNaf(n : Int) : [Int] {
     var input : Int = n;
-    let output = Buffer.Buffer<Int>(256);
+    let output = List.empty<Int>();
 
     while (input != 0) {
       if (input % 2 != 0) {
@@ -55,6 +55,6 @@ module {
       input /= 2;
     };
 
-    return Buffer.toArray(output);
+    return output.toArray();
   };
 };

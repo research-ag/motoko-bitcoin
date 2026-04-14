@@ -1,13 +1,16 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+
+import { expect; test } "mo:test";
+
 import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
-import Debug "mo:base/Debug";
 import Fp "../../src/ec/Fp";
 import P2tr "../../src/bitcoin/P2tr";
-import Result "mo:base/Result";
 import Script "../../src/bitcoin/Script";
-import { expect; test } "mo:test";
 
 let bip340_key_byte_len : Nat = 32;
 
@@ -24,8 +27,8 @@ test(
   },
 );
 
-func assert_tweak_res_eq(expected : Result.Result<Fp.Fp, Text>, computed : Result.Result<Fp.Fp, Text>) {
-  type Res = Result.Result<Fp.Fp, Text>;
+func assert_tweak_res_eq(expected : Result<Fp.Fp, Text>, computed : Result<Fp.Fp, Text>) {
+  type Res = Result<Fp.Fp, Text>;
   func show(a : Res) : Text = switch (a) {
     case (#ok(tweak)) { debug_show (tweak.value) };
     case (#err(text)) { text };
@@ -52,7 +55,7 @@ test(
     let hash : [Nat8] = [121, 89, 72, 255, 55, 49, 57, 37, 229, 20, 144, 247, 94, 100, 207, 182, 103, 190, 68, 196, 13, 225, 177, 166, 254, 123, 145, 71, 129, 171, 15, 191];
     expect.nat(hash.size()).equal(32);
 
-    let computed_tweak : Result.Result<Fp.Fp, Text> = P2tr.tweakFromKeyAndHash(internal_key, hash);
+    let computed_tweak : Result<Fp.Fp, Text> = P2tr.tweakFromKeyAndHash(internal_key, hash);
 
     assert_tweak_res_eq(computed_tweak, #ok expected_tweak);
   },
@@ -61,7 +64,7 @@ test(
 test(
   "tweak from key and hash: invalid input sizes",
   func() {
-    func array_of_size(size : Nat) : [Nat8] = Array.freeze(Array.init<Nat8>(size, 0));
+    func array_of_size(size : Nat) : [Nat8] = Array.repeat<Nat8>(0, size);
     let valid_key_or_hash = array_of_size(32);
 
     for (i in [0, 1, 31, 33].vals()) {
@@ -88,7 +91,7 @@ test(
         expect.bool(tweaked.is_even).isTrue();
       };
       case (#err(text)) {
-        Debug.trap(text);
+        Runtime.trap(text);
       };
     };
   },
@@ -104,7 +107,7 @@ test(
 
     let tweak = switch (P2tr.tweakFromKeyAndHash(public_key_bip340, merkle_root)) {
       case (#ok(tweak)) { tweak };
-      case (#err(text)) { Debug.trap(text) };
+      case (#err(text)) { Runtime.trap(text) };
     };
 
     let expected : [Nat8] = [100, 6, 11, 39, 35, 146, 187, 231, 26, 61, 8, 17, 107, 6, 180, 177, 70, 67, 14, 141, 245, 171, 35, 208, 45, 113, 164, 60, 177, 196, 74, 202];
@@ -120,7 +123,7 @@ test(
         expect.bool(tweaked.is_even).isFalse();
       };
       case (#err(text)) {
-        Debug.trap(text);
+        Runtime.trap(text);
       };
     };
   },

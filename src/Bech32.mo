@@ -1,13 +1,12 @@
-import Text "mo:base/Text";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Nat8 "mo:base/Nat8";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Blob "mo:base/Blob";
-import Buffer "mo:base/Buffer";
-import Result "mo:base/Result";
-import Char "mo:base/Char";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Char "mo:core/Char";
+import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
 
 module {
   public type Encoding = {
@@ -20,7 +19,7 @@ module {
 
   let CHAR_a : Nat8 = 0x61;
   let CHAR_A : Nat8 = 0x41;
-  let CHAR_z : Nat8 = 0x71;
+  let CHAR_z : Nat8 = 0x7a;
   let CHAR_Z : Nat8 = 0x5a;
   let CHAR_1 : Nat8 = 0x31;
   // Code for '!'.
@@ -51,43 +50,39 @@ module {
 
   // Encode input in Bech32 or a Bech32m.
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
+    assert hrp.size() > 0;
+
     // Ensure HRP is lowercase.
-    let encodedHrp : [Nat8] = Blob.toArray(Text.encodeUtf8(hrp));
-    for (val in encodedHrp.vals()) {
-      assert (val < CHAR_A or val > CHAR_Z);
+    for (c in hrp.chars()) {
+      assert (c <= '~' and c >= '!' and not (c <= 'Z' and c >= 'A'));
     };
 
+    // Calculate checksum
+    let encodedHrp : [Nat8] = hrp.encodeUtf8().toArray();
     let checksum : [Nat8] = createChecksum(encodedHrp, values, encoding);
 
     // hrp | '1' | values | checksum.
-    let totalSize = hrp.size() + 1 + values.size() + checksum.size();
-    let output : Buffer.Buffer<Char> = Buffer.Buffer<Char>(totalSize);
+    let output : [Char] = [
+      hrp.toArray(),
+      ['1'],
+      values.map(func x = charset[x.toNat()]),
+      checksum.map(func x = charset[x.toNat()]),
+    ].flatten();
 
-    for (val in Text.toIter(hrp)) {
-      output.add(val);
-    };
+    assert output.size() <= 90;
 
-    output.add('1');
-
-    for (val in values.vals()) {
-      output.add(charset[Nat8.toNat(val)]);
-    };
-    for (val in checksum.vals()) {
-      output.add(charset[Nat8.toNat(val)]);
-    };
-
-    return Text.fromIter(output.vals());
+    return Text.fromArray(output);
   };
 
   // Decode given text as Bech32 or Bech32m.
-  public func decode(input : Text) : Result.Result<DecodeResult, Text> {
+  public func decode(input : Text) : Result<DecodeResult, Text> {
     // Locate the '1' separator.
     var separatorIndex : Nat = 0;
     var lowercase : Bool = false;
     var uppercase : Bool = false;
-    let inputData : [Nat8] = Blob.toArray(Text.encodeUtf8(input));
+    let inputData : [Nat8] = input.encodeUtf8().toArray();
 
-    for (i in Iter.range(0, inputData.size() - 1)) {
+    for (i in Nat.range(0, inputData.size())) {
       let c : Nat8 = inputData[i];
 
       if (c == CHAR_1) {
@@ -99,7 +94,7 @@ module {
       };
 
       if (not isInRange(c)) {
-        return #err("Found unexpected character: " # toText(c));
+        return #err("Found unexpected character: " # c.toText());
       };
 
     };
@@ -113,44 +108,39 @@ module {
       input.size() > 90 or separatorIndex == 0 or
       separatorIndex + 7 > input.size()
     ) {
-      return #err("Bad separator position: " # (Nat.toText(separatorIndex)));
+      return #err("Bad separator position: " # (separatorIndex.toText()));
     };
 
-    // Split into HRP and data.
-    let hrpBuffer : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(separatorIndex);
-    let valuesBuffer : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      input.size() - 1 - separatorIndex
+    // Extract HRP
+    let hrp = inputData.sliceToArray(0, separatorIndex).map(toLower);
+
+    // Extract value data
+    var error : ?Nat8 = null;
+    let values = inputData.sliceToArray(separatorIndex + 1, inputData.size()).map(
+      func(c) {
+        let mappedVal : Nat8 = reverseCharset[c.toNat()];
+        if (mappedVal == 255) error := ?c;
+        mappedVal;
+      }
     );
 
-    for (i in Iter.range(0, separatorIndex - 1)) {
-      hrpBuffer.add(toLower(inputData[i]));
+    // Return parsing error
+    switch (error) {
+      case (?c) return #err("Invalid character found: " # c.toText());
+      case null {};
     };
-
-    for (i in Iter.range(separatorIndex + 1, inputData.size() - 1)) {
-      let c : Nat8 = inputData[i];
-      let mappedVal : Nat8 = reverseCharset[Nat8.toNat(c)];
-
-      if (mappedVal == 255) {
-        return #err("Invalid character found: " # toText(c));
-      };
-      valuesBuffer.add(mappedVal);
-    };
-    let values : [Nat8] = Buffer.toArray(valuesBuffer);
-    let hrp : [Nat8] = Buffer.toArray(hrpBuffer);
 
     return switch (
       verifyChecksum(hrp, values),
-      Text.decodeUtf8(Blob.fromArray(hrp)),
+      Blob.fromArray(hrp).decodeUtf8(),
     ) {
       case (#err(msg), _) {
         #err(msg);
       };
       case (#ok(encodingType), ?hrp) {
-        // Remove checksum from data.
-        for (i in Iter.range(0, 5)) {
-          ignore (valuesBuffer.removeLast());
-        };
-        return #ok(encodingType, hrp, Buffer.toArray(valuesBuffer));
+        // Strip the 6 checksum values from the end of the data.
+        let output = values.sliceToArray(0, -6);
+        return #ok(encodingType, hrp, output);
       };
       case _ {
         #err("Failed to decode HRP.");
@@ -164,21 +154,20 @@ module {
   func expandHrp(hrp : [Nat8]) : [Nat8] {
     let hrpSize = hrp.size();
     let outputSize = hrpSize * 2 + 1;
-    let output = Array.init<Nat8>(outputSize, 0);
+    let output = VarArray.repeat<Nat8>(0, outputSize);
 
-    var i : Nat = 0;
-    for (currHrp in hrp.vals()) {
+    for (i in hrp.keys()) {
+      let currHrp = hrp[i];
       output[i] := currHrp >> 5;
       output[i + hrpSize + 1] := currHrp & 0x1f;
-      i += 1;
     };
 
-    return Array.freeze(output);
+    return Array.fromVarArray(output);
   };
 
   // Constant value associated to the given encoding.
   func encodingConstant(encoding : Encoding) : Nat32 {
-    return switch (encoding) {
+    switch (encoding) {
       case (#BECH32) {
         1;
       };
@@ -194,55 +183,31 @@ module {
 
     // Merge expandedHrp and data arrays and append 6 zeroes to get
     // [expandedHrp..., data..., 0, 0, 0, 0, 0, 0].
-    let polyModValues : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      expandedHrp.size() + data.size() + 6
-    );
+    let polyModValues : [Nat8] = [
+      expandedHrp,
+      data,
+      [0, 0, 0, 0, 0, 0] : [Nat8],
+    ].flatten();
 
-    for (val in expandedHrp.vals()) {
-      polyModValues.add(val);
-    };
-    for (val in data.vals()) {
-      polyModValues.add(val);
-    };
-
-    // Pad with 6 zeros.
-    for (_ in Iter.range(0, 5)) {
-      polyModValues.add(0);
-    };
-
-    let mod : Nat32 = polymod(Buffer.toArray(polyModValues)) ^ encodingConstant(encoding);
+    let mod : Nat32 = polymod(polyModValues) ^ encodingConstant(encoding);
 
     // Convert the 5-bit groups in mod to checksum data.
     return Array.tabulate<Nat8>(
       6,
       func(i) {
         Nat8.fromIntWrap(
-          Nat32.toNat(
-            (mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31
-          )
+          ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat()
         );
       },
     );
   };
 
   // Verify the checksum for the given bech32 data.
-  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result.Result<Encoding, Text> {
+  func verifyChecksum(hrp : [Nat8], values : [Nat8]) : Result<Encoding, Text> {
 
     let expandedHrp : [Nat8] = expandHrp(hrp);
 
-    // Merge expandedHrp and values arrays.
-    let polyModValues : Buffer.Buffer<Nat8> = Buffer.Buffer<Nat8>(
-      expandedHrp.size() + values.size()
-    );
-
-    for (val in expandedHrp.vals()) {
-      polyModValues.add(val);
-    };
-    for (val in values.vals()) {
-      polyModValues.add(val);
-    };
-
-    let check : Nat32 = polymod(Buffer.toArray(polyModValues));
+    let check : Nat32 = polymod(expandedHrp.concat(values));
 
     return if (check == encodingConstant(#BECH32)) {
       #ok(#BECH32);
@@ -259,9 +224,9 @@ module {
   func polymod(values : [Nat8]) : Nat32 {
     var c : Nat32 = 1;
 
-    for (value in values.vals()) {
-      let c0 : Nat8 = Nat8.fromIntWrap(Nat32.toNat(c >> 25));
-      c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(Nat8.toNat(value));
+    for (value in values.values()) {
+      let c0 : Nat8 = Nat8.fromIntWrap((c >> 25).toNat());
+      c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(value.toNat());
 
       // Conditionally add in coefficients of the generator polynomial.
       if (c0 & 1 > 0) c ^= 0x3b6a57b2;
@@ -276,36 +241,21 @@ module {
   // If input corresponds to code of uppercase character, return code of its
   // lowercase version.
   func toLower(c : Nat8) : Nat8 {
-    return if (c >= CHAR_A and c <= CHAR_Z) {
+    if (c >= CHAR_A and c <= CHAR_Z) {
       c + 0x20;
     } else {
       c;
     };
   };
 
-  // Convert given byte value to Text.
-  func toText(c : Nat8) : Text {
-    return Char.toText(
-      Char.fromNat32(
-        Nat32.fromNat(
-          Nat8.toNat(c)
-        )
-      )
-    );
-  };
-
   // Returns true if given code corresponds to a lowercase character.
-  func isLowercase(c : Nat8) : Bool {
-    return (c >= CHAR_a and c <= CHAR_z);
-  };
+  func isLowercase(c : Nat8) : Bool { (c >= CHAR_a and c <= CHAR_z) };
 
   // Returns true if given code corresponds to an uppercase character.
-  func isUppercase(c : Nat8) : Bool {
-    return (c >= CHAR_A and c <= CHAR_Z);
-  };
+  func isUppercase(c : Nat8) : Bool { (c >= CHAR_A and c <= CHAR_Z) };
 
   // Check if given code is within range of human-readable characters.
   func isInRange(c : Nat8) : Bool {
-    return (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
+    (c >= CHARS_LOWLIMIT and c <= CHARS_HIGHLIMIT);
   };
 };

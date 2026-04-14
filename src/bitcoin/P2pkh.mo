@@ -1,16 +1,13 @@
-import Types "./Types";
-import EcdsaTypes "../ecdsa/Types";
-import Ecdsa "../ecdsa/Ecdsa";
+import Array "mo:core/Array";
+import { type Result; type Iter } "mo:core/Types";
+
 import Base58Check "../Base58Check";
-import Sha256 "mo:sha2/Sha256";
-import Ripemd160 "../Ripemd160";
-import PublicKey "../ecdsa/Publickey";
 import ByteUtils "../ByteUtils";
+import Ecdsa "../ecdsa/Ecdsa";
+import EcdsaTypes "../ecdsa/Types";
 import Hash "../Hash";
 import Script "./Script";
-import Array "mo:base/Array";
-import Result "mo:base/Result";
-import Iter "mo:base/Iter";
+import Types "./Types";
 
 module {
   type PublicKey = Ecdsa.PublicKey;
@@ -23,8 +20,8 @@ module {
   };
 
   // Create P2PKH script for the given P2PKH address.
-  public func makeScript(address : Address) : Result.Result<Script, Text> {
-    return switch (decodeAddress(address)) {
+  public func makeScript(address : Address) : Result<Script, Text> {
+    switch (decodeAddress(address)) {
       case (#ok { network = _; publicKeyHash }) {
         #ok([
           #opcode(#OP_DUP),
@@ -42,7 +39,7 @@ module {
 
   // Map given network to its id.
   func encodeVersion(network : Types.Network) : Nat8 {
-    return switch (network) {
+    switch (network) {
       case (#Mainnet) {
         0x00;
       };
@@ -74,11 +71,11 @@ module {
   };
 
   // Decode P2PKH hash into its network and public key hash components.
-  public func decodeAddress(address : Address) : Result.Result<DecodedAddress, Text> {
+  public func decodeAddress(address : Address) : Result<DecodedAddress, Text> {
 
-    let decoded : Iter.Iter<Nat8> = switch (Base58Check.decode(address)) {
+    let decoded : Iter<Nat8> = switch (Base58Check.decode(address)) {
       case (?b58decoded) {
-        b58decoded.vals();
+        b58decoded.values();
       };
       case _ {
         return #err("Could not base58 decode address.");

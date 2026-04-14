@@ -1,12 +1,14 @@
+import Nat "mo:core/Nat";
 // Hex decoding imported from
 // https://github.com/aviate-labs/encoding.mo/blob/main/src/Hex.mo to
 // facilitate in testing.
-import Array "mo:base/Array";
-import Char "mo:base/Char";
-import Iter "mo:base/Iter";
-import Nat8 "mo:base/Nat8";
-import Result "mo:base/Result";
-import Text "mo:base/Text";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+import Char "mo:core/Char";
+import Iter "mo:core/Iter";
+import Nat8 "mo:core/Nat8";
+import { type Result } "mo:core/Types";
+import Text "mo:core/Text";
 
 module {
   private let base : Nat8 = 16;
@@ -44,7 +46,7 @@ module {
   public type Hex = Text;
   // Converts the given hexadecimal character to its corresponding binary format.
   // NOTE: a hexadecimal char is just an 4-bit natural number.
-  public func decodeChar(c : Char) : Result.Result<Nat8, Text> {
+  public func decodeChar(c : Char) : Result<Nat8, Text> {
     for (i in hex.keys()) {
       let h = hex[i];
       if (h == c or h == toLower(c)) {
@@ -55,11 +57,11 @@ module {
   };
 
   // Converts the given hexidecimal text to its corresponding binary format.
-  public func decode(t : Hex) : Result.Result<[Nat8], Text> {
+  public func decode(t : Hex) : Result<[Nat8], Text> {
     let t_ = if (t.size() % 2 == 0) { t } else { "0" # t };
     let cs = Iter.toArray(t_.chars());
-    let ns = Array.init<Nat8>(t_.size() / 2, 0);
-    for (i in Iter.range(0, ns.size() - 1)) {
+    let ns = VarArray.repeat<Nat8>(0, t_.size() / 2);
+    for (i in Nat.range(0, ns.size())) {
       let j : Nat = i * 2;
       switch (decodeChar(cs[j])) {
         case (#err(e)) { return #err(e) };
@@ -73,6 +75,6 @@ module {
         };
       };
     };
-    #ok(Array.freeze(ns));
+    #ok(Array.fromVarArray(ns));
   };
 };

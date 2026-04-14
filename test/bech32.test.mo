@@ -1,9 +1,11 @@
-import Bech32 "../src/Bech32";
-import Debug "mo:base/Debug";
-import Iter "mo:base/Iter";
-import Text "mo:base/Text";
-import Char "mo:base/Char";
+import Char "mo:core/Char";
+import Nat "mo:core/Nat";
+import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
+
 import { test } "mo:test";
+
+import Bech32 "../src/Bech32";
 
 let validChecksumBech32 : [Text] = [
   "A12UEL5L",
@@ -74,7 +76,7 @@ let invalidChecksumBech32m : [Text] = [
 ];
 
 func toLower(text : Text) : Text {
-  return Text.map(
+  Text.map(
     text,
     func(c) {
       if (c >= 'A' and c <= 'Z') {
@@ -93,10 +95,10 @@ func testValidChecksumBech32(testCase : Text) {
       assert (toLower(testCase) == toLower(encoded));
     };
     case (#ok(_)) {
-      Debug.trap("Wrong encoding.");
+      Runtime.trap("Wrong encoding.");
     };
     case (#err(msg)) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };
@@ -109,10 +111,10 @@ func testValidChecksumBech32m(testCase : Text) {
       assert (toLower(testCase) == toLower(encoded));
     };
     case (#ok(_)) {
-      Debug.trap("Wrong encoding.");
+      Runtime.trap("Wrong encoding.");
     };
     case (#err(msg)) {
-      Debug.trap(msg);
+      Runtime.trap(msg);
     };
   };
 };
@@ -121,7 +123,7 @@ func testValidChecksumBech32m(testCase : Text) {
 func testInvalidChecksumBech32(testCase : Text) {
   switch (Bech32.decode(testCase)) {
     case (#ok(_)) {
-      Debug.trap("Parsed invalid string.");
+      Runtime.trap("Parsed invalid string.");
     };
     case (#err(_)) {
       // Test passed.
@@ -133,7 +135,7 @@ func testInvalidChecksumBech32(testCase : Text) {
 func testInvalidChecksumBech32m(testCase : Text) {
   switch (Bech32.decode(testCase)) {
     case (#ok(_)) {
-      Debug.trap("Parsed invalid string.");
+      Runtime.trap("Parsed invalid string.");
     };
     case (#err(_)) {
       // Test passed.
@@ -144,7 +146,7 @@ func testInvalidChecksumBech32m(testCase : Text) {
 test(
   "valid bech32",
   func() {
-    for (i in Iter.range(0, validChecksumBech32.size() - 1)) {
+    for (i in Nat.range(0, validChecksumBech32.size())) {
       testValidChecksumBech32(validChecksumBech32[i]);
     };
   },
@@ -153,7 +155,7 @@ test(
 test(
   "valid bech32m",
   func() {
-    for (i in Iter.range(0, validChecksumBech32m.size() - 1)) {
+    for (i in Nat.range(0, validChecksumBech32m.size())) {
       testValidChecksumBech32m(validChecksumBech32m[i]);
     };
   },
@@ -162,7 +164,7 @@ test(
 test(
   "invalid bech32",
   func() {
-    for (i in Iter.range(0, invalidChecksumBech32.size() - 1)) {
+    for (i in Nat.range(0, invalidChecksumBech32.size())) {
       testInvalidChecksumBech32(invalidChecksumBech32[i]);
     };
   },
@@ -171,7 +173,7 @@ test(
 test(
   "invalid bech32m",
   func() {
-    for (i in Iter.range(0, invalidChecksumBech32m.size() - 1)) {
+    for (i in Nat.range(0, invalidChecksumBech32m.size())) {
       testInvalidChecksumBech32m(invalidChecksumBech32m[i]);
     };
   },

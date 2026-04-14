@@ -1,16 +1,18 @@
-import Jacobi "../../src/ec/Jacobi";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Int "mo:core/Int";
+import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
+import VarArray "mo:core/VarArray";
+
+import Common "../../src/Common";
 import Curves "../../src/ec/Curves";
 import Fp "../../src/ec/Fp";
-import Types "../../src/bitcoin/Types";
-import Common "../../src/Common";
-import Wif "../../src/bitcoin/Wif";
+import Jacobi "../../src/ec/Jacobi";
 import P2pkh "../../src/bitcoin/P2pkh";
 import PublicKey "../../src/ecdsa/Publickey";
-import Debug "mo:base/Debug";
-import Array "mo:base/Array";
-import Nat8 "mo:base/Nat8";
-import Blob "mo:base/Blob";
-import Int "mo:base/Int";
+import Types "../../src/bitcoin/Types";
+import Wif "../../src/bitcoin/Wif";
 
 module {
   public type Signature = { r : Nat; s : Nat };
@@ -18,7 +20,7 @@ module {
 
   // Helper function for operating modulo the curve order.
   func Fr(value : Nat) : Fp.Fp {
-    return Fp.Fp(value, curve.r);
+    Fp.Fp(value, curve.r);
   };
 
   // Helper class for assisting with signing with predetermined nonces.
@@ -35,7 +37,7 @@ module {
         bitcoinPrivateKey;
       };
       case (#err msg) {
-        Debug.trap(msg);
+        Runtime.trap(msg);
       };
     };
 
@@ -48,10 +50,10 @@ module {
       );
       nextNonce += 1;
 
-      let encodedOutput : [var Nat8] = Array.init<Nat8>(64, 0);
+      let encodedOutput : [var Nat8] = VarArray.repeat<Nat8>(0, 64);
       Common.writeBE256(encodedOutput, 0, signature.r);
       Common.writeBE256(encodedOutput, 32, signature.s);
-      return Blob.fromArray(Array.freeze(encodedOutput));
+      return Blob.fromArray(Array.fromVarArray(encodedOutput));
     };
 
     // Returns the public key associated to `bitcoinPrivateKey`.
@@ -71,7 +73,7 @@ module {
           );
         };
         case (#err msg) {
-          Debug.trap(msg);
+          Runtime.trap(msg);
         };
       };
     };
@@ -95,13 +97,13 @@ module {
       case (#point(x, _y, curve)) {
         let r = x.value;
         if (r == 0) {
-          Debug.trap("r = 0, use different rand.");
+          Runtime.trap("r = 0, use different rand.");
         };
         let s = Fr(rand).inverse().mul(
           Fr(h + sk * r)
         );
         if (s.value == 0) {
-          Debug.trap("s = 0, use different rand.");
+          Runtime.trap("s = 0, use different rand.");
         };
 
         let finalS : Int = if (s.value > curve.r / 2) {
@@ -112,7 +114,7 @@ module {
         return { r = r; s = Int.abs(finalS) };
       };
       case (#infinity(_)) {
-        Debug.trap("Computed infinity point, use different rand.");
+        Runtime.trap("Computed infinity point, use different rand.");
       };
     };
   };

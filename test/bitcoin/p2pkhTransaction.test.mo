@@ -1,13 +1,14 @@
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Runtime "mo:core/Runtime";
+
+import Curves "../../src/ec/Curves";
+import P2pkh "../../src/bitcoin/P2pkh";
+import TestUtils "../TestUtils";
 import Transaction "../../src/bitcoin/Transaction";
 import TxInput "../../src/bitcoin/TxInput";
 import TxOutput "../../src/bitcoin/TxOutput";
-import P2pkh "../../src/bitcoin/P2pkh";
 import Witness "../../src/bitcoin/Witness";
-import Curves "../../src/ec/Curves";
-import TestUtils "../TestUtils";
-import Debug "mo:base/Debug";
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 
 type TxInput = {
   txid : [Nat8];
@@ -58,13 +59,13 @@ func makeTransaction(testCase : TransactionTestCase) : Transaction.Transaction {
           TxOutput.TxOutput(output.amount, script);
         };
         case (#err msg) {
-          Debug.trap(msg);
+          Runtime.trap(msg);
         };
       };
     },
   );
 
-  let emptyWitness = Array.thaw<Witness.Witness>([]);
+  let emptyWitness = Array.toVarArray<Witness.Witness>([]);
 
   return Transaction.Transaction(testCase.version, txIns, txOuts, emptyWitness, 0);
 };

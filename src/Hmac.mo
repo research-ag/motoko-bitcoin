@@ -1,5 +1,6 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+
 import Sha256 "mo:sha2/Sha256";
 import Sha512 "mo:sha2/Sha512";
 
@@ -35,7 +36,7 @@ module {
 
   // Construct HMAC from an arbitrary digest function.
   public func new(key : [Nat8], digestFactory : DigestFactory) : Hmac {
-    return HmacImpl(key, digestFactory);
+    HmacImpl(key, digestFactory);
   };
 
   // Construct HMAC from the given digest function:
@@ -66,7 +67,7 @@ module {
         // key' = H(key) + [0x00] * (blockSize - key.size())
         let keyDigest : Digest = digestFactory.create();
         keyDigest.writeArray(key);
-        let keyHash = Blob.toArray(keyDigest.sum());
+        let keyHash = keyDigest.sum().toArray();
 
         Array.tabulate<Nat8>(
           blockSize,
@@ -81,20 +82,18 @@ module {
       };
 
       // H(key' ^ outerPad)
-      let outerPaddedKey = Array.map<Nat8, Nat8>(
-        blockSizedKey,
+      let outerPaddedKey = blockSizedKey.map<Nat8, Nat8>(
         func(byte) {
           byte ^ outerPad;
-        },
+        }
       );
       outerDigest.writeArray(outerPaddedKey);
 
       // H(key' ^ innerPad)
-      let innerPaddedKey = Array.map<Nat8, Nat8>(
-        blockSizedKey,
+      let innerPaddedKey = blockSizedKey.map<Nat8, Nat8>(
         func(byte) {
           byte ^ innerPad;
-        },
+        }
       );
       innerDigest.writeArray(innerPaddedKey);
     };
@@ -104,7 +103,7 @@ module {
     };
 
     public func sum() : Blob {
-      let innerHash = Blob.toArray(innerDigest.sum());
+      let innerHash = innerDigest.sum().toArray();
       outerDigest.writeArray(innerHash);
       return outerDigest.sum();
     };

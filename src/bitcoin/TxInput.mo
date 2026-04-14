@@ -1,16 +1,17 @@
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Blob "mo:base/Blob";
-import Result "mo:base/Result";
-import Script "./Script";
-import Common "../Common";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import { type Iter; type Result } "mo:core/Types";
+import VarArray "mo:core/VarArray";
+
 import ByteUtils "../ByteUtils";
+import Common "../Common";
+import Script "./Script";
 import Types "./Types";
 
 module {
   // Deserialize a TxInput  from bytes with layout:
   // | prevTxId | prevTx output index | script | sequence |
-  public func fromBytes(data : Iter.Iter<Nat8>) : Result.Result<TxInput, Text> {
+  public func fromBytes(data : Iter<Nat8>) : Result<TxInput, Text> {
     let (prevTxId, prevTxOutputIndex, script, sequence) = switch (
       ByteUtils.read(data, 32, false),
       ByteUtils.readLE32(data),
@@ -56,10 +57,10 @@ module {
       let encodedScript = Script.toBytes(script);
       // Total size based on output layout.
       let totalSize = 32 + 4 + encodedScript.size() + 4;
-      let output = Array.init<Nat8>(totalSize, 0);
+      let output = VarArray.repeat<Nat8>(0, totalSize);
       var outputOffset = 0;
 
-      let prevTxId = Blob.toArray(prevOutput.txid);
+      let prevTxId = prevOutput.txid.toArray();
 
       // Write prevTxId.
       Common.copy(output, outputOffset, prevTxId, 0, 32);
@@ -78,7 +79,7 @@ module {
       outputOffset += 4;
 
       assert (outputOffset == output.size());
-      return Array.freeze(output);
+      return Array.fromVarArray(output);
     };
   };
 };

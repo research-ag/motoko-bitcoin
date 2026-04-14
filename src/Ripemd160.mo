@@ -1,6 +1,8 @@
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Nat64 "mo:base/Nat64";
+import Array "mo:core/Array";
+import Nat "mo:core/Nat";
+import Nat64 "mo:core/Nat64";
+import VarArray "mo:core/VarArray";
+
 import Common "./Common";
 
 module {
@@ -12,8 +14,8 @@ module {
   };
 
   public class Digest() {
-    private let s : [var Nat32] = Array.init<Nat32>(5, 0);
-    private let buf : [var Nat8] = Array.init<Nat8>(64, 0);
+    private let s : [var Nat32] = VarArray.repeat<Nat32>(0, 5);
+    private let buf : [var Nat8] = VarArray.repeat<Nat8>(0, 64);
     private var bytes : Nat64 = 0;
 
     private func initialize() {
@@ -712,19 +714,19 @@ module {
     };
 
     public func write(data : [Nat8]) {
-      var bufsize : Nat = Nat64.toNat(bytes % 64);
+      var bufsize : Nat = (bytes % 64).toNat();
       var transformOffset : Nat = 0;
 
       // Check if the incoming data is enough to fill the buffer
       // which might have data from a previous call.
       if (bufsize > 0 and (bufsize + data.size() >= 64)) {
         // Fill the buffer, and process it.
-        for (i in Iter.range(bufsize, 63)) {
+        for (i in Nat.range(bufsize, 64)) {
           buf[i] := data[i - bufsize];
         };
         // Add the count of processed bytes.
         bytes += 64 - Nat64.fromNat(bufsize);
-        transform(Array.freeze(buf), 0);
+        transform(Array.fromVarArray(buf), 0);
         // All data in the buffer has been processed, reset buffer data size
         // point transformOffset to index of not-yet processed data.
         transformOffset += 64 - bufsize;
@@ -740,33 +742,33 @@ module {
         transformOffset += 64;
       };
       // Push any not-yet processed data to buffer.
-      for (i in Iter.range(transformOffset, data.size() - 1)) {
+      for (i in Nat.range(transformOffset, data.size())) {
         buf[bufsize + i - transformOffset] := data[i];
         bytes += 1;
       };
     };
 
     public func sum() : [Nat8] {
-      let pad : [var Nat8] = Array.init<Nat8>(
-        Nat64.toNat(1 + ((119 - (bytes % 64)) % 64)),
+      let pad : [var Nat8] = VarArray.repeat<Nat8>(
         0,
+        (1 + ((119 - (bytes % 64)) % 64)).toNat(),
       );
       pad[0] := 0x80;
 
-      let sizedesc : [var Nat8] = Array.init<Nat8>(8, 0);
+      let sizedesc : [var Nat8] = VarArray.repeat<Nat8>(0, 8);
       Common.writeLE64(sizedesc, 0, bytes << 3);
 
-      write(Array.freeze(pad));
-      write(Array.freeze(sizedesc));
+      write(Array.fromVarArray(pad));
+      write(Array.fromVarArray(sizedesc));
 
-      let hash : [var Nat8] = Array.init<Nat8>(20, 0);
+      let hash : [var Nat8] = VarArray.repeat<Nat8>(0, 20);
       Common.writeLE32(hash, 0, s[0]);
       Common.writeLE32(hash, 4, s[1]);
       Common.writeLE32(hash, 8, s[2]);
       Common.writeLE32(hash, 12, s[3]);
       Common.writeLE32(hash, 16, s[4]);
 
-      return Array.freeze(hash);
+      return Array.fromVarArray(hash);
     };
   };
 };

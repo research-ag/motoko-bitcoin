@@ -1,4 +1,5 @@
-import P "mo:base/Prelude";
+import Runtime "mo:core/Runtime";
+
 import Field "./Field";
 
 module {
@@ -12,7 +13,7 @@ module {
       let inverse : ?Nat = Field.inverse(value, n);
       switch inverse {
         case (null) {
-          P.unreachable();
+          Runtime.trap("unreachable");
         };
         case (?inverse) {
           return Fp(inverse, n);
@@ -43,7 +44,7 @@ module {
 
     // Compute sqrt(value) mod n.
     public func sqrt() : Fp {
-      return Fp(Field.pow(value, (n + 1) / 4, n), n);
+      Fp(Field.pow(value, (n + 1) / 4, n), n);
     };
   };
 };

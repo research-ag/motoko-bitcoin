@@ -1,8 +1,10 @@
 // @testmode wasi
 
-import Bip32 "../src/Bip32";
-import Iter "mo:base/Iter";
+import Iter "mo:core/Iter";
+
 import { test } "mo:test";
+
+import Bip32 "../src/Bip32";
 
 type DerivationVector = {
   xPublicKey : Text;
@@ -32,6 +34,14 @@ let derivationVectors : [DerivationVector] = [
           "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSw"
           # "FMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr"
         );
+      },
+      {
+        derivePath = #text "m//0/1";
+        serialized = null;
+      },
+      {
+        derivePath = #text "m/0//1";
+        serialized = null;
       },
       {
         derivePath = #text "m/0/1/2";
@@ -109,6 +119,25 @@ let derivationVectors : [DerivationVector] = [
           "xpub6H7WkJf547AiSwAbX6xsm8Bmq9M9P1Gjequ5SipsjipWmtXSyp4C3uwzewed"
           # "GEgAMsDy4jEvNTWtxLyqqHY9C12gaBmgUdk2CGmwachwnWK"
         );
+      },
+      {
+        derivePath = #text "m/0/2147483647";
+        serialized = ?(
+          "xpub6ASAVgeWMg4pmutghzHG3BohahjwNwPmy2DgM6W9wGegtPrvNgjBwuZRD7hS"
+          # "DFhYfunq8vDgwG4ah1gVzZysgp3UsKz7VNjCnSUJJ5T4fdD"
+        );
+      },
+      {
+        derivePath = #text "m/0/2147483648";
+        serialized = null;
+      },
+      {
+        derivePath = #text "m/0/4294967295";
+        serialized = null;
+      },
+      {
+        derivePath = #text "m/0/4294967296";
+        serialized = null;
       },
     ];
   },
@@ -234,7 +263,7 @@ func testDerivations(vector : DerivationVector) {
     (
       do ? {
         assert (xPublicKey!.serialize() == vector.xPublicKey);
-        for ({ derivePath; serialized } in vector.derivations.vals()) {
+        for ({ derivePath; serialized } in vector.derivations.values()) {
           switch (xPublicKey!.derivePath(derivePath)) {
             case (null) {
               assert (serialized == null);
@@ -268,7 +297,7 @@ func testRelativeDerivation(vector : DerivationVector) {
     (
       do ? {
         assert (xPublicKey!.serialize() == vector.xPublicKey);
-        for ({ derivePath; serialized } in vector.derivations.vals()) {
+        for ({ derivePath; serialized } in vector.derivations.values()) {
           switch (xPublicKey!.derivePath(derivePath)) {
             case (null) {
               assert (serialized == null);

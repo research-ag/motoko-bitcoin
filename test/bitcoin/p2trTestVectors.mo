@@ -1,16 +1,18 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
-import Debug "mo:base/Debug";
-import Nat32 "mo:base/Nat32";
-import Types "../../src/bitcoin/Types";
-import TxInput "../../src/bitcoin/TxInput";
-import Script "../../src/bitcoin/Script";
-import P2tr "../../src/bitcoin/P2tr";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import Nat32 "mo:core/Nat32";
+import Runtime "mo:core/Runtime";
+import VarArray "mo:core/VarArray";
+
 import P2pkh "../../src/bitcoin/P2pkh";
-import TxOutput "../../src/bitcoin/TxOutput";
-import Transaction "../../src/bitcoin/Transaction";
-import Witness "../../src/bitcoin/Witness";
+import P2tr "../../src/bitcoin/P2tr";
+import Script "../../src/bitcoin/Script";
 import Segwit "../../src/Segwit";
+import Transaction "../../src/bitcoin/Transaction";
+import TxInput "../../src/bitcoin/TxInput";
+import TxOutput "../../src/bitcoin/TxOutput";
+import Types "../../src/bitcoin/Types";
+import Witness "../../src/bitcoin/Witness";
 
 // The expected sighashes in this test were generated using the Rust `bitcoin` crate.
 module {
@@ -86,7 +88,7 @@ module {
         },
       ];
 
-      Array.subArray(Array.reverse(utxos), 0, numInputs);
+      Array.sliceToArray(Array.reverse(utxos), 0, numInputs);
     };
 
     public func inputs() : [TxInput.TxInput] {
@@ -113,7 +115,7 @@ module {
           script;
         };
         case (#err(msg)) {
-          Debug.trap("Could not create script from address: " # msg);
+          Runtime.trap("Could not create script from address: " # msg);
         };
       };
     };
@@ -124,7 +126,7 @@ module {
           program;
         };
         case (#err msg) {
-          Debug.trap("Could not decode address: " # msg);
+          Runtime.trap("Could not decode address: " # msg);
         };
       };
 
@@ -133,7 +135,7 @@ module {
           script;
         };
         case (#err(msg)) {
-          Debug.trap("Could not create leaf script from public key: " # msg);
+          Runtime.trap("Could not create leaf script from public key: " # msg);
         };
       };
     };
@@ -144,7 +146,7 @@ module {
           script;
         };
         case (#err(msg)) {
-          Debug.trap("Could not create script from address: " # msg);
+          Runtime.trap("Could not create script from address: " # msg);
         };
       };
       [
@@ -164,7 +166,7 @@ module {
         version,
         inputs(),
         outputs(),
-        Array.init(numInputs, Witness.EMPTY_WITNESS),
+        VarArray.repeat(Witness.EMPTY_WITNESS, numInputs),
         0,
       );
     };
@@ -172,7 +174,7 @@ module {
     public func keySpendSigHashes() : [[Nat8]] {
       // `moc` doesn't let us use `transaction` as a name with [M0097] error.
       let _transaction : Transaction.Transaction = transaction();
-      let sigHashes = Array.init<[Nat8]>(numInputs, []);
+      let sigHashes = VarArray.repeat<[Nat8]>([], numInputs);
       for (inputIndex in sigHashes.keys()) {
         let sigHash = _transaction.createTaprootKeySpendSignatureHash(
           amounts(),
@@ -181,13 +183,13 @@ module {
         );
         sigHashes[inputIndex] := sigHash;
       };
-      Array.freeze(sigHashes);
+      sigHashes.toArray();
     };
 
     public func scriptSpendSigHashes() : [[Nat8]] {
       // `moc` doesn't let us use `transaction` as a name with [M0097] error.
       let _transaction : Transaction.Transaction = transaction();
-      let sigHashes = Array.init<[Nat8]>(numInputs, []);
+      let sigHashes = VarArray.repeat<[Nat8]>([], numInputs);
       let leafHash = P2tr.leafHash(leafScript());
       for (inputIndex in sigHashes.keys()) {
         let sigHash = _transaction.createTaprootScriptSpendSignatureHash(
@@ -198,20 +200,20 @@ module {
         );
         sigHashes[inputIndex] := sigHash;
       };
-      Array.freeze(sigHashes);
+      sigHashes.toArray();
     };
 
     public func keySpendSignedTransaction() : Transaction.Transaction {
       // `moc` doesn't let us use same names for functions and local vars with [M0097] error.
-      let _sigHashes = Array.thaw<[Nat8]>(keySpendSigHashes());
+      let _sigHashes = Array.toVarArray<[Nat8]>(keySpendSigHashes());
       let _transaction : Transaction.Transaction = transaction();
 
       let signatureByteLength = 64;
 
       for (inputIndex in _sigHashes.keys()) {
         assert _sigHashes[inputIndex].size() <= signatureByteLength;
-        let padding = Array.freeze(Array.init<Nat8>(signatureByteLength - _sigHashes[inputIndex].size(), 0));
-        _sigHashes[inputIndex] := Array.append(_sigHashes[inputIndex], padding);
+        let padding = Array.repeat<Nat8>(0, signatureByteLength - _sigHashes[inputIndex].size());
+        _sigHashes[inputIndex] := Array.concat(_sigHashes[inputIndex], padding);
         // Store the signature in the transaction.
         //
         // The signature in the tests is construced by padding the hash

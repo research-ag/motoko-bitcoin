@@ -1,7 +1,9 @@
-import FpBase "./Fp";
-import Curves "./Curves";
+import Array "mo:core/Array";
+import VarArray "mo:core/VarArray";
+
 import Common "../Common";
-import Array "mo:base/Array";
+import Curves "./Curves";
+import FpBase "./Fp";
 
 module {
   type Fp = FpBase.Fp;
@@ -12,7 +14,7 @@ module {
 
   // Check if the given point is valid.
   public func isOnCurve(point : Point) : Bool {
-    return switch point {
+    switch point {
       case (#infinity(_)) {
         true;
       };
@@ -28,7 +30,7 @@ module {
 
   // Check if the two given affine points are equal.
   public func isEqual(point1 : Point, point2 : Point) : Bool {
-    return switch (point1, point2) {
+    switch (point1, point2) {
       case (#infinity(curve1), #infinity(curve2)) {
         Curves.isEqual(curve1, curve2);
       };
@@ -107,14 +109,14 @@ module {
       case (#point(x, y, _)) {
         return if (compressed) {
           let startByte : Nat8 = if (y.value % 2 == 0) 0x02 else 0x03;
-          let output = Array.init<Nat8>(33, startByte);
+          let output = VarArray.repeat<Nat8>(startByte, 33);
           Common.writeBE256(output, 1, x.value);
-          Array.freeze(output);
+          Array.fromVarArray(output);
         } else {
-          let output = Array.init<Nat8>(65, 0x04);
+          let output = VarArray.repeat<Nat8>(0x04, 65);
           Common.writeBE256(output, 1, x.value);
           Common.writeBE256(output, 33, y.value);
-          Array.freeze(output);
+          Array.fromVarArray(output);
         };
       };
     };

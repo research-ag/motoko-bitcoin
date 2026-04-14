@@ -1,9 +1,10 @@
-import Text "mo:base/Text";
-import Char "mo:base/Char";
-import Nat8 "mo:base/Nat8";
-import Nat32 "mo:base/Nat32";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
+import Array "mo:core/Array";
+import Char "mo:core/Char";
+import { type Iter } "mo:core/Types";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
 
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
@@ -37,7 +38,7 @@ module {
 
   // Convert the given Base58 input to Base256.
   public func decode(input : Text) : [Nat8] {
-    let inputIter : Iter.Iter<Char> = input.chars();
+    let inputIter : Iter<Char> = input.chars();
     var current : ?Char = inputIter.next();
     var spaces : Nat = 0;
 
@@ -75,7 +76,7 @@ module {
     // Base256, which is approximately 733 / 1000. The input size is multiplied
     // by this value and rounded up to get the total Base256 required size.
     let size : Nat = (input.size() - zeroes - spaces) * 733 / 1000 + 1;
-    let b256 : [var Nat8] = Array.init<Nat8>(size, 0x00);
+    let b256 : [var Nat8] = VarArray.repeat<Nat8>(0x00, size);
 
     label l loop {
       switch (current) {
@@ -86,16 +87,14 @@ module {
           break l;
         };
         case (?value) {
-          var carry : Nat = Nat8.toNat(
-            mapBase58[Nat32.toNat(Char.toNat32(value))]
-          );
+          var carry : Nat = mapBase58[value.toNat32().toNat()].toNat();
           assert (carry != 0xff);
 
           var i : Nat = 0;
           var b256Pointer : Nat = b256.size() - 1;
           label reverseIter while (carry != 0 or i < length) {
 
-            carry += 58 * Nat8.toNat(b256[b256Pointer]);
+            carry += 58 * b256[b256Pointer].toNat();
             b256[b256Pointer] := Nat8.fromNat(carry % 256);
             carry /= 256;
             i += 1;
@@ -162,15 +161,15 @@ module {
     // Allocate enough space in big-endian base58 representation:
     // log(256) / log(58), rounded up.
     let size : Nat = (input.size() - inputPointer) * 138 / 100 + 1;
-    let b58 : [var Nat8] = Array.init<Nat8>(size, 0);
+    let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
 
     while (inputPointer < input.size()) {
-      var carry : Nat = Nat8.toNat(input[inputPointer]);
+      var carry : Nat = input[inputPointer].toNat();
       var i : Nat = 0;
       // Apply "b58 = b58 * 256 + ch".
       var b58Pointer : Nat = b58.size() - 1;
       label reverseIter while (carry != 0 or i < length) {
-        carry += 256 * Nat8.toNat((b58[b58Pointer]));
+        carry += 256 * (b58[b58Pointer]).toNat();
         b58[b58Pointer] := Nat8.fromNat(carry % 58);
         carry /= 58;
         i += 1;
@@ -194,10 +193,10 @@ module {
         if (i < zeroes) {
           Char.fromNat32(0x31);
         } else {
-          base58Alphabet[Nat8.toNat(b58[i + b58Pointer - zeroes])];
+          base58Alphabet[b58[i + b58Pointer - zeroes].toNat()];
         };
       },
     );
-    return Text.fromIter(output.vals());
+    return Text.fromIter(output.values());
   };
 };

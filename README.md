@@ -13,6 +13,20 @@ Run all tests
 mops test --mode wasi
 ```
 
+## Benchmarks
+
+This project includes performance benchmarks using the `bench` mops package.
+
+Run all benchmarks locally:
+
+```sh
+mops bench
+```
+
+Tips:
+- Use your shell's filtering (or bench runner options) to focus on specific suites, e.g., base58 or bitcoin tx.
+- Benchmark files are located under the `bench/` directory and cover encoding (Base58/Base58Check/Bech32), hashing and HMAC, BIP32 derivation, EC arithmetic, ECDSA verification, and Bitcoin transaction building and sighash.
+
 ## Usage
 
 Base58:

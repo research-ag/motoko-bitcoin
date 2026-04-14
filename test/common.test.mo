@@ -1,7 +1,10 @@
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
-import Common "../src/Common";
+import Array "mo:core/Array";
+import Nat "mo:core/Nat";
+import VarArray "mo:core/VarArray";
+
 import { test } "mo:test";
+
+import Common "../src/Common";
 
 let testData : [{
   offset : Nat;
@@ -63,7 +66,7 @@ let testData : [{
 test(
   "readBE32",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
       let expected = currentData.nat32;
@@ -76,7 +79,7 @@ test(
 test(
   "readBE64",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
       let expected = currentData.nat64;
@@ -89,7 +92,7 @@ test(
 test(
   "readBE128",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
       let expected = currentData.nat128;
@@ -102,7 +105,7 @@ test(
 test(
   "readBE256",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
       let expected = currentData.nat256;
@@ -115,18 +118,18 @@ test(
 test(
   "writeBE32",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
-      let output = Array.init<Nat8>(4, 0);
+      let output = VarArray.repeat<Nat8>(0, 4);
       let expected = Array.tabulate<Nat8>(
         4,
         func(i) {
-          return currentData.big32[offset + i];
+          currentData.big32[offset + i];
         },
       );
       Common.writeBE32(output, 0, currentData.nat32);
-      assert (expected == Array.freeze(output));
+      assert (expected == Array.fromVarArray(output));
     };
   },
 );
@@ -134,18 +137,18 @@ test(
 test(
   "writeBE64",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
-      let output = Array.init<Nat8>(8, 0);
+      let output = VarArray.repeat<Nat8>(0, 8);
       let expected = Array.tabulate<Nat8>(
         8,
         func(i) {
-          return currentData.big64[offset + i];
+          currentData.big64[offset + i];
         },
       );
       Common.writeBE64(output, 0, currentData.nat64);
-      assert (expected == Array.freeze(output));
+      assert (expected == Array.fromVarArray(output));
     };
   },
 );
@@ -153,18 +156,18 @@ test(
 test(
   "writeBE128",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
-      let output = Array.init<Nat8>(16, 0);
+      let output = VarArray.repeat<Nat8>(0, 16);
       let expected = Array.tabulate<Nat8>(
         16,
         func(i) {
-          return currentData.big128[offset + i];
+          currentData.big128[offset + i];
         },
       );
       Common.writeBE128(output, 0, currentData.nat128);
-      assert (expected == Array.freeze(output));
+      assert (expected == Array.fromVarArray(output));
     };
   },
 );
@@ -172,24 +175,24 @@ test(
 test(
   "writeBE256",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let currentData = testData[i];
       let offset = currentData.offset;
-      let output = Array.init<Nat8>(32, 0);
+      let output = VarArray.repeat<Nat8>(0, 32);
       let expected = Array.tabulate<Nat8>(
         32,
         func(i) {
-          return currentData.big256[offset + i];
+          currentData.big256[offset + i];
         },
       );
       Common.writeBE256(output, 0, currentData.nat256);
-      assert (expected == Array.freeze(output));
+      assert (expected == Array.fromVarArray(output));
     };
   },
 );
 
 test(
-  "textToNat",
+  "Nat.fromText",
   func() {
     let testData : [(Text, ?Nat)] = [
       ("0", ?0),
@@ -210,10 +213,12 @@ test(
       ("5/", null),
       (":5", null),
       ("5:", null),
+      ("'5", null),
+      ("5'", null),
     ];
 
-    for ((input, output) in testData.vals()) {
-      let actual = Common.textToNat(input);
+    for ((input, output) in testData.values()) {
+      let actual = Nat.fromText(input);
       assert (actual == output);
     };
   },

@@ -1,6 +1,8 @@
-import Iter "mo:base/Iter";
-import Base58Check "../src/Base58Check";
+import Nat "mo:core/Nat";
+
 import { test } "mo:test";
+
+import Base58Check "../src/Base58Check";
 
 let testData : [(?[Nat8], Text)] = [
   (
@@ -156,7 +158,7 @@ let testData : [(?[Nat8], Text)] = [
 test(
   "encode",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       ignore (
         do ? {
           let input = testData[i].0!;
@@ -172,7 +174,7 @@ test(
 test(
   "decode",
   func() {
-    for (i in Iter.range(0, testData.size() - 1)) {
+    for (i in Nat.range(0, testData.size())) {
       let input = testData[i].1;
       let expected = testData[i].0;
       let actual = Base58Check.decode(input);

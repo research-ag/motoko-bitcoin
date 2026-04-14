@@ -1,14 +1,15 @@
 // @testmode wasi
 
-import PublicKey "../../src/ecdsa/Publickey";
-import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
-import Hex "../Hex";
-import TestUtils "../TestUtils";
+import Blob "mo:core/Blob";
+import Runtime "mo:core/Runtime";
+
 import Curves "../../src/ec/Curves";
-import Ecdsa "../../src/ecdsa/Ecdsa";
 import Der "../../src/ecdsa/Der";
-import Debug "mo:base/Debug";
-import Blob "mo:base/Blob";
+import Ecdsa "../../src/ecdsa/Ecdsa";
+import Hex "../Hex";
+import PublicKey "../../src/ecdsa/Publickey";
+import TestUtils "../TestUtils";
+import WycheproofEcdsaTestVectors "./wycheproofEcdsaSecp256k1TestVectors";
 
 type WycheproofEcdsaTestCase = WycheproofEcdsaTestVectors.WycheproofEcdsaTestCase;
 let runTest = TestUtils.runTestWithDefaults;
@@ -22,7 +23,7 @@ func testWycheproofEcdsa(testCase : WycheproofEcdsaTestCase) {
     case (#ok(key), #ok(sig), #ok(msg)) { (key, sig, msg) };
     case _ {
       // Converting data from hex failed.
-      Debug.trap("Could not decode test data.");
+      Runtime.trap("Could not decode test data.");
     };
   };
 

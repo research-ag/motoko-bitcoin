@@ -1,16 +1,18 @@
-import Buffer "mo:base/Buffer";
-import Blob "mo:base/Blob";
-import Iter "mo:base/Iter";
-import Array "mo:base/Array";
-import Result "mo:base/Result";
-import Nat32 "mo:base/Nat32";
-import Nat8 "mo:base/Nat8";
-import Transaction "./Transaction";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import List "mo:core/List";
+import { type Result } "mo:core/Types";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Nat8 "mo:core/Nat8";
+import VarArray "mo:core/VarArray";
+
+import Address "./Address";
 import Der "../ecdsa/Der";
 import Script "./Script";
+import Transaction "./Transaction";
 import TxInput "./TxInput";
 import TxOutput "./TxOutput";
-import Address "./Address";
 import Types "./Types";
 import Witness "./Witness";
 
@@ -44,17 +46,17 @@ module {
     destinations : [(Types.Address, Satoshi)],
     changeAddress : Types.Address,
     fees : Satoshi,
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     if (version != 1 and version != 2) {
-      return #err("Unexpected version number: " # Nat32.toText(version));
+      return #err("Unexpected version number: " # version.toText());
     };
 
     // Collect TxOutputs, making space for a potential extra output for change.
-    let txOutputs = Buffer.Buffer<TxOutput.TxOutput>(destinations.size() + 1);
+    let txOutputs = List.empty<TxOutput.TxOutput>();
     var totalSpend : Satoshi = fees;
 
-    for (dest in destinations.vals()) {
+    for (dest in destinations.values()) {
       let (destAddr, destAmount) = dest;
       switch (Address.scriptPubKey(destAddr)) {
         case (#ok destScriptPubKey) {
@@ -70,9 +72,9 @@ module {
     // Select which UTXOs to spend. For now, we spend the first available
     // UTXOs.
     var availableFunds : Satoshi = 0;
-    let txInputs : Buffer.Buffer<TxInput.TxInput> = Buffer.Buffer(utxos.size());
+    let txInputs = List.empty<TxInput.TxInput>();
 
-    label UtxoLoop for (utxo in utxos.vals()) {
+    label UtxoLoop for (utxo in utxos.values()) {
       availableFunds += utxo.value;
       txInputs.add(TxInput.TxInput(utxo.outpoint, defaultSequence));
 
@@ -104,9 +106,9 @@ module {
     return #ok(
       Transaction.Transaction(
         version,
-        Buffer.toArray(txInputs),
-        Buffer.toArray(txOutputs),
-        Array.init<Witness.Witness>(txInputs.size(), Witness.EMPTY_WITNESS),
+        txInputs.toArray(),
+        txOutputs.toArray(),
+        VarArray.repeat<Witness.Witness>(Witness.EMPTY_WITNESS, txInputs.size()),
         0,
       )
     );
@@ -121,7 +123,7 @@ module {
     transaction : Transaction.Transaction,
     ecdsaProxy : EcdsaProxy,
     derivationPath : [Blob],
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     // Obtain the scriptPubKey of the source address which is also the
     // scriptPubKey of the Tx output being spent.
@@ -140,9 +142,7 @@ module {
               Blob.fromArray(sighash),
               derivationPath,
             );
-            let encodedSignature : [Nat8] = Blob.toArray(
-              Der.encodeSignature(signature)
-            );
+            let encodedSignature : [Nat8] = Der.encodeSignature(signature).toArray();
             // Append the sighash type.
             let encodedSignatureWithSighashType = Array.tabulate<Nat8>(
               encodedSignature.size() + 1,
@@ -150,7 +150,7 @@ module {
                 if (n < encodedSignature.size()) {
                   encodedSignature[n];
                 } else {
-                  Nat8.fromNat(Nat32.toNat(Types.SIGHASH_ALL));
+                  Nat8.fromNat(Types.SIGHASH_ALL.toNat());
                 };
               },
             );
@@ -159,12 +159,12 @@ module {
             // ScriptSig = <Signature> <Public Key>.
             [
               #data encodedSignatureWithSighashType,
-              #data(Blob.toArray(ecdsaProxy.publicKey().0)),
+              #data(ecdsaProxy.publicKey().0.toArray()),
             ];
           },
         );
         // Assign ScriptSigs to their associated TxInputs.
-        for (i in Iter.range(0, scriptSigs.size() - 1)) {
+        for (i in Nat.range(0, scriptSigs.size())) {
           transaction.txInputs[i].script := scriptSigs[i];
         };
 
@@ -196,7 +196,7 @@ module {
     destinations : [(Types.Address, Satoshi)],
     changeAddress : Types.Address,
     fees : Satoshi,
-  ) : Result.Result<Transaction.Transaction, Text> {
+  ) : Result<Transaction.Transaction, Text> {
 
     return switch (
       buildTransaction(

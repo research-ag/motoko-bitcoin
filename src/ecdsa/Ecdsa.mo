@@ -1,9 +1,11 @@
+import Blob "mo:core/Blob";
+
+import Sha256 "mo:sha2/Sha256";
+
+import Common "../Common";
 import Fp "../ec/Fp";
 import Jacobi "../ec/Jacobi";
-import Common "../Common";
 import Types "./Types";
-import Blob "mo:base/Blob";
-import Sha256 "mo:sha2/Sha256";
 
 module {
   public type Signature = Types.Signature;
@@ -30,7 +32,7 @@ module {
     };
 
     let (r, s) : (Fp.Fp, Fp.Fp) = (Fp.Fp(signature.r, curve.r), Fp.Fp(signature.s, curve.r));
-    let h : Fp.Fp = Fp.Fp(Common.readBE256(Blob.toArray(Sha256.fromArray(#sha256, message)), 0), curve.r);
+    let h : Fp.Fp = Fp.Fp(Common.readBE256(Sha256.fromArray(#sha256, message).toArray(), 0), curve.r);
 
     let sInverse : Fp.Fp = s.inverse();
     let a : Fp.Fp = h.mul(sInverse);

@@ -1,16 +1,19 @@
-import Common "./Common";
-import Hmac "./Hmac";
-import Hash "./Hash";
-import Base58Check "./Base58Check";
-import Curves "./ec/Curves";
-import Jacobi "./ec/Jacobi";
+import Array "mo:core/Array";
+import Blob "mo:core/Blob";
+import { type Iter } "mo:core/Types";
+import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
+import Nat32 "mo:core/Nat32";
+import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
 import Affine "./ec/Affine";
-import Array "mo:base/Array";
-import Iter "mo:base/Iter";
-import Text "mo:base/Text";
-import Buffer "mo:base/Buffer";
-import Nat32 "mo:base/Nat32";
-import Blob "mo:base/Blob";
+import Base58Check "./Base58Check";
+import Common "./Common";
+import Curves "./ec/Curves";
+import Hash "./Hash";
+import Hmac "./Hmac";
+import Jacobi "./ec/Jacobi";
 
 module {
   public type Path = {
@@ -67,7 +70,7 @@ module {
           switch (parentPubKey) {
             case (?(#publicKeyData publicKeyData)) {
               let parentPubKeyHash = Hash.hash160(publicKeyData);
-              for (i in Iter.range(0, 3)) {
+              for (i in Nat.range(0, 4)) {
                 if (parentPubKeyHash[i] != fingerprint[i]) {
                   return null;
                 };
@@ -75,7 +78,7 @@ module {
             };
             case (?(#fingerprint parentPublicKeyFingerprint)) {
               if (parentPublicKeyFingerprint.size() > 0) {
-                for (i in Iter.range(0, 3)) {
+                for (i in Nat.range(0, 4)) {
                   if (parentPublicKeyFingerprint[i] != fingerprint[i]) {
                     return null;
                   };
@@ -129,19 +132,17 @@ module {
   };
 
   func isHardenedIndex(index : Nat32) : Bool {
-    return index >= 0x80000000; // 2**31
+    index >= 0x80000000 // 2**31
   };
 
   // Parses a Text path in the form "m/a/b/c/..." for unsigned integers
   // a,b,c,... and returns an array [a, b, c, ...]. Parsing fails and returns
   // null if input is not in the expected format or if it contains hardened
   // indices (e.g., m/0/1').
-  func arrayPathFromString(path : Text) : ?[Nat32] {
+  public func arrayPathFromString(path : Text) : ?[Nat32] {
     // Initial size most suitable for single-digit indices
-    let parsedPathBuffer : Buffer.Buffer<Nat32> = Buffer.Buffer(path.size() / 2);
 
-    let sanitized : Text = Text.replace(
-      path,
+    let sanitized : Text = path.replace(
       #predicate(
         func(c) {
           c == '\n' or c == ' ' or c == '\r';
@@ -150,33 +151,33 @@ module {
       "",
     );
 
-    let tokens : Iter.Iter<Text> = Text.tokens(sanitized, #char '/');
-    var first : Bool = true;
-
-    label tokensloop for (token in tokens) {
-      if (token == "m") {
-        if (first) {
-          first := false;
-          continue tokensloop;
-        };
-        return null;
-      };
-      // Find whether it is hardened
-      if (Text.contains(token, #char '\'')) {
-        return null;
-      };
-
-      switch (Common.textToNat(token)) {
-        case (?number) {
-          parsedPathBuffer.add(Nat32.fromNat(number));
-          first := false;
-        };
-        case (null) {
-          return null;
-        };
-      };
+    let trimmed : Text = switch (Text.stripStart(sanitized, #text "m/")) {
+      case (?t) t;
+      case (null) sanitized;
     };
-    return ?Buffer.toArray(parsedPathBuffer);
+
+    let tokens : Iter<Text> = trimmed.split(#char '/');
+
+    var valid = true;
+
+    let res = ?Array.fromIter(
+      tokens.map(
+        func(token) {
+          switch (Nat.fromText(token)) {
+            case (?number) {
+              if (number >= 2 ** 32) valid := false;
+              Nat32.fromIntWrap(number);
+            };
+            case (null) {
+              valid := false;
+              0 : Nat32;
+            };
+          };
+        }
+      )
+    );
+
+    if (valid) res else null;
   };
 
   // Representation of a BIP32 extended public key.
@@ -197,7 +198,7 @@ module {
     // Derive a child public key with path relative to this instance. Returns
     // null if path is #text and cannot be parsed.
     public func derivePath(path : Path) : ?ExtendedPublicKey {
-      return do ? {
+      do ? {
         // Normalize the given path as an array of indices.
         let pathArray : [Nat32] = switch (path) {
           case (#array path) {
@@ -217,7 +218,7 @@ module {
         );
 
         // Derive the hierarchy of child keys.
-        for (childIndex in pathArray.vals()) {
+        for (childIndex in pathArray.values()) {
           target := target.deriveChild(childIndex)!;
         };
         target;
@@ -235,12 +236,12 @@ module {
       // Compute HMAC with chaincode as the key and the serialized
       // parentPublicKey (33 bytes) concatenated with the serialized
       // index (4 bytes) as its data.
-      let hmacData : [var Nat8] = Array.init<Nat8>(33 + 4, 0x00);
+      let hmacData : [var Nat8] = VarArray.repeat<Nat8>(0x00, 33 + 4);
       Common.copy(hmacData, 0, key, 0, 33);
       Common.writeBE32(hmacData, 33, index);
       let hmacSha512 : Hmac.Hmac = Hmac.sha512(chaincode);
-      hmacSha512.writeArray(Array.freeze(hmacData));
-      let fullNode : [Nat8] = Blob.toArray(hmacSha512.sum());
+      hmacSha512.writeArray(Array.fromVarArray(hmacData));
+      let fullNode : [Nat8] = hmacSha512.sum().toArray();
 
       // Split HMAC output into two 32-byte sequences.
       let left : [Nat8] = Array.tabulate<Nat8>(
@@ -291,7 +292,7 @@ module {
     // Serialize the extended public key data into Base58 encoded string
     // following format dictated by BIP32 specification.
     public func serialize() : Text {
-      let result = Array.init<Nat8>(78, 0);
+      let result = VarArray.repeat<Nat8>(0, 78);
 
       Common.writeBE32(result, 0, publicPrefix);
 
@@ -315,7 +316,7 @@ module {
       Common.copy(result, 13, chaincode, 0, 32);
       Common.copy(result, 45, key, 0, key.size());
 
-      return Base58Check.encode(Array.freeze(result));
+      return Base58Check.encode(Array.fromVarArray(result));
     };
   };
 };

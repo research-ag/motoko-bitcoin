@@ -1,6 +1,6 @@
-import PublicKey "../../src/ecdsa/Publickey";
-import Curves "../../src/ec/Curves";
 import Affine "../../src/ec/Affine";
+import Curves "../../src/ec/Curves";
+import PublicKey "../../src/ecdsa/Publickey";
 import TestUtils "../TestUtils";
 
 type PublicKeyFromBytesTestCase = {
