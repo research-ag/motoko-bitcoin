@@ -1,6 +1,5 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Char "mo:core/Char";
 import Nat "mo:core/Nat";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
