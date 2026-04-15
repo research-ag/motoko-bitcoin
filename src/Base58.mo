@@ -1,7 +1,10 @@
 import Array "mo:core/Array";
+import Blob "mo:core/Blob";
 import Char "mo:core/Char";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
@@ -9,11 +12,11 @@ import VarArray "mo:core/VarArray";
 module {
   // All alphanumeric characters except for "0", "I", "O", and "l".
   // prettier-ignore
-  private let base58Alphabet : [Char] = [
-    '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
-    'H','J','K','L','M','N','P','Q','R','S','T','U','V','W','X','Y','Z',
-    'a','b','c','d','e','f','g','h','i','j','k','m','n','o','p','q','r',
-    's','t','u','v','w','x','y','z'
+  private let base58Alphabet : [Nat8] = [
+    49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71,
+    72, 74, 75, 76, 77, 78, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+    97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 109, 110, 111, 112, 113, 114,
+    115, 116, 117, 118, 119, 120, 121, 122
   ];
 
   // prettier-ignore
@@ -87,15 +90,15 @@ module {
           break l;
         };
         case (?value) {
-          var carry : Nat = mapBase58[value.toNat32().toNat()].toNat();
+          var carry : Nat32 = mapBase58[value.toNat32().toNat()].toNat16().toNat32();
           assert (carry != 0xff);
 
           var i : Nat = 0;
           var b256Pointer : Nat = b256.size() - 1;
           label reverseIter while (carry != 0 or i < length) {
 
-            carry += 58 * b256[b256Pointer].toNat();
-            b256[b256Pointer] := Nat8.fromNat(carry % 256);
+            carry += 58 * b256[b256Pointer].toNat16().toNat32();
+            b256[b256Pointer] := Nat8.fromNat((carry % 256).toNat());
             carry /= 256;
             i += 1;
 
@@ -164,13 +167,13 @@ module {
     let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
 
     while (inputPointer < input.size()) {
-      var carry : Nat = input[inputPointer].toNat();
+      var carry : Nat32 = input[inputPointer].toNat16().toNat32();
       var i : Nat = 0;
       // Apply "b58 = b58 * 256 + ch".
       var b58Pointer : Nat = b58.size() - 1;
       label reverseIter while (carry != 0 or i < length) {
-        carry += 256 * (b58[b58Pointer]).toNat();
-        b58[b58Pointer] := Nat8.fromNat(carry % 58);
+        carry += 256 * b58[b58Pointer].toNat16().toNat32();
+        b58[b58Pointer] := Nat8.fromNat((carry % 58).toNat());
         carry /= 58;
         i += 1;
         if (b58Pointer == 0) {
@@ -187,16 +190,19 @@ module {
     var b58Pointer : Nat = size - length;
     while (b58Pointer < b58.size() and b58[b58Pointer] == 0) { b58Pointer += 1 };
 
-    let output = Array.tabulate<Char>(
+    let outputBytes = Array.tabulate<Nat8>(
       zeroes + b58.size() - b58Pointer,
       func(i) {
         if (i < zeroes) {
-          Char.fromNat32(0x31);
+          0x31 : Nat8;
         } else {
           base58Alphabet[b58[i + b58Pointer - zeroes].toNat()];
         };
       },
     );
-    Text.fromIter(output.values());
+    switch (Blob.fromArray(outputBytes).decodeUtf8()) {
+      case (?t) t;
+      case null Runtime.trap("unreachable");
+    };
   };
 };

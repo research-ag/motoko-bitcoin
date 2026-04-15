@@ -1,5 +1,6 @@
 import List "mo:core/List";
 import Nat "mo:core/Nat";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
@@ -126,7 +127,7 @@ module {
     let maxv : Nat32 = (1 << to) - 1;
 
     for (value in data) {
-      let v : Nat32 = Nat32.fromIntWrap(value.toNat());
+      let v : Nat32 = value.toNat16().toNat32();
 
       if ((v >> from) != 0) {
         return #err("Invalid input value: " # value.toNat().toText());
