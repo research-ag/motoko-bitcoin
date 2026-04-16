@@ -38,6 +38,13 @@ module {
     255,255,255,255,255,255,255,255,
   ];
 
+  func arrayToText(arr : [Nat8]) : Text {
+    switch (Blob.fromArray(arr).decodeUtf8()) {
+      case (?t) t;
+      case null Runtime.trap("unreachable");
+    };
+  };
+
   // Convert the given Base58 input to Base256.
   public func decode(input_ : Text) : [Nat8] {
     let input : Blob = Text.encodeUtf8(input_);
@@ -222,9 +229,7 @@ module {
         };
       },
     );
-    switch (Blob.fromArray(outputBytes).decodeUtf8()) {
-      case (?t) t;
-      case null Runtime.trap("unreachable");
-    };
+
+    arrayToText(outputBytes);
   };
 };

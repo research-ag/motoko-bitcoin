@@ -17,6 +17,8 @@ module {
     reverse : Bool,
   ) : ?[Nat8] {
     do ? {
+      if (count == 0) return ?[];
+
       let readData : [var Nat8] = VarArray.repeat<Nat8>(0, count);
       if (reverse) {
         var nextReadIndex : Nat = count - 1;
