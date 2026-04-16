@@ -49,40 +49,73 @@ module {
     };
 
     // Skip and count leading '1's.
-    let start = pos;
-
+    var zeroes : Nat = 0;
     while (pos < inputSize and input[pos] == 0x31) {
+      zeroes += 1;
       pos += 1;
     };
-    let zeroes : Nat = pos - start;
 
-    // Compute how many bytes are needed for the Base256 representation. We
-    // need log(58) / log(256) of one byte to represent a Base58 digit in
-    // Base256, which is approximately 733 / 1000. The input size is multiplied
-    // by this value and rounded up to get the total Base256 required size.
-    let size : Nat = (inputSize - pos) * 733 / 1000 + 1;
+    // Find end of base58 payload (before trailing spaces).
+    var endPos = pos;
+    while (endPos < inputSize and input[endPos] != 0x20) {
+      endPos += 1;
+    };
+    let digitCount = endPos - pos;
+
+    // Allocate base256 buffer: log(58)/log(256) ≈ 733/1000.
+    let size : Nat = digitCount * 733 / 1000 + 1;
     let b256 : [var Nat16] = VarArray.repeat<Nat16>(0x00, size);
     var length : Nat = 0;
 
-    while (pos < inputSize and input[pos] != 0x20) {
+    // Process leading remainder digits (digitCount % 4) one at a time.
+    let remainder = digitCount % 4;
+    var rem : Nat = 0;
+    while (rem < remainder) {
       var carry : Nat16 = mapBase58[input[pos].toNat()];
       assert (carry != 0xff);
 
       var i : Nat = 0;
-      var b256Pointer : Nat = size - 1;
-      label reverseIter while (carry != 0 or i < length) {
-        carry +%= 58 * b256[b256Pointer];
-        b256[b256Pointer] := (carry & 0xff);
+      var j : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 58 * b256[j];
+        b256[j] := (carry & 0xff);
         carry >>= 8;
         i += 1;
-
-        if (b256Pointer == 0) break reverseIter;
-        b256Pointer -= 1;
+        if (j == 0) break inner;
+        j -= 1;
       };
 
       assert (carry == 0);
       length := i;
       pos += 1;
+      rem += 1;
+    };
+
+    // Process full batches of 4 digits: b256 = b256 * 58^4 + v.
+    // 58^4 = 11_316_496. Max carry = 58^4 * 256 = 2_897_022_976 < 2^32.
+    while (pos < endPos) {
+      let d0 : Nat32 = mapBase58[input[pos].toNat()].toNat32();
+      let d1 : Nat32 = mapBase58[input[pos + 1].toNat()].toNat32();
+      let d2 : Nat32 = mapBase58[input[pos + 2].toNat()].toNat32();
+      let d3 : Nat32 = mapBase58[input[pos + 3].toNat()].toNat32();
+      assert (d0 != 0xff and d1 != 0xff and d2 != 0xff and d3 != 0xff);
+
+      var carry : Nat32 = ((d0 * 58 + d1) * 58 + d2) * 58 + d3;
+
+      var i : Nat = 0;
+      var j : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 11_316_496 * b256[j].toNat32();
+        b256[j] := (carry & 0xff).toNat16();
+        carry >>= 8;
+        i += 1;
+        if (j == 0) break inner;
+        j -= 1;
+      };
+
+      assert (carry == 0);
+      length := i;
+      pos += 4;
     };
 
     // Skip trailing spaces.
@@ -94,23 +127,18 @@ module {
     assert (pos == inputSize);
 
     // Skip leading zeroes in base256 result.
-    var b256Pointer : Nat = size - length;
-    while (b256Pointer < b256.size() and b256[b256Pointer] == 0) {
-      b256Pointer += 1;
+    var start : Nat = size - length;
+    while (start < size and b256[start] == 0) {
+      start += 1;
     };
 
-    let output = Array.tabulate<Nat8>(
-      zeroes + b256.size() - b256Pointer,
+    Array.tabulate<Nat8>(
+      zeroes + size - start,
       func(i) {
-        if (i < zeroes) {
-          0x00;
-        } else {
-          b256[i + b256Pointer - zeroes].toNat8();
-        };
+        if (i < zeroes) 0x00
+        else b256[i + start - zeroes].toNat8();
       },
     );
-
-    output;
   };
 
   // Convert the given Base256 input to Base58.
