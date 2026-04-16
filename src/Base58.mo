@@ -20,7 +20,7 @@ module {
   ];
 
   // prettier-ignore
-  private let mapBase58 : [Nat8] = [
+  private let mapBase58 : [Nat16] = [
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255, 255, 0,
@@ -40,20 +40,17 @@ module {
   ];
 
   // Convert the given Base58 input to Base256.
-  public func decode(input : Text) : [Nat8] {
-    let inputIter : Iter<Char> = input.chars();
-    var current : ?Char = inputIter.next();
+  public func decode(input_ : Text) : [Nat8] {
+    let input = Text.encodeUtf8(input_);
+    let inputIter : Iter<Nat8> = input.values();
+    var current : ?Nat8 = inputIter.next();
     var spaces : Nat = 0;
 
     // Skip leading spaces
     label l loop {
       switch (current) {
-        case (?' ') {
-          spaces := spaces + 1;
-        };
-        case (_) {
-          break l;
-        };
+        case (?0x20) spaces += 1;
+        case (_) break l;
       };
       current := inputIter.next();
     };
@@ -64,12 +61,8 @@ module {
 
     label l loop {
       switch (current) {
-        case (?'1') {
-          zeroes := zeroes + 1;
-        };
-        case (_) {
-          break l;
-        };
+        case (?0x31) zeroes += 1;
+        case (_) break l;
       };
       current := inputIter.next();
     };
@@ -79,32 +72,26 @@ module {
     // Base256, which is approximately 733 / 1000. The input size is multiplied
     // by this value and rounded up to get the total Base256 required size.
     let size : Nat = (input.size() - zeroes - spaces) * 733 / 1000 + 1;
-    let b256 : [var Nat8] = VarArray.repeat<Nat8>(0x00, size);
+    let b256 : [var Nat16] = VarArray.repeat<Nat16>(0x00, size);
 
     label l loop {
       switch (current) {
-        case (?' ') {
-          break l;
-        };
-        case (null) {
-          break l;
-        };
+        case (?0x20) break l;
+        case (null) break l;
         case (?value) {
-          var carry : Nat32 = mapBase58[value.toNat32().toNat()].toNat16().toNat32();
+          var carry : Nat16 = mapBase58[value.toNat()];
           assert (carry != 0xff);
 
           var i : Nat = 0;
-          var b256Pointer : Nat = b256.size() - 1;
+          var b256Pointer : Nat = size - 1;
           label reverseIter while (carry != 0 or i < length) {
 
-            carry += 58 * b256[b256Pointer].toNat16().toNat32();
-            b256[b256Pointer] := Nat8.fromNat((carry % 256).toNat());
-            carry /= 256;
+            carry +%= 58 * b256[b256Pointer];
+            b256[b256Pointer] := (carry & 0xff);
+            carry >>= 8;
             i += 1;
 
-            if (b256Pointer == 0) {
-              break reverseIter;
-            };
+            if (b256Pointer == 0) break reverseIter;
             b256Pointer -= 1;
           };
 
@@ -118,10 +105,8 @@ module {
     // Skip trailing spaces.
     label l loop {
       switch (current) {
-        case (?' ') {};
-        case (_) {
-          break l;
-        };
+        case (?0x20) {};
+        case (_) break l;
       };
       current := inputIter.next();
     };
@@ -141,7 +126,7 @@ module {
         if (i < zeroes) {
           0x00;
         } else {
-          b256[i + b256Pointer - zeroes];
+          b256[i + b256Pointer - zeroes].toNat8();
         };
       },
     );
