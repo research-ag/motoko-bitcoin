@@ -19,7 +19,7 @@ module {
   ];
 
   // prettier-ignore
-  private let mapBase58 : [Nat16] = [
+  private let mapBase58 : [Nat] = [
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255,
     255,255,255,255,255,255,255,255, 255,255,255,255,255,255,255,255, 255, 0,
@@ -72,7 +72,7 @@ module {
     let remainder = digitCount % 8;
     var rem : Nat = 0;
     while (rem < remainder) {
-      var carry : Nat16 = mapBase58[input[pos].toNat()];
+      var carry : Nat16 = Nat16.fromIntWrap(mapBase58[input[pos].toNat()]);
       assert (carry != 0xff);
 
       var i : Nat = 0;
@@ -95,14 +95,14 @@ module {
     // Process full batches of 8 digits: b256 = b256 * 58^8 + v.
     // 58^8 = 128_063_081_718_016. Max carry < 2^55, fits in Nat64.
     while (pos < endPos) {
-      let d0 : Nat64 = mapBase58[input[pos].toNat()].toNat64();
-      let d1 : Nat64 = mapBase58[input[pos + 1].toNat()].toNat64();
-      let d2 : Nat64 = mapBase58[input[pos + 2].toNat()].toNat64();
-      let d3 : Nat64 = mapBase58[input[pos + 3].toNat()].toNat64();
-      let d4 : Nat64 = mapBase58[input[pos + 4].toNat()].toNat64();
-      let d5 : Nat64 = mapBase58[input[pos + 5].toNat()].toNat64();
-      let d6 : Nat64 = mapBase58[input[pos + 6].toNat()].toNat64();
-      let d7 : Nat64 = mapBase58[input[pos + 7].toNat()].toNat64();
+      let d0 = Nat64.fromIntWrap(mapBase58[input[pos].toNat()]);
+      let d1 = Nat64.fromIntWrap(mapBase58[input[pos + 1].toNat()]);
+      let d2 = Nat64.fromIntWrap(mapBase58[input[pos + 2].toNat()]);
+      let d3 = Nat64.fromIntWrap(mapBase58[input[pos + 3].toNat()]);
+      let d4 = Nat64.fromIntWrap(mapBase58[input[pos + 4].toNat()]);
+      let d5 = Nat64.fromIntWrap(mapBase58[input[pos + 5].toNat()]);
+      let d6 = Nat64.fromIntWrap(mapBase58[input[pos + 6].toNat()]);
+      let d7 = Nat64.fromIntWrap(mapBase58[input[pos + 7].toNat()]);
       assert (d0 != 0xff and d1 != 0xff and d2 != 0xff and d3 != 0xff
         and d4 != 0xff and d5 != 0xff and d6 != 0xff and d7 != 0xff);
 
@@ -111,8 +111,8 @@ module {
       var i : Nat = 0;
       var j : Nat = size - 1;
       label inner while (carry != 0 or i < length) {
-        carry +%= 128_063_081_718_016 *% b256[j].toNat64();
-        b256[j] := (carry & 0xff).toNat16();
+        carry +%= 128_063_081_718_016 *% b256[j].toNat32().toNat64();
+        b256[j] := (carry & 0xff).toNat32().toNat16();
         carry >>= 8;
         i += 1;
         if (j == 0) break inner;
@@ -162,26 +162,56 @@ module {
     // Allocate enough space in big-endian base58 representation:
     // log(256) / log(58), rounded up.
     let size : Nat = (input.size() - inputPointer) * 138 / 100 + 1;
-    let b58 : [var Nat8] = VarArray.repeat<Nat8>(0, size);
+    let b58 : [var Nat16] = VarArray.repeat<Nat16>(0, size);
+    let inputSize = input.size();
+    let remainingBytes : Nat = inputSize - inputPointer;
 
-    while (inputPointer < input.size()) {
-      var carry : Nat32 = input[inputPointer].toNat16().toNat32();
+    // Process leading remainder bytes (remainingBytes % 7) one at a time.
+    let remainder = remainingBytes % 7;
+    var rem : Nat = 0;
+    while (rem < remainder) {
+      var carry : Nat16 = input[inputPointer].toNat16();
       var i : Nat = 0;
-      // Apply "b58 = b58 * 256 + ch".
-      var b58Pointer : Nat = b58.size() - 1;
-      label reverseIter while (carry != 0 or i < length) {
-        carry += 256 * b58[b58Pointer].toNat16().toNat32();
-        b58[b58Pointer] := Nat8.fromNat((carry % 58).toNat());
+      var b58Pointer : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 256 *% b58[b58Pointer];
+        b58[b58Pointer] := carry % 58;
         carry /= 58;
         i += 1;
-        if (b58Pointer == 0) {
-          break reverseIter;
-        };
+        if (b58Pointer == 0) break inner;
         b58Pointer -= 1;
       };
       assert (carry == 0);
       length := i;
       inputPointer += 1;
+      rem += 1;
+    };
+
+    // Process full batches of 7 bytes: b58 = b58 * 256^7 + v.
+    // 256^7 = 72_057_594_037_927_936. Max carry < 2^62, fits in Nat64.
+    while (inputPointer < inputSize) {
+      var carry : Nat64 =
+        Nat64.fromIntWrap(input[inputPointer].toNat()) << 48
+        | Nat64.fromIntWrap(input[inputPointer + 1].toNat()) << 40
+        | Nat64.fromIntWrap(input[inputPointer + 2].toNat()) << 32
+        | Nat64.fromIntWrap(input[inputPointer + 3].toNat()) << 24
+        | Nat64.fromIntWrap(input[inputPointer + 4].toNat()) << 16
+        | Nat64.fromIntWrap(input[inputPointer + 5].toNat()) << 8
+        | Nat64.fromIntWrap(input[inputPointer + 6].toNat());
+
+      var i : Nat = 0;
+      var b58Pointer : Nat = size - 1;
+      label inner while (carry != 0 or i < length) {
+        carry +%= 72_057_594_037_927_936 *% b58[b58Pointer].toNat32().toNat64();
+        b58[b58Pointer] := (carry % 58).toNat32().toNat16();
+        carry /= 58;
+        i += 1;
+        if (b58Pointer == 0) break inner;
+        b58Pointer -= 1;
+      };
+      assert (carry == 0);
+      length := i;
+      inputPointer += 7;
     };
 
     // Skip leading zeroes in base58 result.
