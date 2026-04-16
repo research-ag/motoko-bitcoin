@@ -2,6 +2,7 @@ import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
+import Nat64 "mo:core/Nat64";
 import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
@@ -60,15 +61,15 @@ module {
     while (endPos < inputSize and input[endPos] != 0x20) {
       endPos += 1;
     };
-    let digitCount = endPos - pos;
+    let digitCount : Nat = endPos - pos;
 
     // Allocate base256 buffer: log(58)/log(256) ≈ 733/1000.
     let size : Nat = digitCount * 733 / 1000 + 1;
     let b256 : [var Nat16] = VarArray.repeat<Nat16>(0x00, size);
     var length : Nat = 0;
 
-    // Process leading remainder digits (digitCount % 4) one at a time.
-    let remainder = digitCount % 4;
+    // Process leading remainder digits (digitCount % 8) one at a time.
+    let remainder = digitCount % 8;
     var rem : Nat = 0;
     while (rem < remainder) {
       var carry : Nat16 = mapBase58[input[pos].toNat()];
@@ -91,21 +92,26 @@ module {
       rem += 1;
     };
 
-    // Process full batches of 4 digits: b256 = b256 * 58^4 + v.
-    // 58^4 = 11_316_496. Max carry = 58^4 * 256 = 2_897_022_976 < 2^32.
+    // Process full batches of 8 digits: b256 = b256 * 58^8 + v.
+    // 58^8 = 128_063_081_718_016. Max carry < 2^55, fits in Nat64.
     while (pos < endPos) {
-      let d0 : Nat32 = mapBase58[input[pos].toNat()].toNat32();
-      let d1 : Nat32 = mapBase58[input[pos + 1].toNat()].toNat32();
-      let d2 : Nat32 = mapBase58[input[pos + 2].toNat()].toNat32();
-      let d3 : Nat32 = mapBase58[input[pos + 3].toNat()].toNat32();
-      assert (d0 != 0xff and d1 != 0xff and d2 != 0xff and d3 != 0xff);
+      let d0 : Nat64 = mapBase58[input[pos].toNat()].toNat64();
+      let d1 : Nat64 = mapBase58[input[pos + 1].toNat()].toNat64();
+      let d2 : Nat64 = mapBase58[input[pos + 2].toNat()].toNat64();
+      let d3 : Nat64 = mapBase58[input[pos + 3].toNat()].toNat64();
+      let d4 : Nat64 = mapBase58[input[pos + 4].toNat()].toNat64();
+      let d5 : Nat64 = mapBase58[input[pos + 5].toNat()].toNat64();
+      let d6 : Nat64 = mapBase58[input[pos + 6].toNat()].toNat64();
+      let d7 : Nat64 = mapBase58[input[pos + 7].toNat()].toNat64();
+      assert (d0 != 0xff and d1 != 0xff and d2 != 0xff and d3 != 0xff
+        and d4 != 0xff and d5 != 0xff and d6 != 0xff and d7 != 0xff);
 
-      var carry : Nat32 = ((d0 * 58 + d1) * 58 + d2) * 58 + d3;
+      var carry : Nat64 = (((((((d0 *% 58 +% d1) *% 58 +% d2) *% 58 +% d3) *% 58 +% d4) *% 58 +% d5) *% 58 +% d6) *% 58 +% d7);
 
       var i : Nat = 0;
       var j : Nat = size - 1;
       label inner while (carry != 0 or i < length) {
-        carry +%= 11_316_496 * b256[j].toNat32();
+        carry +%= 128_063_081_718_016 *% b256[j].toNat64();
         b256[j] := (carry & 0xff).toNat16();
         carry >>= 8;
         i += 1;
@@ -115,7 +121,7 @@ module {
 
       assert (carry == 0);
       length := i;
-      pos += 4;
+      pos += 8;
     };
 
     // Skip trailing spaces.
