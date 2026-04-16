@@ -199,9 +199,7 @@ module {
     Array.tabulate<Nat8>(
       6,
       func(i) {
-        Nat8.fromIntWrap(
-          ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat()
-        );
+        ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat16().toNat8();
       },
     );
   };
@@ -229,7 +227,7 @@ module {
     var c : Nat32 = 1;
 
     for (value in values.values()) {
-      let c0 : Nat8 = Nat8.fromIntWrap((c >> 25).toNat());
+      let c0 : Nat8 = (c >> 25).toNat16().toNat8();
       c := ((c & 0x1ffffff) << 5) ^ value.toNat16().toNat32();
 
       // Conditionally add in coefficients of the generator polynomial.
