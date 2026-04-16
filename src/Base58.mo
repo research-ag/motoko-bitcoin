@@ -1,12 +1,10 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Char "mo:core/Char";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
-import { type Iter } "mo:core/Types";
 import VarArray "mo:core/VarArray";
 
 module {
@@ -42,77 +40,58 @@ module {
   // Convert the given Base58 input to Base256.
   public func decode(input_ : Text) : [Nat8] {
     let input = Text.encodeUtf8(input_);
-    let inputIter : Iter<Nat8> = input.values();
-    var current : ?Nat8 = inputIter.next();
-    var spaces : Nat = 0;
+    let inputSize = input.size();
+    var pos : Nat = 0;
 
-    // Skip leading spaces
-    label l loop {
-      switch (current) {
-        case (?0x20) spaces += 1;
-        case (_) break l;
-      };
-      current := inputIter.next();
+    // Skip leading spaces.
+    while (pos < inputSize and input[pos] == 0x20) {
+      pos += 1;
     };
 
     // Skip and count leading '1's.
-    var zeroes : Nat = 0;
-    var length : Nat = 0;
+    let start = pos;
 
-    label l loop {
-      switch (current) {
-        case (?0x31) zeroes += 1;
-        case (_) break l;
-      };
-      current := inputIter.next();
+    while (pos < inputSize and input[pos] == 0x31) {
+      pos += 1;
     };
+    let zeroes : Nat = pos - start;
 
     // Compute how many bytes are needed for the Base256 representation. We
     // need log(58) / log(256) of one byte to represent a Base58 digit in
     // Base256, which is approximately 733 / 1000. The input size is multiplied
     // by this value and rounded up to get the total Base256 required size.
-    let size : Nat = (input.size() - zeroes - spaces) * 733 / 1000 + 1;
+    let size : Nat = (inputSize - pos) * 733 / 1000 + 1;
     let b256 : [var Nat16] = VarArray.repeat<Nat16>(0x00, size);
+    var length : Nat = 0;
 
-    label l loop {
-      switch (current) {
-        case (?0x20) break l;
-        case (null) break l;
-        case (?value) {
-          var carry : Nat16 = mapBase58[value.toNat()];
-          assert (carry != 0xff);
+    while (pos < inputSize and input[pos] != 0x20) {
+      var carry : Nat16 = mapBase58[input[pos].toNat()];
+      assert (carry != 0xff);
 
-          var i : Nat = 0;
-          var b256Pointer : Nat = size - 1;
-          label reverseIter while (carry != 0 or i < length) {
+      var i : Nat = 0;
+      var b256Pointer : Nat = size - 1;
+      label reverseIter while (carry != 0 or i < length) {
+        carry +%= 58 * b256[b256Pointer];
+        b256[b256Pointer] := (carry & 0xff);
+        carry >>= 8;
+        i += 1;
 
-            carry +%= 58 * b256[b256Pointer];
-            b256[b256Pointer] := (carry & 0xff);
-            carry >>= 8;
-            i += 1;
-
-            if (b256Pointer == 0) break reverseIter;
-            b256Pointer -= 1;
-          };
-
-          assert (carry == 0);
-          length := i;
-        };
+        if (b256Pointer == 0) break reverseIter;
+        b256Pointer -= 1;
       };
-      current := inputIter.next();
+
+      assert (carry == 0);
+      length := i;
+      pos += 1;
     };
 
     // Skip trailing spaces.
-    label l loop {
-      switch (current) {
-        case (?0x20) {};
-        case (_) break l;
-      };
-      current := inputIter.next();
+    while (pos < inputSize and input[pos] == 0x20) {
+      pos += 1;
     };
 
     // Check all input was consumed.
-    assert (current == null);
+    assert (pos == inputSize);
 
     // Skip leading zeroes in base256 result.
     var b256Pointer : Nat = size - length;
