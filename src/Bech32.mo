@@ -49,6 +49,13 @@ module {
     3, 16, 11, 28, 12, 14,  6,  4,  2, 255, 255, 255, 255, 255
   ];
 
+  func arrayToText(arr : [Nat8]) : Text {
+    switch (Blob.fromArray(arr).decodeUtf8()) {
+      case (?t) t;
+      case null Runtime.trap("unreachable");
+    };
+  };
+
   // Encode input in Bech32 or a Bech32m.
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
     assert hrp.size() > 0;
@@ -72,10 +79,7 @@ module {
 
     assert output.size() <= 90;
 
-    switch (Blob.fromArray(output).decodeUtf8()) {
-      case (?t) t;
-      case null Runtime.trap("unreachable");
-    };
+    arrayToText(output);
   };
 
   // Decode given text as Bech32 or Bech32m.
