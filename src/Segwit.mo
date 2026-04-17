@@ -65,6 +65,10 @@ module {
 
     let version : Nat8 = data[0];
 
+    if (version > 16) {
+      return #err("Invalid witness version.");
+    };
+
     let convertedData = switch (convertBits(data, 1, 5, 8, false)) {
       case (#ok(d)) d;
       case _ return #err("Convert bits failed.");
@@ -76,19 +80,19 @@ module {
       return #err("Wrong output size.");
     };
 
-    if (data[0] > 16) {
+    if (version > 16) {
       return #err("Invalid witness version.");
     };
 
     if (
-      data[0] == 0 and convertedDataSize != 20 and convertedDataSize != 32
+      version == 0 and convertedDataSize != 20 and convertedDataSize != 32
     ) {
       return #err("Program size does not match witness version.");
     };
 
     if (
-      data[0] == 0 and encoding != #BECH32 or
-      data[0] != 0 and encoding != #BECH32M
+      version == 0 and encoding != #BECH32 or
+      version != 0 and encoding != #BECH32M
     ) {
       return #err("Encoding does not match witness version.");
     };
