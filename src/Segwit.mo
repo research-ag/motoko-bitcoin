@@ -80,10 +80,6 @@ module {
       return #err("Wrong output size.");
     };
 
-    if (version > 16) {
-      return #err("Invalid witness version.");
-    };
-
     if (
       version == 0 and convertedDataSize != 20 and convertedDataSize != 32
     ) {
