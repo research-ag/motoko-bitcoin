@@ -191,8 +191,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         | 2 utxos | 4 utxos |
 | :------ | ------: | ------: |
-| build   | 230_660 | 238_728 |
-| sighash | 669_752 | 677_883 |
+| build   | 230_666 | 238_734 |
+| sighash | 669_758 | 677_889 |
 
 
 **Heap**
@@ -207,8 +207,8 @@ Garbage Collection: ${\color{gray}0\\%}$
 
 |         |   2 utxos |   4 utxos |
 | :------ | --------: | --------: |
-| build   | 14.17 KiB | 14.64 KiB |
-| sighash | 30.09 KiB | 30.56 KiB |
+| build   | 14.18 KiB | 14.65 KiB |
+| sighash |  30.1 KiB | 30.57 KiB |
 
 
 </details>
