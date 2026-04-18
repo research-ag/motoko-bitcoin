@@ -70,8 +70,8 @@ module {
     };
 
     let convertedData = switch (convertBits(data, 1, 5, 8, false)) {
+      case (#err(msg)) return #err(msg);
       case (#ok(d)) d;
-      case _ return #err("Convert bits failed.");
     };
 
     let convertedDataSize : Nat = convertedData.size();
