@@ -237,7 +237,9 @@ module {
     let YYYY : Int = YY * YY % p;
     let ZZ : Int = Z1 * Z1 % p;
     let S : Int = 2 * ((X1 + YY) ** 2 - XX - YYYY) % p;
-    let M : Int = (3 * XX + a * ZZ * ZZ) % p;
+    let M : Int = if (a == 0) { 3 * XX % p } else {
+      (3 * XX + a * ZZ * ZZ) % p;
+    };
     let T : Int = (M * M - 2 * S) % p;
 
     let Y3 = (M * (S - T) - 8 * YYYY) % p;
