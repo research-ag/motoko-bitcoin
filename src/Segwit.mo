@@ -108,11 +108,12 @@ module {
     var acc : Nat32 = 0;
     var bits : Nat32 = 0;
     let maxv : Nat32 = (1 << to) - 1;
-    let output = VarArray.repeat<Nat8>(0, data.size() * from.toNat() / to.toNat() + 1);
+    let dataSize = data.size();
+    let output = VarArray.repeat<Nat8>(0, (dataSize - start) * from.toNat() / to.toNat() + 1);
     var outputLen : Nat = 0;
 
     var pos = start;
-    while (pos < data.size()) {
+    while (pos < dataSize) {
       let v : Nat32 = data[pos].toNat16().toNat32();
 
       if ((v >> from) != 0) {
