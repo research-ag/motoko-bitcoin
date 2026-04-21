@@ -17,6 +17,8 @@ module {
     reverse : Bool,
   ) : ?[Nat8] {
     do ? {
+      if (count == 0) return ?[];
+
       let readData : [var Nat8] = VarArray.repeat<Nat8>(0, count);
       if (reverse) {
         var nextReadIndex : Nat = count - 1;
@@ -46,7 +48,7 @@ module {
   public func readLE16(data : Iter<Nat8>) : ?Nat16 {
     do ? {
       let (a, b) = (data.next()!, data.next()!);
-      Nat16.fromIntWrap(b.toNat()) << 8 | Nat16.fromIntWrap(a.toNat());
+      b.toNat16() << 8 | a.toNat16();
     };
   };
 
@@ -55,7 +57,7 @@ module {
   public func readLE32(data : Iter<Nat8>) : ?Nat32 {
     do ? {
       let (a, b, c, d) = (data.next()!, data.next()!, data.next()!, data.next()!);
-      Nat32.fromIntWrap(d.toNat()) << 24 | Nat32.fromIntWrap(c.toNat()) << 16 | Nat32.fromIntWrap(b.toNat()) << 8 | Nat32.fromIntWrap(a.toNat());
+      d.toNat16().toNat32() << 24 | c.toNat16().toNat32() << 16 | b.toNat16().toNat32() << 8 | a.toNat16().toNat32();
     };
   };
 
@@ -74,7 +76,7 @@ module {
         data.next()!,
       );
 
-      Nat64.fromIntWrap(h.toNat()) << 56 | Nat64.fromIntWrap(g.toNat()) << 48 | Nat64.fromIntWrap(f.toNat()) << 40 | Nat64.fromIntWrap(e.toNat()) << 32 | Nat64.fromIntWrap(d.toNat()) << 24 | Nat64.fromIntWrap(c.toNat()) << 16 | Nat64.fromIntWrap(b.toNat()) << 8 | Nat64.fromIntWrap(a.toNat());
+      h.toNat16().toNat32().toNat64() << 56 | g.toNat16().toNat32().toNat64() << 48 | f.toNat16().toNat32().toNat64() << 40 | e.toNat16().toNat32().toNat64() << 32 | d.toNat16().toNat32().toNat64() << 24 | c.toNat16().toNat32().toNat64() << 16 | b.toNat16().toNat32().toNat64() << 8 | a.toNat16().toNat32().toNat64();
     };
   };
 

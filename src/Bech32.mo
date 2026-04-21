@@ -1,9 +1,10 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
-import Char "mo:core/Char";
 import Nat "mo:core/Nat";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
+import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import { type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
@@ -28,10 +29,10 @@ module {
   let CHARS_HIGHLIMIT : Nat8 = 0x7e;
 
   // prettier-ignore
-  let charset : [Char] = [
-    'q', 'p', 'z', 'r', 'y', '9', 'x', '8', 'g', 'f', '2', 't', 'v', 'd', 'w',
-    '0', 's', '3', 'j', 'n', '5', '4', 'k', 'h', 'c', 'e', '6', 'm', 'u', 'a',
-    '7', 'l'
+  let charset : [Nat8] = [
+    0x71, 0x70, 0x7a, 0x72, 0x79, 0x39, 0x78, 0x38, 0x67, 0x66, 0x32, 0x74, 0x76, 0x64, 0x77,
+    0x30, 0x73, 0x33, 0x6a, 0x6e, 0x35, 0x34, 0x6b, 0x68, 0x63, 0x65, 0x36, 0x6d, 0x75, 0x61,
+    0x37, 0x6c
   ];
 
   // Mapping from ASCII to indices in charset for characters that exist in
@@ -48,6 +49,13 @@ module {
     3, 16, 11, 28, 12, 14,  6,  4,  2, 255, 255, 255, 255, 255
   ];
 
+  func arrayToText(arr : [Nat8]) : Text {
+    switch (Blob.fromArray(arr).decodeUtf8()) {
+      case (?t) t;
+      case null Runtime.trap("unreachable");
+    };
+  };
+
   // Encode input in Bech32 or a Bech32m.
   public func encode(hrp : Text, values : [Nat8], encoding : Encoding) : Text {
     assert hrp.size() > 0;
@@ -62,16 +70,16 @@ module {
     let checksum : [Nat8] = createChecksum(encodedHrp, values, encoding);
 
     // hrp | '1' | values | checksum.
-    let output : [Char] = [
-      hrp.toArray(),
-      ['1'],
+    let output : [Nat8] = [
+      encodedHrp,
+      [0x31] : [Nat8],
       values.map(func x = charset[x.toNat()]),
       checksum.map(func x = charset[x.toNat()]),
     ].flatten();
 
     assert output.size() <= 90;
 
-    Text.fromArray(output);
+    arrayToText(output);
   };
 
   // Decode given text as Bech32 or Bech32m.
@@ -195,9 +203,7 @@ module {
     Array.tabulate<Nat8>(
       6,
       func(i) {
-        Nat8.fromIntWrap(
-          ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat()
-        );
+        ((mod >> (5 * (5 - Nat32.fromIntWrap(i)))) & 31).toNat16().toNat8();
       },
     );
   };
@@ -225,8 +231,8 @@ module {
     var c : Nat32 = 1;
 
     for (value in values.values()) {
-      let c0 : Nat8 = Nat8.fromIntWrap((c >> 25).toNat());
-      c := ((c & 0x1ffffff) << 5) ^ Nat32.fromIntWrap(value.toNat());
+      let c0 : Nat8 = (c >> 25).toNat16().toNat8();
+      c := ((c & 0x1ffffff) << 5) ^ value.toNat16().toNat32();
 
       // Conditionally add in coefficients of the generator polynomial.
       if (c0 & 1 > 0) c ^= 0x3b6a57b2;
