@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Optimize `Ripemd160`.
+- Optimize `Ripemd160` (#20).
 
 ## [0.2.0] - 2026-04-22
 
