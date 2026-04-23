@@ -58,7 +58,6 @@ module {
   /// Traps if `hrp` is empty, contains characters outside `'!'`..`'~'`,
   /// contains uppercase letters, or if the resulting Bech32 string would
   /// exceed 90 characters — these are inherited from `Bech32.encode`.
-  // Convert a Witness Program to a SegWit Address.
   public func encode(hrp : Text, { version; program } : WitnessProgram) : Result<Text, Text> {
 
     let converted = switch (convertBits(program, 0, 8, 5, true)) {
@@ -97,7 +96,7 @@ module {
   ///
   /// Example:
   /// ```motoko include=import
-  /// let decoded = Segwit.decode("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kygt080");
+  /// let decoded = Segwit.decode("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4");
   /// ```
   ///
   /// Never traps. Returns `#err(message)` with one of:
