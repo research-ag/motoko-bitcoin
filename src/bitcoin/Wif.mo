@@ -1,3 +1,9 @@
+/// Wallet Import Format (WIF) decoding utilities.
+///
+/// ```motoko name=import
+/// import Wif "mo:bitcoin/bitcoin/Wif";
+/// ```
+
 import { type Iter; type Result } "mo:core/Types";
 
 import Base58Check "../Base58Check";
@@ -6,6 +12,11 @@ import Common "../Common";
 import Types "Types";
 
 module {
+  /// Textual WIF private key representation.
+  ///
+  /// A Base58Check string. Mainnet uncompressed keys start with `5`,
+  /// compressed mainnet keys start with `K` or `L`; testnet/regtest keys
+  /// start with `9` (uncompressed) or `c` (compressed).
   public type WifPrivateKey = Text;
 
   // Map network to WIF version prefix.
@@ -35,6 +46,20 @@ module {
     };
   };
 
+  /// Decodes a WIF key into network, scalar value, and compression flag.
+  ///
+  /// Returns `#err(message)` when:
+  /// - `key` is not valid Base58Check (alphabet error or checksum mismatch)
+  ///   — `"Could not base58 decode key."`,
+  /// - the trailing byte is present but not `0x01` —
+  ///   `"Invalid compression flag."`,
+  /// - the payload is not exactly `version || 32-byte key [|| 0x01]` —
+  ///   `"Invalid key format."`,
+  /// - the version byte is not `0x80` (mainnet) or `0xef` (testnet/regtest)
+  ///   — `"Unknown network version."`.
+  ///
+  /// Traps if the Base58 payload is shorter than 4 bytes (inherited from
+  /// `Base58Check.decode`).
   // Decode WIF private key to extract network, private key,
   // and compression flag.
   public func decode(key : WifPrivateKey) : Result<Types.BitcoinPrivateKey, Text> {

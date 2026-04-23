@@ -1,3 +1,14 @@
+/// Base58 encoding and decoding for binary data.
+///
+/// Base58 is a binary-to-text encoding used in Bitcoin to encode addresses
+/// and other data. It uses 58 alphanumeric characters, excluding visually
+/// ambiguous characters such as `0`, `I`, `O`, and `l`.
+///
+/// Import from the bitcoin package to use this module.
+/// ```motoko name=import
+/// import Base58 "mo:bitcoin/Base58";
+/// ```
+
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import Nat16 "mo:core/Nat16";
@@ -45,7 +56,21 @@ module {
     };
   };
 
-  // Convert the given Base58 input to Base256.
+  /// Decodes a Base58-encoded string to a byte array.
+  ///
+  /// Leading `'1'` characters in the input are preserved as leading zero bytes
+  /// in the output. Leading and trailing spaces are ignored.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let bytes = Base58.decode("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i");
+  /// ```
+  ///
+  /// Traps if `input_` contains any byte that is not a leading space, a
+  /// trailing space, or a character in the Base58 alphabet
+  /// (`123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`). In
+  /// particular, spaces embedded inside the payload, ASCII characters such
+  /// as `'0'`, `'O'`, `'I'`, `'l'`, and any non-ASCII byte all trap.
   public func decode(input_ : Text) : [Nat8] {
     let input : Blob = Text.encodeUtf8(input_);
     let inputSize = input.size();
@@ -154,7 +179,17 @@ module {
     );
   };
 
-  // Convert the given Base256 input to Base58.
+  /// Encodes a byte array as a Base58 string.
+  ///
+  /// Leading zero bytes in the input are preserved as leading `'1'` characters
+  /// in the output.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let encoded = Base58.encode([0x00, 0x01, 0x02]);
+  /// ```
+  ///
+  /// Never traps. Accepts any byte array, including the empty array.
   public func encode(input : [Nat8]) : Text {
     let inputSize = input.size();
     var length : Nat = 0;

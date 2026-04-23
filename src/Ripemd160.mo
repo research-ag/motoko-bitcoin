@@ -1,3 +1,13 @@
+/// RIPEMD-160 hash implementation.
+///
+/// Provides a one-shot hash function and an incremental digest API.
+/// RIPEMD-160 is used in Bitcoin as part of HASH160.
+///
+/// Import from the bitcoin package to use this module.
+/// ```motoko name=import
+/// import Ripemd160 "mo:bitcoin/Ripemd160";
+/// ```
+
 import Nat "mo:core/Nat";
 import Nat64 "mo:core/Nat64";
 import VarArray "mo:core/VarArray";
@@ -5,6 +15,14 @@ import VarArray "mo:core/VarArray";
 import Common "Common";
 
 module {
+  /// Computes the RIPEMD-160 digest of `array`.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let digest = Ripemd160.hash([0x01, 0x02, 0x03]);
+  /// ```
+  ///
+  /// Never traps. Always returns exactly 20 bytes.
   // Hash the given array and return finalized result.
   public func hash(array : [Nat8]) : [Nat8] {
     let digest = Digest();
@@ -12,6 +30,15 @@ module {
     digest.sum();
   };
 
+  /// Incremental RIPEMD-160 digest state.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let d = Ripemd160.Digest();
+  /// d.write([0x01, 0x02]);
+  /// d.write([0x03]);
+  /// let digest = d.sum();
+  /// ```
   public class Digest() {
     private let s : [var Nat32] = VarArray.repeat<Nat32>(0, 5);
     private let buf : [var Nat8] = VarArray.repeat<Nat8>(0, 64);
@@ -27,6 +54,9 @@ module {
 
     initialize();
 
+    /// Resets the digest to its initial state.
+    ///
+    /// Never traps.
     public func reset() {
       bytes := 0;
       initialize();
@@ -712,6 +742,9 @@ module {
       s[4] := t +% b1 +% c2;
     };
 
+    /// Adds `data` to the digest state.
+    ///
+    /// Never traps. Accepts an array of any length, including the empty array.
     public func write(data : [Nat8]) {
       var bufsize : Nat = (bytes % 64).toNat();
       var transformOffset : Nat = 0;
@@ -747,6 +780,11 @@ module {
       };
     };
 
+    /// Finalizes and returns the current digest as 20 bytes.
+    ///
+    /// Never traps. The digest state remains usable after `sum`, but further
+    /// `write` calls will continue from the padded state; call `reset` first
+    /// to start a fresh hash.
     public func sum() : [Nat8] {
       let pad : [var Nat8] = VarArray.repeat<Nat8>(
         0,
