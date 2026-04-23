@@ -280,7 +280,7 @@ module {
       let pos = i_msg;
       let wi = Nat16.toNat(pos >> 2);
       let lane = pos & 0x3;
-      let v : Nat32 = Nat32.fromNat16(b.toNat16()) << Nat32.fromNat16(lane << 3);
+      let v : Nat32 = b.toNat16().toNat32() << Nat32.fromNat16(lane << 3);
       if (lane == 0) {
         // First byte of a fresh word: overwrite (the slot may carry stale
         // data from an earlier block, since we never explicitly clear msg).
@@ -343,7 +343,7 @@ module {
     // Convert a 64-bit value's low byte to Nat8 without going through Nat
     // (avoids arbitrary-precision allocation in the padding path).
     private func lowByte64(v : Nat64) : Nat8 {
-      Nat8.fromNat16(Nat16.fromNat32(Nat32.fromNat64(v & 0xff)));
+      (v & 0xff).toNat32().toNat16().toNat8();
     };
 
     public func sum() : [Nat8] {
@@ -372,10 +372,10 @@ module {
       while (k < 5) {
         let v = s[k];
         let o = k * 4;
-        out[o]     := Nat8.fromNat16(Nat16.fromNat32(v & 0xff));
-        out[o + 1] := Nat8.fromNat16(Nat16.fromNat32((v >> 8) & 0xff));
-        out[o + 2] := Nat8.fromNat16(Nat16.fromNat32((v >> 16) & 0xff));
-        out[o + 3] := Nat8.fromNat16(Nat16.fromNat32((v >> 24) & 0xff));
+        out[o]     := (v & 0xff).toNat16().toNat8();
+        out[o + 1] := ((v >> 8) & 0xff).toNat16().toNat8();
+        out[o + 2] := ((v >> 16) & 0xff).toNat16().toNat8();
+        out[o + 3] := ((v >> 24) & 0xff).toNat16().toNat8();
         k += 1;
       };
       out.toArray();
