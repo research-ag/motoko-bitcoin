@@ -366,11 +366,13 @@ module {
       // The 8th length byte fills the block, triggering transform().
 
       // Serialize the 5 chaining words as 20 little-endian bytes.
-      let (b3,  b2,  b1,  b0)  = Prim.explodeNat32(s[0]);
-      let (b7,  b6,  b5,  b4)  = Prim.explodeNat32(s[1]);
-      let (b11, b10, b9,  b8)  = Prim.explodeNat32(s[2]);
+      let (b3, b2, b1, b0) = Prim.explodeNat32(s[0]);
+      let (b7, b6, b5, b4) = Prim.explodeNat32(s[1]);
+      let (b11, b10, b9, b8) = Prim.explodeNat32(s[2]);
       let (b15, b14, b13, b12) = Prim.explodeNat32(s[3]);
       let (b19, b18, b17, b16) = Prim.explodeNat32(s[4]);
+
+      // prettier-ignore
       [
         b0,  b1,  b2,  b3,
         b4,  b5,  b6,  b7,
