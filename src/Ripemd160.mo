@@ -345,6 +345,14 @@ module {
       };
     };
 
+    // Finalize the digest and return the 20-byte RIPEMD-160 hash.
+    //
+    // NOTE: sum() is consuming. It appends padding via writeByte(), which
+    // advances the internal state (s, i_msg, n_blocks) and processes the
+    // final block. Calling sum() a second time without an intervening
+    // reset() will hash additional padding bytes on top of the already-
+    // padded state and produce a different (incorrect) result. Call
+    // reset() before reusing the Digest for another message.
     public func sum() : [Nat8] {
       // Total message length in bits, captured before padding is appended.
       let bitlen : Nat64 = ((n_blocks << 6) +% Nat64.fromNat(Nat16.toNat(i_msg))) << 3;
