@@ -3,6 +3,7 @@ import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat64 "mo:core/Nat64";
 import VarArray "mo:core/VarArray";
+import Prim "mo:prim";
 
 module {
   // Hash the given array and return finalized result.
@@ -344,12 +345,6 @@ module {
       };
     };
 
-    // Convert a 64-bit value's low byte to Nat8 without going through Nat
-    // (avoids arbitrary-precision allocation in the padding path).
-    private func lowByte64(v : Nat64) : Nat8 {
-      (v & 0xff).toNat32().toNat16().toNat8();
-    };
-
     public func sum() : [Nat8] {
       // Total message length in bits, captured before padding is appended.
       let bitlen : Nat64 = ((n_blocks << 6) +% Nat64.fromNat(Nat16.toNat(i_msg))) << 3;
@@ -360,29 +355,29 @@ module {
       while (i_msg != 56) {
         writeByte(0);
       };
-      writeByte(lowByte64(bitlen));
-      writeByte(lowByte64(bitlen >> 8));
-      writeByte(lowByte64(bitlen >> 16));
-      writeByte(lowByte64(bitlen >> 24));
-      writeByte(lowByte64(bitlen >> 32));
-      writeByte(lowByte64(bitlen >> 40));
-      writeByte(lowByte64(bitlen >> 48));
-      writeByte(lowByte64(bitlen >> 56));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 8)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 16)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 24)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 32)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 40)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 48)));
+      writeByte(Nat8.fromIntWrap(Nat64.toNat(bitlen >> 56)));
       // The 8th length byte fills the block, triggering transform().
 
       // Serialize the 5 chaining words as 20 little-endian bytes.
-      let out : [var Nat8] = VarArray.repeat<Nat8>(0, 20);
-      var k = 0;
-      while (k < 5) {
-        let v = s[k];
-        let o = k * 4;
-        out[o] := (v & 0xff).toNat16().toNat8();
-        out[o + 1] := ((v >> 8) & 0xff).toNat16().toNat8();
-        out[o + 2] := ((v >> 16) & 0xff).toNat16().toNat8();
-        out[o + 3] := ((v >> 24) & 0xff).toNat16().toNat8();
-        k += 1;
-      };
-      out.toArray();
+      let (b3,  b2,  b1,  b0)  = Prim.explodeNat32(s[0]);
+      let (b7,  b6,  b5,  b4)  = Prim.explodeNat32(s[1]);
+      let (b11, b10, b9,  b8)  = Prim.explodeNat32(s[2]);
+      let (b15, b14, b13, b12) = Prim.explodeNat32(s[3]);
+      let (b19, b18, b17, b16) = Prim.explodeNat32(s[4]);
+      [
+        b0,  b1,  b2,  b3,
+        b4,  b5,  b6,  b7,
+        b8,  b9,  b10, b11,
+        b12, b13, b14, b15,
+        b16, b17, b18, b19,
+      ];
     };
   };
 };
