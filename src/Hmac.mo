@@ -40,6 +40,10 @@ module {
     sum : () -> Blob;
   };
 
+  object sha256DigestFactory {
+    public let blockSize : Nat = 64;
+    public func create() : Digest = Sha256.Digest(#sha256);
+  };
   /// Creates an HMAC-SHA256 instance with the given `key`.
   ///
   /// Example:
@@ -52,12 +56,12 @@ module {
   /// Never traps. Accepts a `key` of any length, including the empty key.
   /// Subsequent `writeArray` and `sum` calls also never trap.
   // Sha256 support.
-  object sha256DigestFactory {
-    public let blockSize : Nat = 64;
-    public func create() : Digest = Sha256.Digest(#sha256);
-  };
   public func sha256(key : [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
 
+  object sha512DigestFactory {
+    public let blockSize : Nat = 128;
+    public func create() : Digest = Sha512.Digest(#sha512);
+  };
   /// Creates an HMAC-SHA512 instance with the given `key`.
   ///
   /// Example:
@@ -70,10 +74,6 @@ module {
   /// Never traps. Accepts a `key` of any length, including the empty key.
   /// Subsequent `writeArray` and `sum` calls also never trap.
   // Sha512 support.
-  object sha512DigestFactory {
-    public let blockSize : Nat = 128;
-    public func create() : Digest = Sha512.Digest(#sha512);
-  };
   public func sha512(key : [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
 
   /// Creates an HMAC instance using a custom digest factory.

@@ -32,8 +32,14 @@ module {
   /// Never traps. Returns `#err(message)` when the byte stream is
   /// malformed (e.g. truncated header, invalid varint sizes, malformed
   /// inputs, outputs, witnesses or scripts). Specific messages include
-  /// `"Could not read version."`, `"Could not read txInCount."`,
-  /// `"Could not read txOutCount."`, `"Could not read locktime."`,
+  /// `"Could not read version."`, `"Invalid witness flag."`,
+  /// `"Could not read TxInputs size in a transaction with witness."`,
+  /// `"Could not read TxInputs size in a transaction without witness."`,
+  /// `"Could not deserialize TxInput: <message>"`,
+  /// `"Could not read TxOutputs size."`,
+  /// `"Could not deserialize TxOutput: <message>"`,
+  /// `"Could not deserialize Witness: <message>"`,
+  /// `"Could not read locktime."`,
   /// and errors propagated from `TxInput.fromBytes`, `TxOutput.fromBytes`,
   /// `Witness.fromBytes`, and `Script.fromBytes`.
   public func fromBytes(data : Iter<Nat8>) : Result<Transaction, Text> {

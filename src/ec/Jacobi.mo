@@ -66,7 +66,6 @@ module {
   };
 
   /// Creates a Jacobian point from raw coordinates.
-  // Returns null if the point is not valid.
   public func fromNat(x : Nat, y : Nat, z : Nat, curve : Curves.Curve) : ?Point {
     ?(#point(curve.Fp(x), curve.Fp(y), curve.Fp(z), curve));
   };

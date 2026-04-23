@@ -27,7 +27,7 @@ module {
   /// the address text or call `Segwit.decode` directly if you need to
   /// distinguish them.
   ///
-  /// Never traps. Returns `#err("Failed to decode address ...")` when the
+  /// Returns `#err("Failed to decode address ...")` when the
   /// input is neither a valid SegWit nor a valid P2PKH address.
   public func addressFromText(address : Text) : Result<Types.Address, Text> {
     switch (Segwit.decode(address)) {

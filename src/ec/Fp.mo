@@ -70,13 +70,21 @@ module {
     /// Raises this element to `exponent` modulo `n`.
     public func pow(exponent : Nat) : Fp = Fp(Field.pow(value, exponent, n), n);
 
-    // Compute sqrt(value) mod n.
-    /// Computes a square root modulo `n` when one exists.
+    /// Computes a square root of `value` modulo `n` for the special case
+    /// where `n` is a prime and `n ≡ 3 (mod 4)`.
     ///
-    /// Uses the Tonelli–Shanks shortcut for primes `n ≡ 3 (mod 4)` and
-    /// returns `value^((n+1)/4) mod n`. The result is only a valid square
-    /// root when one exists; callers are responsible for verifying that
-    /// `result.sqr().isEqual(self)`. Never traps.
+    /// In this case, the square root (when it exists) can be computed as
+    /// `value^((n + 1) / 4) mod n`, which is a shortcut of the
+    /// Tonelli–Shanks algorithm.
+    ///
+    /// Note:
+    /// - This function does not check whether a square root exists.
+    /// - The returned value is only valid if `value` is a quadratic residue mod `n`.
+    /// - Callers should verify the result by checking `result.sqr().isEqual(value)`,
+    ///   where `result` is the returned Fp value and `value` is the Fp instance on
+    ///   which sqrt() was called.
+    ///
+    /// Never traps.
     public func sqrt() : Fp {
       Fp(Field.pow(value, (n + 1) / 4, n), n);
     };
