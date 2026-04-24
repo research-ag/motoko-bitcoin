@@ -38,10 +38,14 @@ test(
     );
 
     let hash0 = txLocktime0.createTaprootKeySpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
     );
     let hash42 = txLocktime42.createTaprootKeySpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
     );
 
     expect.blob(Blob.fromArray(hash0)).notEqual(Blob.fromArray(hash42));
@@ -62,10 +66,14 @@ test(
     );
 
     let hash2 = txVersion2.createTaprootKeySpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
     );
     let hash1 = txVersion1.createTaprootKeySpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
     );
 
     expect.blob(Blob.fromArray(hash2)).notEqual(Blob.fromArray(hash1));
