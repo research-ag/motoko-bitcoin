@@ -138,13 +138,9 @@ module {
   /// distinct error categories are:
   /// - `"Found unexpected character: ..."` — `input` contains a byte
   ///   outside the printable ASCII range `'!'`..`'~'`.
-  /// - `"Inconsistent character casing in HRP."` — the entire `input` string
-  ///   mixes uppercase and lowercase letters (the `lowercase` and `uppercase`
-  ///   flags are set during the initial scan of all characters in `input`
-  ///   before the separator is located), or there are no alphabetical
-  ///   characters at all in `input`. The Bech32 standard forbids mixed case
-  ///   across the entire string, and the HRP is extracted later after this
-  ///   validation passes.
+  /// - `"Inconsistent character casing in HRP."` — `input` contains both
+  ///   lowercase and uppercase alphabetic characters (forbidden by Bech32
+  ///   standard).
   /// - `"Bad separator position: ..."` — the `'1'` separator is missing,
   ///   too close to the start, or leaves fewer than 6 checksum characters
   ///   at the end; or the total length exceeds 90 characters.
@@ -178,7 +174,7 @@ module {
 
     };
 
-    if (lowercase == uppercase) {
+    if (lowercase and uppercase) {
       return #err("Inconsistent character casing in HRP.");
     };
 
