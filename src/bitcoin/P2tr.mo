@@ -109,7 +109,7 @@ module {
     let tweak = Common.readBE256(tagged_hash, 0);
 
     if (tweak >= Curves.secp256k1.p) {
-      return #err("Failed to compute tweak, tweak is not smaller than the curve order");
+      return #err("Failed to compute tweak, tweak is not smaller than the field prime");
     };
 
     #ok(Curves.secp256k1.Fp(tweak));
