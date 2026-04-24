@@ -66,8 +66,8 @@ module {
   };
 
   /// Creates a Jacobian point from raw coordinates.
-  public func fromNat(x : Nat, y : Nat, z : Nat, curve : Curves.Curve) : ?Point {
-    ?(#point(curve.Fp(x), curve.Fp(y), curve.Fp(z), curve));
+  public func fromNat(x : Nat, y : Nat, z : Nat, curve : Curves.Curve) : Point {
+    #point(curve.Fp(x), curve.Fp(y), curve.Fp(z), curve);
   };
 
   /// Returns the generator point for `curve`.

@@ -268,8 +268,6 @@ module {
     ///
     /// Traps when:
     /// - `txInputIndex.toNat() >= txInputs.size()` (out-of-bounds index),
-    /// - `amounts.size() != txInputs.size()` (out-of-bounds index inside
-    ///   the SHA-amounts loop),
     /// - any contained `Script` has a `#data` element larger than
     ///   `2^32 - 1` bytes (inherited from `Script.toBytes`).
     public func createTaprootKeySpendSignatureHash(
