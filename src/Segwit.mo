@@ -60,6 +60,19 @@ module {
   /// exceed 90 characters — these are inherited from `Bech32.encode`.
   public func encode(hrp : Text, { version; program } : WitnessProgram) : Result<Text, Text> {
 
+    if (version > 16) {
+      return #err("Invalid witness version.");
+    };
+
+    let programSize = program.size();
+    if (programSize < 2 or programSize > 40) {
+      return #err("Wrong output size.");
+    };
+
+    if (version == 0 and programSize != 20 and programSize != 32) {
+      return #err("Program size does not match witness version.");
+    };
+
     let converted = switch (convertBits(program, 0, 8, 5, true)) {
       case (#err(msg)) return #err(msg);
       case (#ok(c)) c;
