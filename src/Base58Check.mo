@@ -58,16 +58,21 @@ module {
   /// let decoded = Base58Check.decode("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i");
   /// ```
   ///
-  /// Returns `null` when the trailing 4 checksum bytes do not match the
-  /// double-SHA256 of the payload.
+  /// Returns `null` when:
+  /// - the Base58 decoding of `input` produces fewer than 4 bytes (so there
+  ///   is no room for the 4-byte checksum), or
+  /// - the trailing 4 checksum bytes do not match the double-SHA256 of the
+  ///   payload.
   ///
-  /// Traps if the Base58 decoding of `input` produces fewer than 4 bytes
-  /// (via `Nat` underflow when stripping the checksum) or if `input`
-  /// contains any character outside the Base58 alphabet (propagated from
-  /// `Base58.decode`). For fully graceful parsing of arbitrary user input,
-  /// validate the character set first.
+  /// Traps if `input` contains any character outside the Base58 alphabet
+  /// (propagated from `Base58.decode`). For fully graceful parsing of
+  /// arbitrary user input, validate the character set first.
   public func decode(input : Text) : ?[Nat8] {
     let decoded : [Nat8] = Base58.decode(input);
+
+    if (decoded.size() < 4) {
+      return null;
+    };
 
     // Strip the last 4 bytes.
     let output = Array.tabulate<Nat8>(

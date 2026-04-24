@@ -122,6 +122,21 @@ let testData : [(?[Nat8], Text)] = [
     "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL",
   ),
   (
+    // Empty Base58 string decodes to 0 bytes — too short for a 4-byte checksum.
+    null,
+    "",
+  ),
+  (
+    // "1" decodes to a single zero byte — too short for a 4-byte checksum.
+    null,
+    "1",
+  ),
+  (
+    // "111" decodes to three zero bytes — too short for a 4-byte checksum.
+    null,
+    "111",
+  ),
+  (
     // prettier-ignore
       ?[
         0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa,
@@ -180,5 +195,17 @@ test(
       let actual = Base58Check.decode(input);
       assert (expected == actual);
     };
+  },
+);
+
+// Boundary case: input Base58-decodes to exactly 4 bytes (the checksum
+// alone) and the payload is empty. This is the smallest valid Base58Check
+// string. "3QJmnh" Base58-decodes to the 4-byte double-SHA256 prefix of
+// the empty byte string.
+test(
+  "decode empty payload (checksum-only input)",
+  func() {
+    let actual = Base58Check.decode("3QJmnh");
+    assert (actual == ?([] : [Nat8]));
   },
 );
