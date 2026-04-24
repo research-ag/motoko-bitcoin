@@ -40,10 +40,16 @@ test(
 
     let leafHash = P2tr.leafHash(testCase.leafScript());
     let hash0 = txLocktime0.createTaprootScriptSpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0, leafHash,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
+      leafHash,
     );
     let hash42 = txLocktime42.createTaprootScriptSpendSignatureHash(
-      testCase.amounts(), testCase.ownScript(), 0, leafHash,
+      testCase.amounts(),
+      testCase.ownScript(),
+      0,
+      leafHash,
     );
 
     expect.blob(Blob.fromArray(hash0)).notEqual(Blob.fromArray(hash42));
