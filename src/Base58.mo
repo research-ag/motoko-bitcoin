@@ -56,6 +56,73 @@ module {
     };
   };
 
+  /// Returns `true` if `input` consists entirely of characters from the
+  /// Base58 alphabet (`123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz`),
+  /// optionally surrounded by leading and/or trailing ASCII spaces (`0x20`).
+  ///
+  /// The empty string and a string of only spaces both return `true`
+  /// (consistent with `decode`, which accepts these as the encoding of the
+  /// empty byte array).
+  ///
+  /// Embedded spaces (between Base58 characters) and any character outside
+  /// the alphabet (e.g. `'0'`, `'O'`, `'I'`, `'l'`, non-ASCII bytes) cause
+  /// this function to return `false`.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let ok = Base58.isBase58Alphabet("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i");
+  /// ```
+  ///
+  /// Never traps.
+  public func isBase58Alphabet(input : Text) : Bool {
+    let bytes : Blob = Text.encodeUtf8(input);
+    let size = bytes.size();
+    var pos : Nat = 0;
+
+    // Skip leading spaces.
+    while (pos < size and bytes[pos] == 0x20) {
+      pos += 1;
+    };
+
+    // Find end of payload (before trailing spaces).
+    var endPos = size;
+    while (endPos > pos and bytes[endPos - 1] == 0x20) {
+      endPos -= 1;
+    };
+
+    // All bytes in [pos, endPos) must map to a Base58 alphabet index.
+    while (pos < endPos) {
+      if (mapBase58[bytes[pos].toNat()] == 255) {
+        return false;
+      };
+      pos += 1;
+    };
+
+    true;
+  };
+
+  /// Decodes a Base58-encoded string to a byte array, returning `null`
+  /// instead of trapping when `input` contains characters outside the
+  /// Base58 alphabet.
+  ///
+  /// Equivalent to checking `isBase58Alphabet(input)` first and then
+  /// calling `decode(input)`. Leading and trailing spaces are accepted (see
+  /// `decode` for the exact semantics).
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let result = Base58.decodeOpt("1AGNa15ZQXAZUgFiqJ2i7Z2DPU2J6hW62i");
+  /// ```
+  ///
+  /// Returns `?bytes` on success and `null` if `input` is not valid in the
+  /// Base58 alphabet. Never traps.
+  public func decodeOpt(input : Text) : ?[Nat8] {
+    if (not isBase58Alphabet(input)) {
+      return null;
+    };
+    ?decode(input);
+  };
+
   /// Decodes a Base58-encoded string to a byte array.
   ///
   /// Leading `'1'` characters in the input are preserved as leading zero bytes

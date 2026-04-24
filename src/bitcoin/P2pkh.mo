@@ -7,6 +7,7 @@
 import Array "mo:core/Array";
 import { type Result; type Iter } "mo:core/Types";
 
+import Base58 "../Base58";
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Hash "../Hash";
@@ -37,9 +38,6 @@ module {
   ///
   /// Returns `#err(message)` propagated from `decodeAddress` (see that
   /// function for the exact error categories).
-  ///
-  /// Traps if Base58 decoding of `address` would underflow because the
-  /// payload is shorter than 4 bytes (inherited from `Base58Check.decode`).
   public func makeScript(address : Address) : Result<Script, Text> {
     switch (decodeAddress(address)) {
       case (#ok { network = _; publicKeyHash }) {
@@ -103,10 +101,11 @@ module {
   ///   — `"Unrecognized network id."`,
   /// - the decoded payload does not contain a version byte followed by
   ///   exactly 20 hash bytes — `"Could not decode address."`.
-  ///
-  /// Traps if the Base58 payload is shorter than 4 bytes (inherited from
-  /// `Base58Check.decode`).
   public func decodeAddress(address : Address) : Result<DecodedAddress, Text> {
+
+    if (not Base58.isBase58Alphabet(address)) {
+      return #err("Could not base58 decode address.");
+    };
 
     let decoded : Iter<Nat8> = switch (Base58Check.decode(address)) {
       case (?b58decoded) {
