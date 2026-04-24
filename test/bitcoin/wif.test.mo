@@ -90,6 +90,18 @@ let invalidWifTestCases : [InvalidWifTestCase] = [
     // Invalid length.
     wif = "38uMpGARR2BJy5p4dNFKYg9UsWNoBtkpbdrXDjmfvz8krCtw3T1W92ZDSR";
   },
+];
+
+// Vectors that exercise the secp256k1 private-scalar guard
+// (`privateKey == 0` or `privateKey >= Curves.secp256k1.r`). All of
+// these decode to a syntactically valid WIF whose 32-byte payload is
+// either zero or `>= r`, so `Wif.decode` must reject them with the exact
+// error message "Invalid private scalar."
+type InvalidScalarWifTestCase = {
+  wif : Text;
+};
+
+let invalidScalarWifTestCases : [InvalidScalarWifTestCase] = [
   {
     // Zero scalar (mainnet, compressed).
     wif = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73Nd2Mcv1";
@@ -135,6 +147,17 @@ func testInvalidWifDecode(tcase : InvalidWifTestCase) {
   };
 };
 
+func testInvalidScalarWifDecode(tcase : InvalidScalarWifTestCase) {
+  switch (Wif.decode(tcase.wif)) {
+    case (#err(msg)) {
+      assert (msg == "Invalid private scalar.");
+    };
+    case (#ok(_privateKey)) {
+      assert (false);
+    };
+  };
+};
+
 let runTest = TestUtils.runTestWithDefaults;
 
 runTest({
@@ -147,4 +170,10 @@ runTest({
   title = "Decode invalid Wifs";
   fn = testInvalidWifDecode;
   vectors = invalidWifTestCases;
+});
+
+runTest({
+  title = "Decode WIFs with out-of-range private scalar";
+  fn = testInvalidScalarWifDecode;
+  vectors = invalidScalarWifTestCases;
 });

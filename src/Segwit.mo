@@ -125,7 +125,7 @@ module {
   /// - `"Encoding does not match witness version."` — v0 with Bech32m
   ///   or v1+ with Bech32,
   /// - any error from the bit-group conversion (e.g. invalid padding).
-  // Convert a segwit address into a numan-readable part (HRP) and a Witness Program.
+  // Convert a segwit address into a human-readable part (HRP) and a Witness Program.
   // Decodes using Bech32.
   public func decode(address : Text) : Result<(Text, WitnessProgram), Text> {
     let (encoding, decodedHrp, data) = switch (Bech32.decode(address)) {

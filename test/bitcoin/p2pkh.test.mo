@@ -105,11 +105,10 @@ runTest({
   vectors = makeScriptTestCases;
 });
 
-// Per the doc string of `P2pkh.decodeAddress`, an address with an invalid
-// Base58 alphabet character (e.g. `0`, `O`, `I`, `l`) should result in
-// `#err("Could not base58 decode address.")`. With the current
-// implementation this traps instead, because `Base58.decode` traps on
-// non-alphabet characters and `Base58Check.decode` does not catch it.
+// `P2pkh.decodeAddress` performs an `isBase58Alphabet` pre-check on the
+// input before delegating to `Base58Check.decode`, so an address that
+// contains a character outside the Base58 alphabet (e.g. `0`, `O`, `I`,
+// `l`) is rejected with `#err("Could not base58 decode address.")`.
 type InvalidAlphabetTestCase = {
   address : Text;
 };

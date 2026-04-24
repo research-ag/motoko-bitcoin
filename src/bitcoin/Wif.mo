@@ -67,7 +67,7 @@ module {
   public func decode(key : WifPrivateKey) : Result<Types.BitcoinPrivateKey, Text> {
 
     if (not Base58.isBase58Alphabet(key)) {
-      return #err("Could not base58 decode address.");
+      return #err("Could not base58 decode key.");
     };
 
     let decoded : Iter<Nat8> = switch (Base58Check.decode(key)) {
