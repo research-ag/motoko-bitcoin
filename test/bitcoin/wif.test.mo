@@ -90,6 +90,26 @@ let invalidWifTestCases : [InvalidWifTestCase] = [
     // Invalid length.
     wif = "38uMpGARR2BJy5p4dNFKYg9UsWNoBtkpbdrXDjmfvz8krCtw3T1W92ZDSR";
   },
+  {
+    // Zero scalar (mainnet, compressed).
+    wif = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73Nd2Mcv1";
+  },
+  {
+    // Zero scalar (mainnet, uncompressed).
+    wif = "5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsreAbuatmU";
+  },
+  {
+    // Zero scalar (testnet, compressed).
+    wif = "cMahea7zqjxrtgAbB7LSGbcQUr1uX1ojuat9jZodMN87J7g8rY9t";
+  },
+  {
+    // Scalar equal to secp256k1 group order r (mainnet, compressed).
+    wif = "L5oLkpV3aqBjhki6LmvChTCV6odsp4SXM6FfU2Gppt5kFqRzExJJ";
+  },
+  {
+    // Scalar equal to r + 1 (mainnet, uncompressed).
+    wif = "5Km2kuu7vtFDPpxywn4u3NLpbr5jKpTB3jsuDU2KYEqetyuszSh";
+  },
 ];
 
 func testValidWifDecode(tcase : ValidWifTestCase) {

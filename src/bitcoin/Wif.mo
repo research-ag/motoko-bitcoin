@@ -9,6 +9,7 @@ import { type Iter; type Result } "mo:core/Types";
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
+import Curves "../ec/Curves";
 import Types "Types";
 
 module {
@@ -56,7 +57,9 @@ module {
   /// - the payload is not exactly `version || 32-byte key [|| 0x01]` —
   ///   `"Invalid key format."`,
   /// - the version byte is not `0x80` (mainnet) or `0xef` (testnet/regtest)
-  ///   — `"Unknown network version."`.
+  ///   — `"Unknown network version."`,
+  /// - the decoded scalar is `0` or `≥` the secp256k1 group order —
+  ///   `"Invalid private scalar."`.
   ///
   /// Traps if the Base58 payload is shorter than 4 bytes (inherited from
   /// `Base58Check.decode`).
@@ -97,9 +100,14 @@ module {
       };
     };
 
+    let privateKey = Common.readBE256(data, 0);
+    if (privateKey == 0 or privateKey >= Curves.secp256k1.r) {
+      return #err("Invalid private scalar.");
+    };
+
     return #ok({
       network = network;
-      key = Common.readBE256(data, 0);
+      key = privateKey;
       compressedPublicKey = compressed;
     });
   };
