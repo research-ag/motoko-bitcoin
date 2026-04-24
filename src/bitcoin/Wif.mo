@@ -6,6 +6,7 @@
 
 import { type Iter; type Result } "mo:core/Types";
 
+import Base58 "../Base58";
 import Base58Check "../Base58Check";
 import ByteUtils "../ByteUtils";
 import Common "../Common";
@@ -61,19 +62,23 @@ module {
   /// - the decoded scalar is `0` or `≥` the secp256k1 group order —
   ///   `"Invalid private scalar."`.
   ///
-  /// Traps if the Base58 payload is shorter than 4 bytes (inherited from
-  /// `Base58Check.decode`).
   // Decode WIF private key to extract network, private key,
   // and compression flag.
   public func decode(key : WifPrivateKey) : Result<Types.BitcoinPrivateKey, Text> {
+
+    if (not Base58.isBase58Alphabet(key)) {
+      return #err("Could not base58 decode address.");
+    };
+
     let decoded : Iter<Nat8> = switch (Base58Check.decode(key)) {
       case (?b58decoded) {
         b58decoded.values();
       };
-      case _ {
+      case (null) {
         return #err("Could not base58 decode key.");
       };
     };
+
     // Split into version || data || compressed.
     let (version, data, compressed) : (Nat8, [Nat8], Bool) = switch (
       decoded.next(),
