@@ -104,3 +104,40 @@ runTest({
   fn = testMakeScript;
   vectors = makeScriptTestCases;
 });
+
+// Per the doc string of `P2pkh.decodeAddress`, an address with an invalid
+// Base58 alphabet character (e.g. `0`, `O`, `I`, `l`) should result in
+// `#err("Could not base58 decode address.")`. With the current
+// implementation this traps instead, because `Base58.decode` traps on
+// non-alphabet characters and `Base58Check.decode` does not catch it.
+type InvalidAlphabetTestCase = {
+  address : Text;
+};
+
+let invalidAlphabetTestCases : [InvalidAlphabetTestCase] = [
+  // Valid mainnet address with one character replaced by '0' (not in alphabet).
+  { address = "0MmqjDhakEfJd9r5BoDhPApCpA75Em17GA" },
+  // Valid mainnet address with one character replaced by 'O' (not in alphabet).
+  { address = "1MmqjDhakEfJd9r5BoDhPApCpA75Em17GO" },
+  // Valid mainnet address with one character replaced by 'l' (not in alphabet).
+  { address = "1MmqjDhakEfJd9r5BoDhPApCpA75Em17Gl" },
+  // Valid mainnet address with one character replaced by 'I' (not in alphabet).
+  { address = "1MmqjDhakEfJd9r5BoDhPApCpA75Em17GI" },
+];
+
+func testP2pkhDecodeAddressInvalidAlphabet(testCase : InvalidAlphabetTestCase) {
+  switch (P2pkh.decodeAddress(testCase.address)) {
+    case (#err msg) {
+      assert (msg == "Could not base58 decode address.");
+    };
+    case (#ok _) {
+      Runtime.trap("Expected #err for address with invalid alphabet character.");
+    };
+  };
+};
+
+runTest({
+  title = "Decode P2PKH address with invalid alphabet character";
+  fn = testP2pkhDecodeAddressInvalidAlphabet;
+  vectors = invalidAlphabetTestCases;
+});
