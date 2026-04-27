@@ -117,7 +117,7 @@ module {
       };
     };
 
-    let tweak_point = Jacobi.mulBase(tweak.value, Curves.secp256k1);
+    let tweak_point = Jacobi.mulBase(tweak.toNat(), Curves.secp256k1);
 
     let tweaked_public_key = Jacobi.add(public_key_point, tweak_point);
 

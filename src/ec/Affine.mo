@@ -78,10 +78,12 @@ module {
       // Solve for left side.
       let beta : Fp = alpha.sqrt();
 
-      let (evenBeta, oddBeta) : (Fp, Fp) = if (beta.value % 2 == 0) {
-        (beta, Fp(curve.p - beta.value));
+      let betaNat = beta.toNat();
+      let negBeta = beta.neg();
+      let (evenBeta, oddBeta) : (Fp, Fp) = if (betaNat % 2 == 0) {
+        (beta, negBeta);
       } else {
-        (Fp(curve.p - beta.value), beta);
+        (negBeta, beta);
       };
 
       if (even) {
@@ -106,15 +108,17 @@ module {
         return [];
       };
       case (#point(x, y, _)) {
+        let xNat = x.toNat();
+        let yNat = y.toNat();
         return if (compressed) {
-          let startByte : Nat8 = if (y.value % 2 == 0) 0x02 else 0x03;
+          let startByte : Nat8 = if (yNat % 2 == 0) 0x02 else 0x03;
           let output = VarArray.repeat<Nat8>(startByte, 33);
-          Common.writeBE256(output, 1, x.value);
+          Common.writeBE256(output, 1, xNat);
           output.toArray();
         } else {
           let output = VarArray.repeat<Nat8>(0x04, 65);
-          Common.writeBE256(output, 1, x.value);
-          Common.writeBE256(output, 33, y.value);
+          Common.writeBE256(output, 1, xNat);
+          Common.writeBE256(output, 33, yNat);
           output.toArray();
         };
       };

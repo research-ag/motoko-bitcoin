@@ -1,50 +1,32 @@
-import Runtime "mo:core/Runtime";
-
-import Field "Field";
+import Mont "Mont";
 
 module {
-  // Arithmetic computations modulo n over the given _value.
-  public class Fp(_value : Nat, n : Nat) : Fp {
-    public let value : Nat = _value % n;
+  // Arithmetic computations modulo n, with values represented internally in
+  // Montgomery form (`value` = `_value * R mod n`, R = 2^256). The constructor
+  // takes an already-Mont value; use `fromNat` to wrap a natural-form Nat.
+  // Use `toNat()` to obtain the natural representative when crossing a
+  // boundary (e.g. for serialization, parity tests, or as a scalar for EC
+  // scalar multiplication).
+  public class Fp(_value : Nat, ctx : Mont.Ctx) : Fp = self {
+    public let value : Nat = _value;
 
-    // Compute value ** -1 mod n. The inverse does not exist if _value and n are
-    // not relatively prime.
-    public func inverse() : Fp {
-      let inverse : ?Nat = Field.inverse(value, n);
-      switch inverse {
-        case (null) {
-          Runtime.trap("unreachable");
-        };
-        case (?inverse) {
-          return Fp(inverse, n);
-        };
-      };
-    };
+    public func toNat() : Nat = Mont.fromMont(value, ctx);
 
-    // Compute value + other mod n.
-    public func add(other : Fp) : Fp = Fp(Field.add(value, other.value, n), n);
-
-    // Compute value * other mod n.
-    public func mul(other : Fp) : Fp = Fp(Field.mul(value, other.value, n), n);
-
-    // Compute value * 2 mod n.
-    public func sqr() : Fp = Fp(Field.mul(value, value, n), n);
-
-    // Compute value - other mod n.
-    public func sub(other : Fp) : Fp = Fp(Field.sub(value, other.value, n), n);
-
-    // Compute -value mod n.
-    public func neg() : Fp = Fp(Field.neg(value, n), n);
-
-    // Check equality with the given Fp object.
+    public func inverse() : Fp = Fp(Mont.inverse(value, ctx), ctx);
+    public func add(other : Fp) : Fp = Fp(Mont.add(value, other.value, ctx), ctx);
+    public func mul(other : Fp) : Fp = Fp(Mont.mul(value, other.value, ctx), ctx);
+    public func sqr() : Fp = Fp(Mont.sqr(value, ctx), ctx);
+    public func sub(other : Fp) : Fp = Fp(Mont.sub(value, other.value, ctx), ctx);
+    public func neg() : Fp = Fp(Mont.neg(value, ctx), ctx);
     public func isEqual(other : Fp) : Bool = other.value == value;
+    public func pow(exponent : Nat) : Fp = Fp(Mont.pow(value, exponent, ctx), ctx);
 
-    // Compute value ** other mod n.
-    public func pow(exponent : Nat) : Fp = Fp(Field.pow(value, exponent, n), n);
+    // Square root mod n. Assumes n ≡ 3 (mod 4).
+    public func sqrt() : Fp = Fp(Mont.pow(value, (ctx.n + 1) / 4, ctx), ctx);
+  };
 
-    // Compute sqrt(value) mod n.
-    public func sqrt() : Fp {
-      Fp(Field.pow(value, (n + 1) / 4, n), n);
-    };
+  // Wrap a natural-form Nat into Fp (converts into Montgomery form).
+  public func fromNat(natValue : Nat, ctx : Mont.Ctx) : Fp {
+    Fp(Mont.toMont(natValue, ctx), ctx);
   };
 };

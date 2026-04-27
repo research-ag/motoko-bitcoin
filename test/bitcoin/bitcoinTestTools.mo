@@ -19,7 +19,7 @@ module {
 
   // Helper function for operating modulo the curve order.
   func Fr(value : Nat) : Fp.Fp {
-    Fp.Fp(value, curve.r);
+    curve.Fr(value);
   };
 
   // Helper class for assisting with signing with predetermined nonces.
@@ -94,21 +94,22 @@ module {
     let h = Common.readBE256(hash, 0);
     switch (Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1))) {
       case (#point(x, _y, curve)) {
-        let r = x.value;
+        let r = x.toNat();
         if (r == 0) {
           Runtime.trap("r = 0, use different rand.");
         };
         let s = Fr(rand).inverse().mul(
           Fr(h + sk * r)
         );
-        if (s.value == 0) {
+        let sNat = s.toNat();
+        if (sNat == 0) {
           Runtime.trap("s = 0, use different rand.");
         };
 
-        let finalS : Int = if (s.value > curve.r / 2) {
-          curve.r - s.value;
+        let finalS : Int = if (sNat > curve.r / 2) {
+          curve.r - sNat;
         } else {
-          s.value;
+          sNat;
         };
         return { r = r; s = Int.abs(finalS) };
       };

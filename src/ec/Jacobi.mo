@@ -1,18 +1,22 @@
 // EC operations using Jacobian coordinates.
 //
+// Field elements are kept in Montgomery form throughout: doubling and
+// addition formulas operate on `Nat` values in [0, p) representing `xR mod p`
+// (R = 2^256). Mont add/sub/neg are linear; Mont mul/sqr go through `redc`.
+//
 // This implementation is intended for use within Internet Computer canisters
 // which must only execute public operations. The code does not account for
 // side-channels as they're not relevant to the use case.
 //
 // Therefore, DO NOT use this code for any operations involving secrets.
 
-import Int "mo:core/Int";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 
 import Affine "Affine";
 import Curves "Curves";
 import BaseFp "Fp";
+import Mont "Mont";
 import Numbers "Numbers";
 
 module {
@@ -136,11 +140,12 @@ module {
     switch (normalizeInfinity(point)) {
       case (#infinity(curve)) #infinity(curve);
       case (#point(x, y, z, curve)) {
-        let (x2, y2, z2) = doDouble(x.value, y.value, z.value, curve.a, curve.p);
+        let ctx = curve.mont_p;
+        let (x2, y2, z2) = doDouble(x.value, y.value, z.value, curve.aMont, ctx);
         #point(
-          fpFromInt(x2, curve),
-          fpFromInt(y2, curve),
-          fpFromInt(z2, curve),
+          BaseFp.Fp(x2, ctx),
+          BaseFp.Fp(y2, ctx),
+          BaseFp.Fp(z2, ctx),
           curve,
         );
       };
@@ -155,32 +160,30 @@ module {
     switch (scale(point)) {
       case (#infinity(curve)) #infinity(curve);
       case (#point(x2, y2, _, curve)) {
-        var p : (Int, Int, Int) = (0, 0, 1);
+        let ctx = curve.mont_p;
+        let aM = curve.aMont;
+        var p : (Nat, Nat, Nat) = (0, 0, ctx.one);
         let naf = Numbers.toNaf(other);
         let y2neg = y2.neg().value;
 
         for (i in Nat.rangeByInclusive(naf.size() - 1, 0, -1)) {
           let nafItem : Int = naf[i];
-          p := doDouble(p.0, p.1, p.2, curve.a, curve.p);
+          p := doDouble(p.0, p.1, p.2, aM, ctx);
           if (nafItem < 0) {
-            p := _add(
-              p.0,
-              p.1,
-              p.2,
-              x2.value,
-              y2neg,
-              1,
-              curve.a,
-              curve.p,
-            );
+            p := _add(p.0, p.1, p.2, x2.value, y2neg, ctx.one, aM, ctx);
           } else if (nafItem > 0) {
-            p := _add(p.0, p.1, p.2, x2.value, y2.value, 1, curve.a, curve.p);
+            p := _add(p.0, p.1, p.2, x2.value, y2.value, ctx.one, aM, ctx);
           };
         };
         if (p.1 == 0 or p.2 == 0) {
           return #infinity(curve);
         };
-        #point(fpFromInt(p.0, curve), fpFromInt(p.1, curve), fpFromInt(p.2, curve), curve);
+        #point(
+          BaseFp.Fp(p.0, ctx),
+          BaseFp.Fp(p.1, ctx),
+          BaseFp.Fp(p.2, ctx),
+          curve,
+        );
       };
     };
   };
@@ -201,6 +204,7 @@ module {
       case (#infinity(_), _) point2;
       case (_, #infinity(_)) point1;
       case (#point(X1, Y1, Z1, curve), #point(X2, Y2, Z2, _)) {
+        let ctx = curve.mont_p;
         let (X3, Y3, Z3) = _add(
           X1.value,
           Y1.value,
@@ -208,16 +212,16 @@ module {
           X2.value,
           Y2.value,
           Z2.value,
-          curve.a,
-          curve.p,
+          curve.aMont,
+          ctx,
         );
         if (Y3 == 0 or Z3 == 0) {
           #infinity(curve);
         } else {
           #point(
-            fpFromInt(X3, curve),
-            fpFromInt(Y3, curve),
-            fpFromInt(Z3, curve),
+            BaseFp.Fp(X3, ctx),
+            BaseFp.Fp(Y3, ctx),
+            BaseFp.Fp(Z3, ctx),
             curve,
           );
         };
@@ -225,168 +229,256 @@ module {
     };
   };
 
-  func doDouble(X1 : Int, Y1 : Int, Z1 : Int, a : Nat, p : Nat) : (Int, Int, Int) {
-    if (Z1 == 1) {
-      return doubleWithZ1(X1, Y1, a, p);
+  // ---- Mont-form Jacobian inner formulas. ----
+  // All inputs/outputs are Nat in [0, p) representing field elements in
+  // Montgomery form (xR mod p, R = 2^256). aM is the curve's `a` parameter
+  // also in Montgomery form. ctx carries the Montgomery context (n, mp, r2,
+  // one).
+
+  func doDouble(X1 : Nat, Y1 : Nat, Z1 : Nat, aM : Nat, ctx : Mont.Ctx) : (Nat, Nat, Nat) {
+    if (Z1 == ctx.one) {
+      return doubleWithZ1(X1, Y1, aM, ctx);
     };
     if (Y1 == 0 or Z1 == 0) {
       return (0, 0, 0);
     };
 
-    let (XX, YY) = (X1 * X1 % p, Y1 * Y1 % p);
-    let YYYY : Int = YY * YY % p;
-    let ZZ : Int = Z1 * Z1 % p;
-    let S : Int = 2 * ((X1 + YY) ** 2 - XX - YYYY) % p;
-    let M : Int = (3 * XX + a * ZZ * ZZ) % p;
-    let T : Int = (M * M - 2 * S) % p;
+    let XX = Mont.sqr(X1, ctx);
+    let YY = Mont.sqr(Y1, ctx);
+    let YYYY = Mont.sqr(YY, ctx);
+    let ZZ = Mont.sqr(Z1, ctx);
 
-    let Y3 = (M * (S - T) - 8 * YYYY) % p;
-    let Z3 = ((Y1 + Z1) ** 2 - YY - ZZ) % p;
+    // S = 2 * ((X1 + YY)^2 - XX - YYYY)
+    let X1pYY = Mont.add(X1, YY, ctx);
+    let X1pYY_sq = Mont.sqr(X1pYY, ctx);
+    let inner = Mont.sub(Mont.sub(X1pYY_sq, XX, ctx), YYYY, ctx);
+    let S = Mont.add(inner, inner, ctx);
+
+    // M = 3*XX + a*ZZ^2
+    let three_XX = Mont.add(Mont.add(XX, XX, ctx), XX, ctx);
+    let M = if (aM == 0) {
+      three_XX;
+    } else {
+      Mont.add(three_XX, Mont.mul(aM, Mont.sqr(ZZ, ctx), ctx), ctx);
+    };
+
+    // T = M^2 - 2S
+    let M2 = Mont.sqr(M, ctx);
+    let twoS = Mont.add(S, S, ctx);
+    let T = Mont.sub(M2, twoS, ctx);
+
+    // Y3 = M*(S - T) - 8*YYYY
+    let SsubT = Mont.sub(S, T, ctx);
+    let MSsubT = Mont.mul(M, SsubT, ctx);
+    let YY2 = Mont.add(YYYY, YYYY, ctx);
+    let YY4 = Mont.add(YY2, YY2, ctx);
+    let YY8 = Mont.add(YY4, YY4, ctx);
+    let Y3 = Mont.sub(MSsubT, YY8, ctx);
+
+    // Z3 = (Y1 + Z1)^2 - YY - ZZ
+    let Y1pZ1 = Mont.add(Y1, Z1, ctx);
+    let Y1pZ1_sq = Mont.sqr(Y1pZ1, ctx);
+    let Z3 = Mont.sub(Mont.sub(Y1pZ1_sq, YY, ctx), ZZ, ctx);
 
     return (T, Y3, Z3);
   };
 
-  func doubleWithZ1(X1 : Int, Y1 : Int, a : Nat, p : Nat) : (Int, Int, Int) {
+  func doubleWithZ1(X1 : Nat, Y1 : Nat, aM : Nat, ctx : Mont.Ctx) : (Nat, Nat, Nat) {
     if (Y1 == 0) {
       return (0, 0, 0);
     };
 
-    let (XX, YY) = (X1 * X1 % p, Y1 * Y1 % p);
-    let YYYY : Int = YY * YY % p;
-    let S : Int = 2 * ((X1 + YY) ** 2 - XX - YYYY) % p;
-    let M : Int = 3 * XX + a;
-    let T : Int = (M * M - 2 * S) % p;
-    let Y3 : Int = (M * (S - T) - 8 * YYYY) % p;
-    let Z3 : Int = 2 * Y1 % p;
+    let XX = Mont.sqr(X1, ctx);
+    let YY = Mont.sqr(Y1, ctx);
+    let YYYY = Mont.sqr(YY, ctx);
+
+    let X1pYY = Mont.add(X1, YY, ctx);
+    let X1pYY_sq = Mont.sqr(X1pYY, ctx);
+    let inner = Mont.sub(Mont.sub(X1pYY_sq, XX, ctx), YYYY, ctx);
+    let S = Mont.add(inner, inner, ctx);
+
+    // Z = 1, so M = 3*XX + a (in Mont form, a is aM).
+    let three_XX = Mont.add(Mont.add(XX, XX, ctx), XX, ctx);
+    let M = if (aM == 0) three_XX else Mont.add(three_XX, aM, ctx);
+
+    let M2 = Mont.sqr(M, ctx);
+    let twoS = Mont.add(S, S, ctx);
+    let T = Mont.sub(M2, twoS, ctx);
+
+    let SsubT = Mont.sub(S, T, ctx);
+    let MSsubT = Mont.mul(M, SsubT, ctx);
+    let YY2 = Mont.add(YYYY, YYYY, ctx);
+    let YY4 = Mont.add(YY2, YY2, ctx);
+    let YY8 = Mont.add(YY4, YY4, ctx);
+    let Y3 = Mont.sub(MSsubT, YY8, ctx);
+
+    // Z3 = 2 * Y1
+    let Z3 = Mont.add(Y1, Y1, ctx);
+
     return (T, Y3, Z3);
   };
 
   func addWithEqZ(
-    X1 : Int,
-    Y1 : Int,
-    Z1 : Int,
-    X2 : Int,
-    Y2 : Int,
-    a : Nat,
-    p : Nat,
-  ) : (Int, Int, Int) {
+    X1 : Nat,
+    Y1 : Nat,
+    Z1 : Nat,
+    X2 : Nat,
+    Y2 : Nat,
+    aM : Nat,
+    ctx : Mont.Ctx,
+  ) : (Nat, Nat, Nat) {
 
-    let A : Int = (X2 - X1) ** 2 % p;
-    let B : Int = X1 * A % p;
-    let C : Int = X2 * A % p;
-    let D : Int = (Y2 - Y1) ** 2 % p;
+    let dX = Mont.sub(X2, X1, ctx);
+    let A = Mont.sqr(dX, ctx);
+    let B = Mont.mul(X1, A, ctx);
+    let C_ = Mont.mul(X2, A, ctx);
+    let dY = Mont.sub(Y2, Y1, ctx);
+    let D = Mont.sqr(dY, ctx);
 
     if (A == 0 and D == 0) {
-      return doDouble(X1, Y1, Z1, a, p);
+      return doDouble(X1, Y1, Z1, aM, ctx);
     };
 
-    let X3 : Int = (D - B - C) % p;
-    let Y3 : Int = ((Y2 - Y1) * (B - X3) - Y1 * (C - B)) % p;
-    let Z3 : Int = Z1 * (X2 - X1) % p;
+    let X3 = Mont.sub(Mont.sub(D, B, ctx), C_, ctx);
+    let CsubB = Mont.sub(C_, B, ctx);
+    let BsubX3 = Mont.sub(B, X3, ctx);
+    let Y3 = Mont.sub(Mont.mul(dY, BsubX3, ctx), Mont.mul(Y1, CsubB, ctx), ctx);
+    let Z3 = Mont.mul(Z1, dX, ctx);
 
     return (X3, Y3, Z3);
   };
 
   func addWithZ1(
-    X1 : Int,
-    Y1 : Int,
-    X2 : Int,
-    Y2 : Int,
-    a : Nat,
-    p : Nat,
-  ) : (Int, Int, Int) {
-    let H : Int = X2 - X1;
-    let HH : Int = H * H;
-    let I : Int = 4 * HH % p;
-    let J : Int = H * I;
-    let r : Int = 2 * (Y2 - Y1);
+    X1 : Nat,
+    Y1 : Nat,
+    X2 : Nat,
+    Y2 : Nat,
+    aM : Nat,
+    ctx : Mont.Ctx,
+  ) : (Nat, Nat, Nat) {
+    let H = Mont.sub(X2, X1, ctx);
+    let HH = Mont.sqr(H, ctx);
+    let HH2 = Mont.add(HH, HH, ctx);
+    let I = Mont.add(HH2, HH2, ctx);
+    let J = Mont.mul(H, I, ctx);
+    let dY = Mont.sub(Y2, Y1, ctx);
+    let r = Mont.add(dY, dY, ctx);
 
     if (H == 0 and r == 0) {
-      return doubleWithZ1(X1, Y1, a, p);
+      return doubleWithZ1(X1, Y1, aM, ctx);
     };
 
-    let V : Int = X1 * I;
-    let X3 : Int = (r ** 2 - J - 2 * V) % p;
-    let Y3 : Int = (r * (V - X3) - 2 * Y1 * J) % p;
-    let Z3 : Int = 2 * H % p;
+    let V = Mont.mul(X1, I, ctx);
+    let r_sq = Mont.sqr(r, ctx);
+    let twoV = Mont.add(V, V, ctx);
+    let X3 = Mont.sub(Mont.sub(r_sq, J, ctx), twoV, ctx);
+    let VsubX3 = Mont.sub(V, X3, ctx);
+    let r_VsubX3 = Mont.mul(r, VsubX3, ctx);
+    let Y1J = Mont.mul(Y1, J, ctx);
+    let twoY1J = Mont.add(Y1J, Y1J, ctx);
+    let Y3 = Mont.sub(r_VsubX3, twoY1J, ctx);
+    let Z3 = Mont.add(H, H, ctx);
 
     return (X3, Y3, Z3);
   };
 
   func addWithZ2Eq1(
-    X1 : Int,
-    Y1 : Int,
-    Z1 : Int,
-    X2 : Int,
-    Y2 : Int,
-    a : Nat,
-    p : Nat,
-  ) : (Int, Int, Int) {
+    X1 : Nat,
+    Y1 : Nat,
+    Z1 : Nat,
+    X2 : Nat,
+    Y2 : Nat,
+    aM : Nat,
+    ctx : Mont.Ctx,
+  ) : (Nat, Nat, Nat) {
 
-    let Z1Z1 : Int = Z1 * Z1 % p;
-    let (U2, S2) = (X2 * Z1Z1 % p, Y2 * Z1 * Z1Z1 % p);
-    let H : Int = (U2 - X1) % p;
-    let HH : Int = H * H % p;
-    let I : Int = 4 * HH % p;
-    let J : Int = H * I;
-    let r : Int = 2 * (S2 - Y1) % p;
+    let Z1Z1 = Mont.sqr(Z1, ctx);
+    let U2 = Mont.mul(X2, Z1Z1, ctx);
+    let S2 = Mont.mul(Mont.mul(Y2, Z1, ctx), Z1Z1, ctx);
+    let H = Mont.sub(U2, X1, ctx);
+    let HH = Mont.sqr(H, ctx);
+    let HH2 = Mont.add(HH, HH, ctx);
+    let I = Mont.add(HH2, HH2, ctx);
+    let J = Mont.mul(H, I, ctx);
+    let dS = Mont.sub(S2, Y1, ctx);
+    let r = Mont.add(dS, dS, ctx);
 
     if (r == 0 and H == 0) {
-      return doubleWithZ1(X2, Y2, a, p);
+      return doubleWithZ1(X2, Y2, aM, ctx);
     };
 
-    let V : Int = X1 * I;
-    let X3 = ((r * r) - J - (2 * V)) % p;
-    let Y3 = (r * (V - X3) - 2 * Y1 * J) % p;
-    let Z3 = ((Z1 + H) ** 2 - Z1Z1 - HH) % p;
+    let V = Mont.mul(X1, I, ctx);
+    let r_sq = Mont.sqr(r, ctx);
+    let twoV = Mont.add(V, V, ctx);
+    let X3 = Mont.sub(Mont.sub(r_sq, J, ctx), twoV, ctx);
+    let VsubX3 = Mont.sub(V, X3, ctx);
+    let r_VsubX3 = Mont.mul(r, VsubX3, ctx);
+    let Y1J = Mont.mul(Y1, J, ctx);
+    let twoY1J = Mont.add(Y1J, Y1J, ctx);
+    let Y3 = Mont.sub(r_VsubX3, twoY1J, ctx);
+    let Z1pH = Mont.add(Z1, H, ctx);
+    let Z1pH_sq = Mont.sqr(Z1pH, ctx);
+    let Z3 = Mont.sub(Mont.sub(Z1pH_sq, Z1Z1, ctx), HH, ctx);
 
     return (X3, Y3, Z3);
   };
 
   func addWithArbitraryZ(
-    X1 : Int,
-    Y1 : Int,
-    Z1 : Int,
-    X2 : Int,
-    Y2 : Int,
-    Z2 : Int,
-    a : Nat,
-    p : Nat,
-  ) : (Int, Int, Int) {
+    X1 : Nat,
+    Y1 : Nat,
+    Z1 : Nat,
+    X2 : Nat,
+    Y2 : Nat,
+    Z2 : Nat,
+    aM : Nat,
+    ctx : Mont.Ctx,
+  ) : (Nat, Nat, Nat) {
 
-    let Z1Z1 : Int = Z1 * Z1 % p;
-    let Z2Z2 : Int = Z2 * Z2 % p;
-    let U1 : Int = X1 * Z2Z2 % p;
-    let U2 : Int = X2 * Z1Z1 % p;
-    let S1 : Int = Y1 * Z2 * Z2Z2 % p;
-    let S2 : Int = Y2 * Z1 * Z1Z1 % p;
-    let H : Int = U2 - U1;
-    let r : Int = 2 * (S2 - S1) % p;
+    let Z1Z1 = Mont.sqr(Z1, ctx);
+    let Z2Z2 = Mont.sqr(Z2, ctx);
+    let U1 = Mont.mul(X1, Z2Z2, ctx);
+    let U2 = Mont.mul(X2, Z1Z1, ctx);
+    let S1 = Mont.mul(Mont.mul(Y1, Z2, ctx), Z2Z2, ctx);
+    let S2 = Mont.mul(Mont.mul(Y2, Z1, ctx), Z1Z1, ctx);
+    let H = Mont.sub(U2, U1, ctx);
+    let dS = Mont.sub(S2, S1, ctx);
+    let r = Mont.add(dS, dS, ctx);
 
     if (H == 0 and r == 0) {
-      return doDouble(X1, Y1, Z1, a, p);
+      return doDouble(X1, Y1, Z1, aM, ctx);
     };
 
-    let I : Int = 4 * H * H % p;
-    let J : Int = H * I % p;
-    let V = U1 * I;
-    let X3 : Int = (r * r - J - 2 * V) % p;
-    let Y3 : Int = (r * (V - X3) - 2 * S1 * J) % p;
-    let Z3 : Int = ((Z1 + Z2) ** 2 - Z1Z1 - Z2Z2) * H % p;
+    let HH = Mont.sqr(H, ctx);
+    let HH2 = Mont.add(HH, HH, ctx);
+    let I = Mont.add(HH2, HH2, ctx);
+    let J = Mont.mul(H, I, ctx);
+    let V = Mont.mul(U1, I, ctx);
+    let r_sq = Mont.sqr(r, ctx);
+    let twoV = Mont.add(V, V, ctx);
+    let X3 = Mont.sub(Mont.sub(r_sq, J, ctx), twoV, ctx);
+    let VsubX3 = Mont.sub(V, X3, ctx);
+    let r_VsubX3 = Mont.mul(r, VsubX3, ctx);
+    let S1J = Mont.mul(S1, J, ctx);
+    let twoS1J = Mont.add(S1J, S1J, ctx);
+    let Y3 = Mont.sub(r_VsubX3, twoS1J, ctx);
+    let Z1pZ2 = Mont.add(Z1, Z2, ctx);
+    let Z1pZ2_sq = Mont.sqr(Z1pZ2, ctx);
+    let inner = Mont.sub(Mont.sub(Z1pZ2_sq, Z1Z1, ctx), Z2Z2, ctx);
+    let Z3 = Mont.mul(inner, H, ctx);
 
     return (X3, Y3, Z3);
   };
 
   func _add(
-    X1 : Int,
-    Y1 : Int,
-    Z1 : Int,
-    X2 : Int,
-    Y2 : Int,
-    Z2 : Int,
-    a : Nat,
-    p : Nat,
-  ) : (Int, Int, Int) {
+    X1 : Nat,
+    Y1 : Nat,
+    Z1 : Nat,
+    X2 : Nat,
+    Y2 : Nat,
+    Z2 : Nat,
+    aM : Nat,
+    ctx : Mont.Ctx,
+  ) : (Nat, Nat, Nat) {
 
     if (Y1 == 0 or Z1 == 0) {
       return (X2, Y2, Z2);
@@ -397,30 +489,21 @@ module {
     };
 
     if (Z1 == Z2) {
-      if (Z1 == 1) {
-        return addWithZ1(X1, Y1, X2, Y2, a, p);
+      if (Z1 == ctx.one) {
+        return addWithZ1(X1, Y1, X2, Y2, aM, ctx);
       };
-      return addWithEqZ(X1, Y1, Z1, X2, Y2, a, p);
+      return addWithEqZ(X1, Y1, Z1, X2, Y2, aM, ctx);
     };
 
-    if (Z1 == 1) {
-      return addWithZ2Eq1(X2, Y2, Z2, X1, Y1, a, p);
+    if (Z1 == ctx.one) {
+      return addWithZ2Eq1(X2, Y2, Z2, X1, Y1, aM, ctx);
     };
 
-    if (Z2 == 1) {
-      return addWithZ2Eq1(X1, Y1, Z1, X2, Y2, a, p);
+    if (Z2 == ctx.one) {
+      return addWithZ2Eq1(X1, Y1, Z1, X2, Y2, aM, ctx);
     };
 
-    return addWithArbitraryZ(X1, Y1, Z1, X2, Y2, Z2, a, p);
-  };
-
-  func fpFromInt(value : Int, curve : Curves.Curve) : Fp {
-    let mod : Int = value % curve.p;
-    if (mod < 0) {
-      curve.Fp(Int.abs(mod + curve.p));
-    } else {
-      curve.Fp(Int.abs(mod));
-    };
+    return addWithArbitraryZ(X1, Y1, Z1, X2, Y2, Z2, aM, ctx);
   };
 
   // Normalizes infinity point of the form #point (_, _, 0, _) to #infinity.

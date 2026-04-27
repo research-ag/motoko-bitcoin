@@ -125,7 +125,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
             case (#point(x, _y, _)) {
               // If we are here, then the test is expected to succeed.
               assert (testCase.result != "invalid");
-              assert (expectedOutput == x.value);
+              assert (expectedOutput == x.toNat());
             };
             case _ {
               Runtime.trap("Test failed.");

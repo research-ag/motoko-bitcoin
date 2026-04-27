@@ -31,8 +31,8 @@ module {
       return false;
     };
 
-    let (r, s) : (Fp.Fp, Fp.Fp) = (Fp.Fp(signature.r, curve.r), Fp.Fp(signature.s, curve.r));
-    let h : Fp.Fp = Fp.Fp(Common.readBE256(Sha256.fromArray(#sha256, message).toArray(), 0), curve.r);
+    let (r, s) : (Fp.Fp, Fp.Fp) = (curve.Fr(signature.r), curve.Fr(signature.s));
+    let h : Fp.Fp = curve.Fr(Common.readBE256(Sha256.fromArray(#sha256, message).toArray(), 0));
 
     let sInverse : Fp.Fp = s.inverse();
     let a : Fp.Fp = h.mul(sInverse);
@@ -41,13 +41,13 @@ module {
     return switch (
       Jacobi.toAffine(
         Jacobi.add(
-          Jacobi.mulBase(a.value, curve),
-          Jacobi.mul(Jacobi.fromAffine(#point(x, y, curve)), b.value),
+          Jacobi.mulBase(a.toNat(), curve),
+          Jacobi.mul(Jacobi.fromAffine(#point(x, y, curve)), b.toNat()),
         )
       )
     ) {
       case (#point(x2, _, _)) {
-        r.isEqual(Fp.Fp(x2.value, curve.r));
+        r.isEqual(curve.Fr(x2.toNat()));
       };
       case _ {
         false;
