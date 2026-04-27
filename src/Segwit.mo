@@ -70,18 +70,14 @@ module {
     };
 
     let convertedData = switch (convertBits(data, 1, 5, 8, false)) {
+      case (#err(msg)) return #err(msg);
       case (#ok(d)) d;
-      case _ return #err("Convert bits failed.");
     };
 
     let convertedDataSize : Nat = convertedData.size();
 
     if (convertedDataSize < 2 or convertedDataSize > 40) {
       return #err("Wrong output size.");
-    };
-
-    if (version > 16) {
-      return #err("Invalid witness version.");
     };
 
     if (
@@ -112,11 +108,12 @@ module {
     var acc : Nat32 = 0;
     var bits : Nat32 = 0;
     let maxv : Nat32 = (1 << to) - 1;
-    let output = VarArray.repeat<Nat8>(0, data.size() * from.toNat() / to.toNat() + 1);
+    let dataSize = data.size();
+    let output = VarArray.repeat<Nat8>(0, (dataSize - start) * from.toNat() / to.toNat() + 1);
     var outputLen : Nat = 0;
 
     var pos = start;
-    while (pos < data.size()) {
+    while (pos < dataSize) {
       let v : Nat32 = data[pos].toNat16().toNat32();
 
       if ((v >> from) != 0) {

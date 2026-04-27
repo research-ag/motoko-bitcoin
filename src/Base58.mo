@@ -172,7 +172,7 @@ module {
     let size : Nat = bytesCount * 138 / 100 + 1;
     let b58 : [var Nat16] = VarArray.repeat<Nat16>(0, size);
 
-    // Process leading remainder bytes (remainingBytes % 7) one at a time.
+    // Process leading remainder bytes (bytesCount % 7) one at a time.
     let remainder = bytesCount % 7;
     var rem : Nat = 0;
     while (rem < remainder) {
