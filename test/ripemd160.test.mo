@@ -1,9 +1,12 @@
 import Nat "mo:core/Nat";
 // @testmode wasi
 
-import VarArray "mo:core/VarArray";
+import Array "mo:core/Array";
 import Blob "mo:core/Blob";
+import Nat8 "mo:core/Nat8";
 import Text "mo:core/Text";
+import VarArray "mo:core/VarArray";
+
 import Ripemd160 "../src/Ripemd160";
 import { test } "mo:test";
 
@@ -115,28 +118,48 @@ test(
     digest.write(Blob.toArray(Text.encodeUtf8("vwxyz")));
 
     assert (
-      [
-        247,
-        28,
-        39,
-        16,
-        156,
-        105,
-        44,
-        27,
-        86,
-        187,
-        220,
-        235,
-        91,
-        157,
-        40,
-        101,
-        179,
-        112,
-        141,
-        188,
-      ] == digest.sum()
+      // prettier-ignore
+      digest.sum() == [
+        247, 28, 39, 16, 156, 105, 44, 27, 86, 187, 220, 235, 91, 157, 40, 101,
+        179, 112, 141, 188
+      ]
     );
+  },
+);
+
+test(
+  "single write spanning full block + tail",
+  func() {
+    // 96 bytes = one full 64-byte block + 32 tail bytes, exercising both the
+    // full-block fast path and the tail path inside Ripemd160.write().
+    let input : [Nat8] = Array.tabulate<Nat8>(96, func i { Nat8.fromIntWrap(i * 19 + 7) });
+    let expected : [Nat8] = [
+      0xc3,
+      0xfd,
+      0x14,
+      0xbf,
+      0x82,
+      0xc7,
+      0x10,
+      0x5e,
+      0xd2,
+      0x86,
+      0x0c,
+      0xa8,
+      0xa3,
+      0xa2,
+      0xad,
+      0x54,
+      0x8b,
+      0x74,
+      0x71,
+      0x5a,
+    ];
+
+    assert (Ripemd160.hash(input) == expected);
+
+    let digest : Ripemd160.Digest = Ripemd160.Digest();
+    digest.write(input);
+    assert (digest.sum() == expected);
   },
 );
