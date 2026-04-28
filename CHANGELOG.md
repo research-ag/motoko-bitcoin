@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optimize `Ripemd160` (#20).
 
+### Fixed
+
+- `Ripemd160` and `Hmac` Digests now guard against accidentally writing more data after calling `sum()`.
+
 ## [0.2.0] - 2026-04-22
 
 ### Changed
