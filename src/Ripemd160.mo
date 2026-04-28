@@ -32,6 +32,9 @@ module {
     // Number of complete 64-byte blocks already absorbed.
     private var n_blocks : Nat64 = 0;
 
+    // Flag to close Digest after call to sum()
+    private var closed = false;
+
     private func initialize() {
       s[0] := 0x67452301;
       s[1] := 0xEFCDAB89;
@@ -47,6 +50,7 @@ module {
 
     public func reset() {
       initialize();
+      closed := false;
     };
 
     private func rol(x : Nat32, r : Nat32) : Nat32 {
@@ -303,6 +307,9 @@ module {
     };
 
     public func write(data : [Nat8]) {
+      // Don't allow writes if Digest is closed, i.e. after sum()
+      assert (not closed);
+
       let n = data.size();
       if (n == 0) return;
       var i = 0;
@@ -354,6 +361,12 @@ module {
     // padded state and produce a different (incorrect) result. Call
     // reset() before reusing the Digest for another message.
     public func sum() : [Nat8] {
+      // Prevent sum() from being called twice.
+      assert (not closed);
+      
+      // Close Digest for futher writes.
+      closed := true;
+
       // Total message length in bits, captured before padding is appended.
       let bitlen : Nat64 = ((n_blocks << 6) +% Nat64.fromNat(Nat16.toNat(i_msg))) << 3;
 
