@@ -48,6 +48,7 @@ module {
     let outerDigest : Digest = digestFactory.create();
     let innerPad : Nat8 = 0x36;
     let outerPad : Nat8 = 0x5c;
+    var closed = false;
 
     do {
       let blockSize = digestFactory.blockSize;
@@ -99,10 +100,13 @@ module {
     };
 
     public func writeArray(data : [Nat8]) {
+      assert (not closed);
       innerDigest.writeArray(data);
     };
 
     public func sum() : Blob {
+      assert (not closed);
+      closed := true;
       let innerHash = innerDigest.sum().toArray();
       outerDigest.writeArray(innerHash);
       outerDigest.sum();
