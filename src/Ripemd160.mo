@@ -363,7 +363,7 @@ module {
     public func sum() : [Nat8] {
       // Prevent sum() from being called twice.
       assert (not closed);
-      
+
       // Close Digest for futher writes.
       closed := true;
 
