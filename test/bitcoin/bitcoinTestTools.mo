@@ -15,11 +15,11 @@ import Wif "../../src/bitcoin/Wif";
 
 module {
   public type Signature = { r : Nat; s : Nat };
-  let curve = Curves.secp256k1;
+  func curve() : Curves.Curve = Curves.secp256k1();
 
   // Helper function for operating modulo the curve order.
   func Fr(value : Nat) : Fp.Fp {
-    curve.Fr(value);
+    curve().Fr(value);
   };
 
   // Helper class for assisting with signing with predetermined nonces.
@@ -60,7 +60,7 @@ module {
       let publicPoint = Jacobi.toAffine(
         Jacobi.mulBase(
           bitcoinPrivateKey.key,
-          Curves.secp256k1,
+          Curves.secp256k1(),
         )
       );
 
@@ -81,7 +81,7 @@ module {
     public func p2pkhAddress() : Types.P2PkhAddress {
       P2pkh.deriveAddress(
         bitcoinPrivateKey.network,
-        (Blob.toArray(publicKey().0), Curves.secp256k1),
+        (Blob.toArray(publicKey().0), Curves.secp256k1()),
       );
     };
   };
@@ -92,7 +92,7 @@ module {
   // `message` is the data to sign.
   func ecdsaSign(sk : Nat, rand : Nat, hash : [Nat8]) : Signature {
     let h = Common.readBE256(hash, 0);
-    switch (Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1))) {
+    switch (Jacobi.toAffine(Jacobi.mulBase(rand, Curves.secp256k1()))) {
       case (#point(x, _y, curve)) {
         let r = x.toNat();
         if (r == 0) {

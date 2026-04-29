@@ -13,7 +13,7 @@ module {
       cols = ["k small", "k medium", "k large"];
     };
 
-    let curve = Curves.secp256k1;
+    let curve = Curves.secp256k1();
     let gAff : Affine.Point = #point(curve.Fp(curve.gx), curve.Fp(curve.gy), curve);
 
     func run(ri : Nat, ci : Nat) {

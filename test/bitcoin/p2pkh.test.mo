@@ -57,7 +57,7 @@ let makeScriptTestCases : [MakeScriptTestCase] = [
 func testP2pkhDeriveAddress(testCase : AddressTestCase) {
   let actual = P2pkh.deriveAddress(
     testCase.network,
-    (testCase.key, Curves.secp256k1),
+    (testCase.key, Curves.secp256k1()),
   );
   assert (testCase.p2pkh == actual);
 };

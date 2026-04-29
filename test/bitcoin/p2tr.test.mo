@@ -48,7 +48,7 @@ test(
   func() {
     let expected_tweak_bytes : [Nat8] = [93, 80, 16, 188, 233, 192, 60, 9, 243, 64, 251, 234, 102, 39, 147, 81, 152, 14, 119, 40, 221, 40, 12, 227, 47, 186, 208, 188, 123, 78, 238, 105];
     expect.nat(expected_tweak_bytes.size()).equal(32);
-    let expected_tweak : Fp.Fp = Curves.secp256k1.Fp(Common.readBE256(expected_tweak_bytes, 0));
+    let expected_tweak : Fp.Fp = Curves.secp256k1().Fp(Common.readBE256(expected_tweak_bytes, 0));
 
     let internal_key : [Nat8] = [56, 52, 223, 2, 209, 226, 50, 193, 145, 4, 96, 207, 104, 89, 54, 45, 238, 254, 164, 193, 142, 173, 243, 44, 173, 50, 55, 172, 237, 168, 233, 170];
     expect.nat(internal_key.size()).equal(32);
@@ -84,7 +84,7 @@ test(
   "add zero tweak",
   func() {
     let public_key_bip340 : [Nat8] = [56, 52, 223, 2, 209, 226, 50, 193, 145, 4, 96, 207, 104, 89, 54, 45, 238, 254, 164, 193, 142, 173, 243, 44, 173, 50, 55, 172, 237, 168, 233, 170];
-    let zero_tweak : Fp.Fp = Curves.secp256k1.Fp(0);
+    let zero_tweak : Fp.Fp = Curves.secp256k1().Fp(0);
     switch (P2tr.tweakPublicKey(public_key_bip340, zero_tweak)) {
       case (#ok(tweaked)) {
         expect.blob(Blob.fromArray(tweaked.bip340_public_key)).equal(Blob.fromArray(public_key_bip340));

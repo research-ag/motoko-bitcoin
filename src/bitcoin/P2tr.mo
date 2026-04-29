@@ -82,11 +82,11 @@ module {
 
     let tweak = Common.readBE256(tagged_hash, 0);
 
-    if (tweak >= Curves.secp256k1.p) {
+    if (tweak >= Curves.secp256k1().p) {
       return #err("Failed to compute tweak, tweak is not smaller than the curve order");
     };
 
-    #ok(Curves.secp256k1.Fp(tweak));
+    #ok(Curves.secp256k1().Fp(tweak));
   };
 
   /// Corresponds to
@@ -102,7 +102,7 @@ module {
   public func tweakPublicKey(public_key_bip340_bytes : [Nat8], tweak : Fp.Fp) : Result<PublicKey, Text> {
     let even_point_flag : [Nat8] = [0x02];
     let public_key_sec1_bytes = [even_point_flag, public_key_bip340_bytes].flatten();
-    let public_key_point = switch (Jacobi.fromBytes(public_key_sec1_bytes, Curves.secp256k1)) {
+    let public_key_point = switch (Jacobi.fromBytes(public_key_sec1_bytes, Curves.secp256k1())) {
       case (?point) {
         switch (point) {
           case (#infinity _) {
@@ -117,7 +117,7 @@ module {
       };
     };
 
-    let tweak_point = Jacobi.mulBase(tweak.toNat(), Curves.secp256k1);
+    let tweak_point = Jacobi.mulBase(tweak.toNat(), Curves.secp256k1());
 
     let tweaked_public_key = Jacobi.add(public_key_point, tweak_point);
 

@@ -28,7 +28,7 @@ func testWycheproofEcdsa(testCase : WycheproofEcdsaTestCase) {
   };
 
   switch (
-    PublicKey.decode(#sec1(key, Curves.secp256k1)),
+    PublicKey.decode(#sec1(key, Curves.secp256k1())),
     Der.decodeSignature(Blob.fromArray(sig)),
   ) {
     case (#ok(publicKey), #ok(signature)) {

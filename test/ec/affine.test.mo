@@ -2,7 +2,7 @@ import Affine "../../src/ec/Affine";
 import Curves "../../src/ec/Curves";
 import TestUtils "../TestUtils";
 
-let curve = Curves.secp256k1;
+let curve = Curves.secp256k1();
 let Fp = curve.Fp;
 
 type FromBytesTestCase = {

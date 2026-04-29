@@ -23,12 +23,12 @@ let runTest = TestUtils.runTestWithDefaults;
 func getSecp256k1Point(coords : ?(Nat, Nat)) : Jacobi.Point {
   switch (coords) {
     case (?(x, y)) {
-      switch (Jacobi.fromNat(x, y, 1, Curves.secp256k1)) {
+      switch (Jacobi.fromNat(x, y, 1, Curves.secp256k1())) {
         case (null) Runtime.trap("unreachable");
         case (?point) point;
       };
     };
-    case (null) #infinity(Curves.secp256k1);
+    case (null) #infinity(Curves.secp256k1());
   };
 };
 
@@ -56,7 +56,7 @@ func testMultiplication(vector : MultiplicationVector) {
 
 func testBaseMultiplication(vector : BaseMultiplicationVector) {
   let expectedPoint = getSecp256k1Point(?vector.output);
-  let actual = Jacobi.mulBase(vector.multiplicand, Curves.secp256k1);
+  let actual = Jacobi.mulBase(vector.multiplicand, Curves.secp256k1());
   assert (Jacobi.isEqual(expectedPoint, actual));
 };
 
@@ -114,7 +114,7 @@ func testWycheproofEcdh(testCase : WycheproofEcdhTestCase) {
         null;
       };
 
-      switch (Jacobi.fromBytes(publicKey, Curves.secp256k1), expectedOutput) {
+      switch (Jacobi.fromBytes(publicKey, Curves.secp256k1()), expectedOutput) {
         case (?(#point(point)), ?(expectedOutput)) {
           // Point is successfully decoded, compute ECDH.
           switch (

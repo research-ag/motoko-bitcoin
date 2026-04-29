@@ -1,5 +1,6 @@
 import Array "mo:core/Array";
 import Blob "mo:core/Blob";
+import Debug "mo:core/Debug";
 import Runtime "mo:core/Runtime";
 import Text "mo:core/Text";
 import VarArray "mo:core/VarArray";
@@ -60,9 +61,9 @@ module {
         let s = samples[i];
         let keyBytes = decode(s.key);
         let sigBytes = decode(s.sig);
-        let pk = switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1))) {
+        let pk = switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1()))) {
           case (#ok v) v;
-          case (_) Runtime.trap("Invalid ECDSA benchmark public key fixture");
+          case (#err e) Runtime.trap("Invalid ECDSA benchmark public key fixture: " # e);
         };
         let sig = switch (Der.decodeSignature(Blob.fromArray(sigBytes))) {
           case (#ok v) v;
@@ -79,7 +80,7 @@ module {
         case (0) {
           let keyBytes = decode(s.key);
           let sigBytes = decode(s.sig);
-          switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1)), Der.decodeSignature(Blob.fromArray(sigBytes))) {
+          switch (PublicKey.decode(#sec1(keyBytes, Curves.secp256k1())), Der.decodeSignature(Blob.fromArray(sigBytes))) {
             case (#ok pk, #ok sig) { ignore Ecdsa.verify(sig, pk, msgBytes) };
             case (_) {};
           };

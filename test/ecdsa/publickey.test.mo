@@ -73,7 +73,7 @@ let publicKeyFromBytesTestCases : [PublicKeyFromBytesTestCase] = [
 ];
 
 func testPublicKeyFromBytes(testCase : PublicKeyFromBytesTestCase) {
-  switch (PublicKey.decode(#sec1(testCase.data, Curves.secp256k1))) {
+  switch (PublicKey.decode(#sec1(testCase.data, Curves.secp256k1()))) {
     case (#ok(_pk)) {
       assert (testCase.valid);
     };
@@ -84,7 +84,7 @@ func testPublicKeyFromBytes(testCase : PublicKeyFromBytesTestCase) {
 };
 
 func testPublicKeyFromPoint(testCase : PublicKeyFromPointTestCase) {
-  let curve = Curves.secp256k1;
+  let curve = Curves.secp256k1();
   let point : Affine.Point = switch (testCase.coords) {
     case (null) {
       #infinity(curve);

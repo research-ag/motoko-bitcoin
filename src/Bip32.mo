@@ -28,7 +28,7 @@ module {
     #fingerprint : [Nat8];
   };
 
-  let curve : Curves.Curve = Curves.secp256k1;
+  func curve() : Curves.Curve = Curves.secp256k1();
   let publicPrefix : Nat32 = 0x0488B21E;
 
   // Parse a Bip32 serialized key. If _parentPubKey is #publicKeyData, will
@@ -112,7 +112,7 @@ module {
           },
         );
 
-        switch (Affine.fromBytes(keyData, curve)) {
+        switch (Affine.fromBytes(keyData, curve())) {
           case (null) {
             return null;
           };
@@ -260,18 +260,19 @@ module {
       // Parse the left 32-bytes as an integer in the domain parameters of
       // secp2secp256k1 curve.
       let multiplicand : Nat = Common.readBE256(left, 0);
-      if (multiplicand >= curve.r) {
+      let c = curve();
+      if (multiplicand >= c.r) {
         // This has probability lower than 1 in 2^127.
         return null;
       };
 
-      switch (Jacobi.fromBytes(key, curve)) {
+      switch (Jacobi.fromBytes(key, c)) {
         case (null) {
           return null;
         };
         case (?parsedKey) {
           // Derive the child public key.
-          switch (Jacobi.add(Jacobi.mulBase(multiplicand, curve), parsedKey)) {
+          switch (Jacobi.add(Jacobi.mulBase(multiplicand, c), parsedKey)) {
             case (#infinity(_)) {
               return null;
             };
