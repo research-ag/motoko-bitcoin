@@ -15,8 +15,6 @@
 import Int "mo:core/Int";
 import Prim "mo:prim";
 
-import Numbers "Numbers";
-
 module {
   public type Ctx = {
     n : Nat; // odd modulus
@@ -87,13 +85,11 @@ module {
   };
 
   // Modular inverse: a is in Mont form (= aR), returns a^-1 in Mont form.
-  // Uses extended Euclidean algorithm on the natural-form representative.
-  // Traps if a is not coprime to n (gcd != 1).
+  // Delegates to the runtime's `intInvMod` (libtommath modular inverse) on
+  // the natural-form representative. Traps if a is not coprime to n.
   public func inverse(a : Nat, c : Ctx) : Nat {
     let aNat = redc(a, c);
-    let (gcd, x, _) = Numbers.eea(aNat, c.n);
-    assert (gcd == 1);
-    let invNat = if (x < 0) Int.abs(x + c.n) else Int.abs(x);
+    let invNat = Int.abs(Prim.intInvMod(aNat, c.n));
     mul(invNat, c.r2, c);
   };
 };
