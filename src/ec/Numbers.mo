@@ -3,7 +3,6 @@ import List "mo:core/List";
 
 module {
   // Extended Euclidean Algorithm.
-  /*
   public func eea(a : Int, b : Int) : (Int, Int, Int) {
     if (b == 0) {
       return (a, 1, 0);
@@ -11,7 +10,6 @@ module {
     let (d, s, t) = eea(b, a % b);
     return (d, t, s - (a / b) * t);
   };
-  */
 
   // Convert given number to binary represented as an array of Bool in reverse
   // order.
