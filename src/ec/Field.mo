@@ -5,6 +5,8 @@ import Numbers "Numbers";
 
 module {
   // Compute a ** -1 mod n.
+  // This function isn't used in the library itself, but is
+  // provided for completeness.
   public func inverse(a : Nat, n : Nat) : ?Nat {
     let (gcd, x, _) = Numbers.eea(a, n);
 
