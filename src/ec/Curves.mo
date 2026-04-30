@@ -2,6 +2,21 @@ import Fp "Fp";
 import Mont "Mont";
 
 module {
+  // Parameters for the GLV endomorphism `phi(x, y) = (beta * x, y)`, which
+  // satisfies `phi(P) = lambda * P` on the curve. The basis `(a1, b1), (a2, b2)`
+  // is used to decompose a scalar `k mod r` into a pair `(k1, k2)` of roughly
+  // half the bit-length such that `k = k1 + k2 * lambda mod r`.
+  // `betaMont` is `beta` in Montgomery form mod p so it can be used directly
+  // by the hot scalar-multiplication loop.
+  public type Glv = {
+    betaMont : Nat;
+    lambda : Nat;
+    a1 : Int;
+    b1 : Int;
+    a2 : Int;
+    b2 : Int;
+  };
+
   public type Curve = {
     p : Nat;
     // Order (number of points on the curve)
@@ -21,6 +36,8 @@ module {
     Fp : (Nat) -> Fp.Fp;
     // Construct an Fp value mod r from a natural-form Nat.
     Fr : (Nat) -> Fp.Fp;
+    // Optional GLV endomorphism parameters for fast scalar multiplication.
+    glv : ?Glv;
   };
 
   let secp256k1_p : Nat = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f;
@@ -42,6 +59,14 @@ module {
       aMont = 0;
       Fp = func(value : Nat) : Fp.Fp = Fp.fromNat(value, mont_p);
       Fr = func(value : Nat) : Fp.Fp = Fp.fromNat(value, mont_r);
+      glv = ?{
+        betaMont = Mont.toMont(0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee, mont_p);
+        lambda = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72;
+        a1 = 0x3086d221a7d46bcde86c90e49284eb15;
+        b1 = -0xe4437ed6010e88286f547fa90abfe4c3;
+        a2 = 0x114ca50f7a8e2f3f657c1108d9d44cfd8;
+        b2 = 0x3086d221a7d46bcde86c90e49284eb15;
+      };
     };
     curve;
   };

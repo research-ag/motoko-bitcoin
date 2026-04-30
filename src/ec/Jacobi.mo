@@ -11,6 +11,7 @@
 // Therefore, DO NOT use this code for any operations involving secrets.
 
 import Nat "mo:core/Nat";
+import Int "mo:core/Int";
 import Runtime "mo:core/Runtime";
 
 import Affine "Affine";
@@ -160,6 +161,10 @@ module {
     switch (scale(point)) {
       case (#infinity(curve)) #infinity(curve);
       case (#point(x2, y2, _, curve)) {
+        switch (curve.glv) {
+          case (?glv) return mulGlv(x2, y2, other, glv, curve);
+          case null {};
+        };
         let ctx = curve.mont_p;
         let aM = curve.aMont;
         var p : (Nat, Nat, Nat) = (0, 0, ctx.one);
@@ -186,6 +191,87 @@ module {
         );
       };
     };
+  };
+
+  // Scalar multiplication using the GLV endomorphism. Decomposes the scalar
+  // `k mod r` into `(k1, k2)` such that `k1 + lambda * k2 == k (mod r)` and
+  // both halves are roughly half the bit-length of `r`. Then computes
+  // `k1 * P + k2 * phi(P)` with a Straus/Shamir-style interleaved-NAF loop,
+  // where `phi(X, Y, Z) = (beta * X, Y, Z)` in Jacobian coordinates.
+  // Field elements are kept in Montgomery form throughout, matching the rest
+  // of the Jacobian inner formulas. Caller guarantees `(x, y)` is the affine
+  // (Z=1) representation of P (in Mont form) and that `scalar != 0`.
+  func mulGlv(
+    x : Fp,
+    y : Fp,
+    scalar : Nat,
+    glv : Curves.Glv,
+    curve : Curves.Curve,
+  ) : Point {
+    let ctx = curve.mont_p;
+    let aM = curve.aMont;
+
+    let n : Int = curve.r;
+    let k : Int = scalar % curve.r;
+    if (k == 0) {
+      return #infinity(curve);
+    };
+    let halfN : Int = n / 2;
+
+    // Both `b2` and `-b1` are positive for valid GLV bases, so the numerators
+    // are non-negative and Motoko's truncating Int division yields rounding
+    // to nearest (with halves rounded away from zero, which is acceptable).
+    let c1 : Int = (glv.b2 * k + halfN) / n;
+    let c2 : Int = (-glv.b1 * k + halfN) / n;
+    let k1 : Int = k - c1 * glv.a1 - c2 * glv.a2;
+    let k2 : Int = -c1 * glv.b1 - c2 * glv.b2;
+
+    let absK1 = Int.abs(k1);
+    let absK2 = Int.abs(k2);
+
+    // Precompute base points and their negations, all in Mont form.
+    let p1x = x.value;
+    let yPos = y.value;
+    let yNeg = Mont.neg(yPos, ctx);
+    let p1y = if (k1 < 0) yNeg else yPos;
+    let p1yAlt = if (k1 < 0) yPos else yNeg;
+    let p2x = Mont.mul(x.value, glv.betaMont, ctx);
+    let p2y = if (k2 < 0) yNeg else yPos;
+    let p2yAlt = if (k2 < 0) yPos else yNeg;
+
+    let naf1 = Numbers.toNaf(absK1);
+    let naf2 = Numbers.toNaf(absK2);
+    let len = if (naf1.size() > naf2.size()) naf1.size() else naf2.size();
+
+    var p : (Nat, Nat, Nat) = (0, 0, ctx.one);
+    for (i in Nat.rangeByInclusive(len - 1, 0, -1)) {
+      p := doDouble(p.0, p.1, p.2, aM, ctx);
+      if (i < naf1.size()) {
+        let d : Int = naf1[i];
+        if (d > 0) {
+          p := _add(p.0, p.1, p.2, p1x, p1y, ctx.one, aM, ctx);
+        } else if (d < 0) {
+          p := _add(p.0, p.1, p.2, p1x, p1yAlt, ctx.one, aM, ctx);
+        };
+      };
+      if (i < naf2.size()) {
+        let d : Int = naf2[i];
+        if (d > 0) {
+          p := _add(p.0, p.1, p.2, p2x, p2y, ctx.one, aM, ctx);
+        } else if (d < 0) {
+          p := _add(p.0, p.1, p.2, p2x, p2yAlt, ctx.one, aM, ctx);
+        };
+      };
+    };
+    if (p.1 == 0 or p.2 == 0) {
+      return #infinity(curve);
+    };
+    #point(
+      BaseFp.Fp(p.0, ctx),
+      BaseFp.Fp(p.1, ctx),
+      BaseFp.Fp(p.2, ctx),
+      curve,
+    );
   };
 
   // Multiply the base point of the given curve by the given scalar value.
