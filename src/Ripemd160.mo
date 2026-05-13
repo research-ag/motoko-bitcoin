@@ -361,7 +361,7 @@ module {
       // Prevent sum() from being called twice.
       assert (not closed);
 
-      // Close Digest for futher writes.
+      // Close Digest for further writes.
       closed := true;
 
       // Total message length in bits, captured before padding is appended.
