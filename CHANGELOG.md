@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Make Bech32.decode() accept all-numeric input (bugfix)
+- Avoid trap in Base58Check.decode() on short input
+- Check for invalid input in Wif.decode(), Segwit.encode()
+- Make non-trapping:
+  - Address.addressFromText()
+  - P2pkh.decodeAddress()
+  - P2pkh.decodeAddress()
+  - P2pkh.makeScript()
+  - Address.scriptPubKey()
+  - Bitcoin.buildTransaction()
+  - Wif.decode()
+
 ## [0.2.0] - 2026-04-22
 
 ### Changed
