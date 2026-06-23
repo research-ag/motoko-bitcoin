@@ -1,3 +1,14 @@
+/// RIPEMD-160 hash implementation.
+///
+/// Provides a one-shot hash function and an incremental digest API.
+/// RIPEMD-160 is used in Bitcoin as part of HASH160.
+///
+/// Import from the bitcoin package to use this module.
+/// ```motoko name=import
+/// import Ripemd160 "mo:bitcoin/Ripemd160";
+/// ```
+
+import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
@@ -6,6 +17,14 @@ import VarArray "mo:core/VarArray";
 import Prim "mo:prim";
 
 module {
+  /// Computes the RIPEMD-160 digest of `array`.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let digest = Ripemd160.hash([0x01, 0x02, 0x03]);
+  /// ```
+  ///
+  /// Never traps. Always returns exactly 20 bytes.
   // Hash the given array and return finalized result.
   public func hash(array : [Nat8]) : [Nat8] {
     let digest = Digest();
@@ -13,6 +32,15 @@ module {
     digest.sum();
   };
 
+  /// Incremental RIPEMD-160 digest state.
+  ///
+  /// Example:
+  /// ```motoko include=import
+  /// let d = Ripemd160.Digest();
+  /// d.write([0x01, 0x02]);
+  /// d.write([0x03]);
+  /// let digest = d.sum();
+  /// ```
   public class Digest() {
     // Persistent chaining state: 5 Nat32 words (h0..h4).
     // Stored inline in a [var Nat32] so per-block updates do not allocate.
@@ -48,6 +76,9 @@ module {
 
     initialize();
 
+    /// Resets the digest to its initial state.
+    ///
+    /// Never traps.
     public func reset() {
       initialize();
       closed := false;
@@ -306,6 +337,9 @@ module {
       };
     };
 
+    /// Adds `data` to the digest state.
+    ///
+    /// Never traps. Accepts an array of any length, including the empty array.
     public func write(data : [Nat8]) {
       // Don't allow writes if Digest is closed, i.e. after sum()
       assert (not closed);
@@ -352,11 +386,11 @@ module {
       };
     };
 
-    // Finalize the digest and return the 20-byte RIPEMD-160 hash.
-    //
-    // NOTE: sum() is consuming and locks the Digest.
-    // Calling sum() a second time or calling one of the write..() functions after sum() will trap.
-    // You have to call reset() before you can re-use a Digest for another message.
+    /// Finalize the digest and return the 20-byte RIPEMD-160 hash.
+    ///
+    /// NOTE: sum() is consuming and locks the Digest.
+    /// Calling sum() a second time or calling one of the write..() functions after sum() will trap.
+    /// You have to call reset() before you can re-use a Digest for another message.
     public func sum() : [Nat8] {
       // Prevent sum() from being called twice.
       assert (not closed);
