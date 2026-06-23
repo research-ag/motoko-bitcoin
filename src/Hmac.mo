@@ -32,7 +32,7 @@ module {
     create : () -> Digest;
   };
 
-  // HMAC instance for computing an incremental HMAC.
+  /// HMAC instance for computing an incremental HMAC.
   ///
   /// Allows writing data in chunks and retrieving the final HMAC.
   ///
@@ -58,7 +58,8 @@ module {
   /// ```
   ///
   /// Never traps. Accepts a `key` of any length, including the empty key.
-  /// Subsequent `writeArray` and `sum` calls also never trap.
+  /// `writeArray` and `sum` do not trap on any input, but the instance is
+  /// one-shot: after `sum()` locks it, further `writeArray`/`sum` calls trap.
   // Sha256 support.
   public func sha256(key : [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
 
@@ -76,7 +77,8 @@ module {
   /// ```
   ///
   /// Never traps. Accepts a `key` of any length, including the empty key.
-  /// Subsequent `writeArray` and `sum` calls also never trap.
+  /// `writeArray` and `sum` do not trap on any input, but the instance is
+  /// one-shot: after `sum()` locks it, further `writeArray`/`sum` calls trap.
   // Sha512 support.
   public func sha512(key : [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
 

@@ -339,7 +339,9 @@ module {
 
     /// Adds `data` to the digest state.
     ///
-    /// Never traps. Accepts an array of any length, including the empty array.
+    /// Accepts an array of any length, including the empty array. Does not trap
+    /// on any input, but traps if called after `sum()` has locked the Digest
+    /// (call `reset()` first to reuse it).
     public func write(data : [Nat8]) {
       // Don't allow writes if Digest is closed, i.e. after sum()
       assert (not closed);
@@ -389,7 +391,7 @@ module {
     /// Finalize the digest and return the 20-byte RIPEMD-160 hash.
     ///
     /// NOTE: sum() is consuming and locks the Digest.
-    /// Calling sum() a second time or calling one of the write..() functions after sum() will trap.
+    /// Calling sum() a second time or calling write() after sum() will trap.
     /// You have to call reset() before you can re-use a Digest for another message.
     public func sum() : [Nat8] {
       // Prevent sum() from being called twice.
