@@ -11,6 +11,7 @@ import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import List "mo:core/List";
 import Nat "mo:core/Nat";
+import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
 import Nat8 "mo:core/Nat8";
 import { type Result } "mo:core/Types";
@@ -184,7 +185,7 @@ module {
               Types.SIGHASH_ALL,
             );
             let signature : Blob = ecdsaProxy.sign(
-              Blob.fromArray(sighash),
+              sighash.toBlob(),
               derivationPath,
             );
             let encodedSignature : [Nat8] = Der.encodeSignature(signature).toArray();
@@ -195,7 +196,7 @@ module {
                 if (n < encodedSignature.size()) {
                   encodedSignature[n];
                 } else {
-                  Nat8.fromNat(Types.SIGHASH_ALL.toNat());
+                  Types.SIGHASH_ALL.toNat16().toNat8();
                 };
               },
             );

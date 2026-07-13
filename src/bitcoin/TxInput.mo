@@ -4,6 +4,7 @@
 /// import TxInput "mo:bitcoin/bitcoin/TxInput";
 /// ```
 
+import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import { type Iter; type Result } "mo:core/Types";
 import VarArray "mo:core/VarArray";
@@ -33,7 +34,7 @@ module {
       ByteUtils.readLE32(data),
     ) {
       case (?prevTxId, ?prevTxOutputIndex, #ok script, ?sequence) {
-        (Blob.fromArray(prevTxId), prevTxOutputIndex, script, sequence);
+        (prevTxId.toBlob(), prevTxOutputIndex, script, sequence);
       };
       case (null, _, _, _) {
         return #err("Could not read prevTxId.");

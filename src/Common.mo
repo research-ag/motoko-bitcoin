@@ -102,10 +102,10 @@ module {
   /// Traps if `offset + 4 > bytes.size()`.
   // Write given value as 32-bit big endian into array starting at offset.
   public func writeBE32(bytes : [var Nat8], offset : Nat, value : Nat32) {
-    bytes[offset] := Nat8.fromNat(((value & 0xFF000000) >> 24).toNat());
-    bytes[offset + 1] := Nat8.fromNat(((value & 0xFF0000) >> 16).toNat());
-    bytes[offset + 2] := Nat8.fromNat(((value & 0xFF00) >> 8).toNat());
-    bytes[offset + 3] := Nat8.fromNat((value & 0xFF).toNat());
+    bytes[offset] := ((value & 0xFF000000) >> 24).toNat16().toNat8();
+    bytes[offset + 1] := ((value & 0xFF0000) >> 16).toNat16().toNat8();
+    bytes[offset + 2] := ((value & 0xFF00) >> 8).toNat16().toNat8();
+    bytes[offset + 3] := (value & 0xFF).toNat16().toNat8();
   };
 
   /// Writes `value` as a 64-bit big-endian integer into `bytes` at `offset`.

@@ -8,7 +8,6 @@
 /// import Ripemd160 "mo:bitcoin/Ripemd160";
 /// ```
 
-import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
@@ -319,7 +318,7 @@ module {
       let pos = i_msg;
       let wi = Nat16.toNat(pos >> 2);
       let lane = pos & 0x3;
-      let v : Nat32 = b.toNat16().toNat32() << Nat32.fromNat16(lane << 3);
+      let v : Nat32 = b.toNat16().toNat32() << (lane << 3).toNat32();
       if (lane == 0) {
         // First byte of a fresh word: overwrite (the slot may carry stale
         // data from an earlier block, since we never explicitly clear msg).
@@ -401,7 +400,7 @@ module {
       closed := true;
 
       // Total message length in bits, captured before padding is appended.
-      let bitlen : Nat64 = ((n_blocks << 6) +% Nat64.fromNat(Nat16.toNat(i_msg))) << 3;
+      let bitlen : Nat64 = ((n_blocks << 6) +% i_msg.toNat32().toNat64()) << 3;
 
       // Standard MD-style padding: 0x80 byte, then zeros until 56 bytes
       // remain in the current block, then 8 bytes of bit length (LE).

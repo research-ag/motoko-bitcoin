@@ -217,22 +217,20 @@ module {
 
     var valid = true;
 
-    let res = ?Array.fromIter(
-      tokens.map(
-        func(token) {
-          switch (Nat.fromText(token)) {
-            case (?number) {
-              if (number >= 2 ** 32) valid := false;
-              Nat32.fromIntWrap(number);
-            };
-            case (null) {
-              valid := false;
-              0 : Nat32;
-            };
+    let res = ?tokens.map(
+      func(token) {
+        switch (Nat.fromText(token)) {
+          case (?number) {
+            if (number >= 2 ** 32) valid := false;
+            Nat32.fromIntWrap(number);
           };
-        }
-      )
-    );
+          case (null) {
+            valid := false;
+            0 : Nat32;
+          };
+        };
+      }
+    ).toArray();
 
     if (valid) res else null;
   };

@@ -4,6 +4,7 @@
 /// import Der "mo:bitcoin/ecdsa/Der";
 /// ```
 
+import Array "mo:core/Array";
 import Blob "mo:core/Blob";
 import List "mo:core/List";
 import Nat "mo:core/Nat";
@@ -96,7 +97,7 @@ module {
       output.add(i);
     };
 
-    Blob.fromArray(output.toArray());
+    output.toArray().toBlob();
   };
 
   /// Encodes a raw `(r || s)` 64-byte signature into DER.

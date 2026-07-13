@@ -50,7 +50,7 @@ module {
   ];
 
   func arrayToText(arr : [Nat8]) : Text {
-    switch (Blob.fromArray(arr).decodeUtf8()) {
+    switch (arr.toBlob().decodeUtf8()) {
       case (?t) t;
       case null Runtime.trap("unreachable");
     };
