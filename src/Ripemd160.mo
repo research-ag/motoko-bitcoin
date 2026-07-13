@@ -8,7 +8,6 @@
 /// import Ripemd160 "mo:bitcoin/Ripemd160";
 /// ```
 
-import Nat "mo:core/Nat";
 import Nat8 "mo:core/Nat8";
 import Nat16 "mo:core/Nat16";
 import Nat32 "mo:core/Nat32";
