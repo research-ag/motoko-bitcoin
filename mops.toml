@@ -15,9 +15,9 @@ test = "2.1.2"
 bench-helper = "0.0.3"
 
 [toolchain]
-moc = "1.7.0"
-pocket-ic = "9.0.3"
-wasmtime = "44.0.1"
+moc = "1.9.0"
+pocket-ic = "14.0.0"
+wasmtime = "44.0.3"
 
 [requirements]
 moc = "1.4.0"

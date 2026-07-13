@@ -32,9 +32,13 @@ module {
     create : () -> Digest;
   };
 
-  /// Interface for computing an incremental HMAC.
+  /// HMAC instance for computing an incremental HMAC.
   ///
   /// Allows writing data in chunks and retrieving the final HMAC.
+  ///
+  /// NOTE: An Hmac is one-shot. Calling `sum()` finalizes and consumes the
+  /// instance: `closed` is set, and any subsequent call to `sum()` or
+  /// `writeArray()` will trap. To compute another HMAC, construct a new Hmac.
   public type Hmac = {
     writeArray : ([Nat8]) -> ();
     sum : () -> Blob;
@@ -54,7 +58,8 @@ module {
   /// ```
   ///
   /// Never traps. Accepts a `key` of any length, including the empty key.
-  /// Subsequent `writeArray` and `sum` calls also never trap.
+  /// `writeArray` and `sum` do not trap on any input, but the instance is
+  /// one-shot: after `sum()` locks it, further `writeArray`/`sum` calls trap.
   // Sha256 support.
   public func sha256(key : [Nat8]) : Hmac = HmacImpl(key, sha256DigestFactory);
 
@@ -72,7 +77,8 @@ module {
   /// ```
   ///
   /// Never traps. Accepts a `key` of any length, including the empty key.
-  /// Subsequent `writeArray` and `sum` calls also never trap.
+  /// `writeArray` and `sum` do not trap on any input, but the instance is
+  /// one-shot: after `sum()` locks it, further `writeArray`/`sum` calls trap.
   // Sha512 support.
   public func sha512(key : [Nat8]) : Hmac = HmacImpl(key, sha512DigestFactory);
 
@@ -103,6 +109,7 @@ module {
     let outerDigest : Digest = digestFactory.create();
     let innerPad : Nat8 = 0x36;
     let outerPad : Nat8 = 0x5c;
+    var closed = false;
 
     do {
       let blockSize = digestFactory.blockSize;
@@ -154,10 +161,13 @@ module {
     };
 
     public func writeArray(data : [Nat8]) {
+      assert (not closed);
       innerDigest.writeArray(data);
     };
 
     public func sum() : Blob {
+      assert (not closed);
+      closed := true;
       let innerHash = innerDigest.sum().toArray();
       outerDigest.writeArray(innerHash);
       outerDigest.sum();

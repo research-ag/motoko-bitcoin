@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Optimize `Ripemd160` (#20).
+
+### Fixed
+
+- `Ripemd160` and `Hmac` Digests now guard against accidentally writing more data after calling `sum()`.
 - Make Bech32.decode() accept all-numeric input (bugfix)
 - Avoid trap in Base58Check.decode() on short input
 - Check for invalid input in Wif.decode(), Segwit.encode()
