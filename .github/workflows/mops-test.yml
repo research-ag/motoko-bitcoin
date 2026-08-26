@@ -1,9 +1,8 @@
-name: Tests and formatting
+name: Tests, benchmarks and formatting
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
     types: [synchronize, opened, reopened, ready_for_review, unlabeled]
 
@@ -13,37 +12,56 @@ concurrency:
 
 jobs:
   test:
-    name: Run tests
-    runs-on: ubuntu-22.04
-
+    name: Tests and Benchmarks
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: caffeinelabs/setup-mops@v1
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: make sure moc is installed
-        run: mops toolchain bin moc || mops toolchain use moc latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: latest
 
-      - name: Show mops version
-        run: mops -v
+      - name: Install mops
+        uses: caffeinelabs/setup-mops@v1
 
-      - name: Install all mops dependencies
+      - name: Make sure moc is installed
+        run: mops toolchain bin moc
+
+      - name: Show versions
+        run: |
+          mops --version
+          $(mops toolchain bin moc) --version
+
+      - name: Install dependencies
         run: mops install
 
-      - name: run tests
+      - name: Make sure pocket-ic is installed
+        run: mops toolchain bin pocket-ic
+
+      - name: Make sure wasm-opt is installed
+        run: mops toolchain bin wasm-opt
+
+      - name: Run tests
         run: mops test
 
-  format:
-    name: Check formatting
-    runs-on: ubuntu-22.04
+      - name: Run benchmarks
+        run: mops bench
 
+  fmt:
+    name: Formatting Check
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: latest
 
-      - name: Install prettier plugin
-        run: npm install --save-dev prettier prettier-plugin-motoko
-
-      - name: Run prettier check
-        run: npx prettier --check --plugin=prettier-plugin-motoko **/*.mo
+      - name: Prettier Check
+        run: |
+          npm install prettier prettier-plugin-motoko --no-save
+          npx -y prettier --plugin prettier-plugin-motoko --check '**/*.{mo,json,md}'
