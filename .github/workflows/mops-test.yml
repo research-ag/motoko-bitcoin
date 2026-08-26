@@ -1,10 +1,14 @@
-name: CI
+name: Tests, benchmarks and formatting
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [synchronize, opened, reopened, ready_for_review, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
